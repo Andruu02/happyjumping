@@ -16,15 +16,9 @@ class ReporteController extends Controller {
         $this->view('admin/reportes', ['titulo' => 'Generar Reportes - Admin']);
     }
 
-    // ════════════════════════════════════════════════════════
-    // EXCEL — SpreadsheetML nativo (.xls compatible con Excel)
-    // ════════════════════════════════════════════════════════
-    // ════════════════════════════════════════════════════════
-    // EXCEL — SpreadsheetML (.xls abre en Excel sin problemas)
-    // ════════════════════════════════════════════════════════
-    // ════════════════════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     // EXCEL — HTML Table (abre en Excel sin errores, con estilos)
-    // ════════════════════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     public function excel() {
         $estado      = isset($_GET['estado'])      ? trim($_GET['estado'])      : 'all';
         $fecha_desde = isset($_GET['fecha_desde']) ? trim($_GET['fecha_desde']) : '';
@@ -46,19 +40,16 @@ class ReporteController extends Controller {
             if ($r->estado_pago === 'cancelada')  { $ingCanc += $m; $nCanc++; }
         }
         $nTotal   = count($reservas);
-        $sumMonto = $ingConf + $ingPend + $ingCanc; // suma total del periodo filtrado
+        $sumMonto = $ingConf + $ingPend + $ingCanc;
         $ticket   = $nConf > 0 ? round($ingConf / $nConf, 2) : 0;
         $tasaConv = $nTotal > 0 ? round($nConf  / $nTotal * 100, 1) : 0;
         $tasaCanc = $nTotal > 0 ? round($nCanc  / $nTotal * 100, 1) : 0;
 
-        // ── Helpers ──
         $xe  = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
         $mon = fn($v) => 'S/ ' . number_format(floatval($v), 2);
 
-        // ── Estilos CSS (inline, Excel los respeta) ──
         $S = [
             'titulo'   => 'background:#7F00FF;color:#fff;font-weight:bold;font-size:14pt;text-align:center;padding:10px;',
-            'hoja'     => 'background:#5500bb;color:#fff;font-weight:bold;font-size:11pt;text-align:center;padding:8px;',
             'seccion'  => 'background:#EDE7F6;color:#4A148C;font-weight:bold;font-size:10pt;padding:6px;',
             'seccion_r'=> 'background:#FFEBEE;color:#B71C1C;font-weight:bold;font-size:10pt;padding:6px;',
             'cab'      => 'background:#2D2D2D;color:#fff;font-weight:bold;font-size:9pt;text-align:center;padding:5px;border:1px solid #555;',
@@ -102,8 +93,6 @@ class ReporteController extends Controller {
 
         echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
         echo '<head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>';
-
-        // Declarar las 4 hojas
         foreach (['Reservas','Por Paquete','Codigos','Contabilidad'] as $sh) {
             echo '<x:ExcelWorksheet><x:Name>'.$sh.'</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>';
         }
@@ -113,21 +102,19 @@ class ReporteController extends Controller {
         // HOJA 1: RESERVAS
         // ════════════════════════════
         echo '<table style="border-collapse:collapse;font-family:Arial,sans-serif;" x:str>';
-        // Título
         echo $tr($td('REPORTE DE RESERVAS — HAPPY JUMPING','titulo',13));
         echo $tr($td('Generado: '.date('d/m/Y H:i:s').'   |   Estado: '.($estado==='all'?'Todos':strtoupper($estado)).'   |   Desde: '.($fecha_desde?:'Sin filtro').'   |   Hasta: '.($fecha_hasta?:'Sin filtro'),'meta',13));
         echo $vr(13);
 
-        // ── KPIs fila 1: datos del PERIODO FILTRADO ──
         $periodoLabel = ($fecha_desde && $fecha_hasta)
             ? 'Periodo: '.date('d/m/Y',strtotime($fecha_desde)).' al '.date('d/m/Y',strtotime($fecha_hasta))
             : 'Todos los registros';
         echo $tr($td('— '.$periodoLabel.' —','nota',13));
         echo $tr(
             $td('Reservas en el periodo','kpi_lbl',2).'<td style="'.$S['vacio'].'"></td>'.
-            $td('✔ Ingresos confirmados del periodo','kpi_lbl',3).'<td style="'.$S['vacio'].'"></td>'.
-            $td('⏳ Monto pendiente','kpi_lbl',2).'<td style="'.$S['vacio'].'"></td>'.
-            $td('✘ Canceladas','kpi_lbl',2)
+            $td('Ingresos confirmados del periodo','kpi_lbl',3).'<td style="'.$S['vacio'].'"></td>'.
+            $td('Monto pendiente','kpi_lbl',2).'<td style="'.$S['vacio'].'"></td>'.
+            $td('Canceladas','kpi_lbl',2)
         );
         echo $tr(
             '<td colspan="2" style="'.$S['kpi_val'].'">'.$nTotal.'</td><td style="'.$S['vacio'].'"></td>'.
@@ -137,26 +124,23 @@ class ReporteController extends Controller {
         );
         echo $vr(13);
 
-        // ── Fila separadora: total general histórico (referencia) ──
         $ingConfTot = floatval($totales->ingresos_confirmados ?? 0);
         $S['ref_lbl'] = 'background:#F3E5FF;color:#4A148C;font-size:8pt;font-style:italic;text-align:center;padding:3px;border:1px solid #CE93D8;';
         $S['ref_val'] = 'background:#F3E5FF;color:#4A148C;font-weight:bold;font-size:9pt;text-align:right;padding:3px;border:1px solid #CE93D8;';
         echo $tr(
-            '<td colspan="5" style="'.$S['ref_lbl'].'">📊 Total histórico confirmado (todos los periodos, solo referencia):</td>'.
+            '<td colspan="5" style="'.$S['ref_lbl'].'">Total historico confirmado (todos los periodos, solo referencia):</td>'.
             '<td colspan="3" style="'.$S['ref_val'].'">'.$mon($ingConfTot).'</td>'.
             '<td colspan="5" style="'.$S['ref_lbl'].'">Este dato NO corresponde al periodo filtrado arriba</td>'
         );
         echo $vr(13);
 
-        // Cabecera tabla
         echo $tr(
             $td('ID','cab').$td('Fecha','cab').$td('H.Inicio','cab').$td('H.Fin','cab').
-            $td('Cumpleañero','cab').$td('Cliente','cab').$td('Paquete','cab').
+            $td('Cumpleanero','cab').$td('Cliente','cab').$td('Paquete','cab').
             $td('Personas','cab').$td('Edad','cab').$td('Correo','cab').
             $td('Monto','cab').$td('Estado','cab').$td('Observaciones','cab')
         );
 
-        // Filas reservas
         $alt = false; $sumR = 0;
         foreach ($reservas as $r) {
             $sumR += floatval($r->monto);
@@ -181,11 +165,8 @@ class ReporteController extends Controller {
             );
             $alt=!$alt;
         }
-        // Total
         echo $tr('<td colspan="10" style="'.$S['totc'].'">TOTAL ('.count($reservas).' reservas)</td><td style="'.$S['tot'].'">'.$mon($sumR).'</td><td colspan="2" style="'.$S['totc'].'"></td>');
         echo '</table>';
-
-        // Separador de hoja (Excel interpreta cada table como hoja con mso-data-placement)
         echo '<br style="mso-data-placement:same-cell"/>';
 
         // ════════════════════════════
@@ -205,7 +186,7 @@ class ReporteController extends Controller {
         echo '</table>';
 
         // ════════════════════════════
-        // HOJA 3: CÓDIGOS
+        // HOJA 3: CODIGOS
         // ════════════════════════════
         echo '<table style="border-collapse:collapse;font-family:Arial,sans-serif;page-break-before:always">';
         echo $tr($td('CODIGOS DE PROMOCION','titulo',9));
@@ -231,9 +212,9 @@ class ReporteController extends Controller {
                 '<td style="'.$S[$sc].'">'.$xe($cod->puntos_necesarios).'</td>'.
                 '<td style="'.$S[$sc].'">'.$xe($cod->nombre_usuario).'</td>'.
                 '<td style="'.$S[$sc].'">'.$xe($cod->correo_usuario).'</td>'.
-                '<td style="'.$S[$sc].'">'.(($cod->estado==='disponible')?'✔ DISPONIBLE':'✘ USADO').'</td>'.
+                '<td style="'.$S[$sc].'">'.(($cod->estado==='disponible')?'DISPONIBLE':'USADO').'</td>'.
                 '<td style="'.$S[$sc].'">'.date('d/m/Y H:i',strtotime($cod->fecha_generacion)).'</td>'.
-                '<td style="'.$S[$sc].'">'.($cod->fecha_uso?date('d/m/Y H:i',strtotime($cod->fecha_uso)):'—').'</td>'
+                '<td style="'.$S[$sc].'">'.($cod->fecha_uso?date('d/m/Y H:i',strtotime($cod->fecha_uso)):'-').'</td>'
             );
         }
         echo '</table>';
@@ -242,13 +223,12 @@ class ReporteController extends Controller {
         // HOJA 4: CONTABILIDAD
         // ════════════════════════════
         echo '<table style="border-collapse:collapse;font-family:Arial,sans-serif;page-break-before:always">';
-        $W = 6; // columnas totales
-        echo $tr($td('HOJA DE TRABAJO CONTABLE — HAPPY JUMPING  |  '.date('d/m/Y'),'titulo',$W));
-        echo $tr($td('Celdas AMARILLAS = ingrese valores manualmente. Celdas VERDES = calculadas automáticamente.','nota',$W));
+        $W = 6;
+        echo $tr($td('HOJA DE TRABAJO CONTABLE - HAPPY JUMPING  |  '.date('d/m/Y'),'titulo',$W));
+        echo $tr($td('Celdas AMARILLAS = ingrese valores manualmente. Celdas VERDES = calculadas automaticamente.','nota',$W));
         echo $vr($W);
 
-        // ── Sección 1: Estado de resultados ──
-        echo $tr($td('SECCIÓN 1 — ESTADO DE RESULTADOS DEL PERIODO','seccion',$W));
+        echo $tr($td('SECCION 1 - ESTADO DE RESULTADOS DEL PERIODO','seccion',$W));
         echo $vr($W);
         echo $tr($td('INGRESOS','cab',2).$td('IMPORTE','cab').'<td style="'.$S['vacio'].'"></td>'.$td('EGRESOS / COSTOS','cab',2).$td('IMPORTE','cab'));
 
@@ -258,62 +238,62 @@ class ReporteController extends Controller {
             ['Descuentos / devoluciones',       null,     true],
             ['Otros ingresos',                  null,     true],
         ];
-        $egrItems = ['Alquiler / arrendamiento','Sueldos y planilla','Servicios básicos','Mantenimiento de equipos','Materiales y suministros','Publicidad y marketing','Honorarios / comisiones','Seguros','Depreciación de activos','Otros gastos'];
+        $egrItems = ['Alquiler / arrendamiento','Sueldos y planilla','Servicios basicos','Mantenimiento de equipos','Materiales y suministros','Publicidad y marketing','Honorarios / comisiones','Seguros','Depreciacion de activos','Otros gastos'];
 
         $maxR = max(count($ingItems), count($egrItems));
         for ($i=0; $i<$maxR; $i++) {
-            $cI = isset($ingItems[$i]) ? '<td colspan="2" style="'.$S['nd'].'">'.$xe($ingItems[$i][0]).'</td>'.($ingItems[$i][2]?'<td style="'.$S['ny'].'">&nbsp;</td>':'<td style="'.$S['ndr'].'">'.$mon($ingItems[$i][1]).'</td>') : '<td colspan="3" style="'.$S['vacio'].'"></td>';
-            $cE = isset($egrItems[$i]) ? '<td colspan="2" style="'.$S['nd'].'">'.$xe($egrItems[$i]).'</td><td style="'.$S['ny'].'">&nbsp;</td>' : '<td colspan="3" style="'.$S['vacio'].'"></td>';
+            $cI = isset($ingItems[$i])
+                ? '<td colspan="2" style="'.$S['nd'].'">'.$xe($ingItems[$i][0]).'</td>'.($ingItems[$i][2]?'<td style="'.$S['ny'].'">&nbsp;</td>':'<td style="'.$S['ndr'].'">'.$mon($ingItems[$i][1]).'</td>')
+                : '<td colspan="3" style="'.$S['vacio'].'"></td>';
+            $cE = isset($egrItems[$i])
+                ? '<td colspan="2" style="'.$S['nd'].'">'.$xe($egrItems[$i]).'</td><td style="'.$S['ny'].'">&nbsp;</td>'
+                : '<td colspan="3" style="'.$S['vacio'].'"></td>';
             echo $tr($cI.'<td style="'.$S['vacio'].'"></td>'.$cE);
         }
         echo $vr($W);
         $sumIngSistema = $ingConf + $ingPend;
         echo $tr('<td colspan="2" style="'.$S['subc'].'">TOTAL INGRESOS</td><td style="'.$S['sub'].'">'.$mon($sumIngSistema).' + editables</td><td style="'.$S['vacio'].'"></td><td colspan="2" style="'.$S['subc'].'">TOTAL EGRESOS</td><td style="'.$S['subr'].'">(suma celdas amarillas)</td>');
         echo $vr($W);
-        echo $tr('<td colspan="2" style="'.$S['resc'].'">💰 UTILIDAD / PÉRDIDA DEL PERIODO</td><td style="'.$S['res'].'">Total Ingresos − Total Egresos</td><td colspan="3" style="'.$S['nota'].'">Complete los egresos en amarillo para calcular</td>');
+        echo $tr('<td colspan="2" style="'.$S['resc'].'">UTILIDAD / PERDIDA DEL PERIODO</td><td style="'.$S['res'].'">Total Ingresos - Total Egresos</td><td colspan="3" style="'.$S['nota'].'">Complete los egresos en amarillo para calcular</td>');
         echo $vr($W);
 
-        // ── Sección 2: IGV y tributos ──
-        echo $tr($td('SECCIÓN 2 — CÁLCULO DE IGV Y TRIBUTOS','seccion',$W));
+        echo $tr($td('SECCION 2 - CALCULO DE IGV Y TRIBUTOS','seccion',$W));
         echo $vr($W);
-        echo $tr($td('CONCEPTO','cab',2).$td('IMPORTE','cab').'<td style="'.$S['vacio'].'"></td>'.$td('REFERENCIA / FÓRMULA','cab',2).'<td></td>');
-
+        echo $tr($td('CONCEPTO','cab',2).$td('IMPORTE','cab').'<td style="'.$S['vacio'].'"></td>'.$td('REFERENCIA / FORMULA','cab',2).'<td></td>');
         $tributos = [
-            ['Base imponible (ventas afectas)',          $ingConf,          false, 'Ingresos confirmados del sistema'],
-            ['IGV débito fiscal (18%)',                  $ingConf*0.18,     false, 'Base × 18% = '.$mon($ingConf*0.18)],
-            ['IGV crédito fiscal (compras)',             null,              true,  'Completar con facturas de compra'],
-            ['IGV neto a pagar (débito − crédito)',      null,              true,  'Débito − Crédito fiscal'],
-            ['Imp. a la renta (1.5% ventas mensuales)',  $ingConf*0.015,    false, 'Base × 1.5% = '.$mon($ingConf*0.015)],
-            ['Essalud empleados (9% planilla)',          null,              true,  'Completar con monto planilla'],
-            ['AFP / ONP trabajadores',                   null,              true,  'Completar con boletas'],
+            ['Base imponible (ventas afectas)',         $ingConf,       false, 'Ingresos confirmados del sistema'],
+            ['IGV debito fiscal (18%)',                 $ingConf*0.18,  false, 'Base x 18% = '.$mon($ingConf*0.18)],
+            ['IGV credito fiscal (compras)',            null,           true,  'Completar con facturas de compra'],
+            ['IGV neto a pagar (debito - credito)',     null,           true,  'Debito - Credito fiscal'],
+            ['Imp. a la renta (1.5% ventas mensuales)', $ingConf*0.015, false, 'Base x 1.5% = '.$mon($ingConf*0.015)],
+            ['Essalud empleados (9% planilla)',         null,           true,  'Completar con monto planilla'],
+            ['AFP / ONP trabajadores',                  null,           true,  'Completar con boletas'],
         ];
         foreach ($tributos as $t) {
             echo $tr('<td colspan="2" style="'.$S['nd'].'">'.$xe($t[0]).'</td>'.($t[2]?'<td style="'.$S['ny'].'">&nbsp;</td>':'<td style="'.$S['ndr'].'">'.$mon($t[1]).'</td>').'<td style="'.$S['vacio'].'"></td><td colspan="2" style="'.$S['nota'].'">'.$xe($t[3]).'</td><td></td>');
         }
         echo $vr($W);
 
-        // ── Sección 3: Indicadores ──
-        echo $tr($td('SECCIÓN 3 — INDICADORES FINANCIEROS','seccion',$W));
+        echo $tr($td('SECCION 3 - INDICADORES FINANCIEROS','seccion',$W));
         echo $vr($W);
-        echo $tr($td('INDICADOR','cab',2).$td('VALOR','cab').'<td style="'.$S['vacio'].'"></td>'.$td('DESCRIPCIÓN','cab',2).'<td></td>');
+        echo $tr($td('INDICADOR','cab',2).$td('VALOR','cab').'<td style="'.$S['vacio'].'"></td>'.$td('DESCRIPCION','cab',2).'<td></td>');
         $indicadores = [
-            ['Ticket promedio por reserva',      $mon($ticket),          'Ingresos confirmados ÷ Reservas confirmadas'],
-            ['Tasa de conversión',               $tasaConv.'%',          'Confirmadas ÷ Total × 100'],
-            ['Tasa de cancelación',              $tasaCanc.'%',          'Canceladas ÷ Total × 100'],
-            ['Ingresos pendientes de cobro',     $mon($ingPend),         'Suma reservas en estado pendiente'],
-            ['Total reservas en el periodo',     $nTotal.' reservas',    'Incluye todos los estados'],
-            ['Reservas confirmadas',             $nConf.' reservas',     'Solo estado confirmada'],
+            ['Ticket promedio por reserva',     $mon($ticket),       'Ingresos confirmados / Reservas confirmadas'],
+            ['Tasa de conversion',              $tasaConv.'%',       'Confirmadas / Total x 100'],
+            ['Tasa de cancelacion',             $tasaCanc.'%',       'Canceladas / Total x 100'],
+            ['Ingresos pendientes de cobro',    $mon($ingPend),      'Suma reservas en estado pendiente'],
+            ['Total reservas en el periodo',    $nTotal.' reservas', 'Incluye todos los estados'],
+            ['Reservas confirmadas',            $nConf.' reservas',  'Solo estado confirmada'],
         ];
         foreach ($indicadores as $ind) {
             echo $tr('<td colspan="2" style="'.$S['nd'].'">'.$xe($ind[0]).'</td><td style="'.$S['nf'].'">'.$xe($ind[1]).'</td><td style="'.$S['vacio'].'"></td><td colspan="2" style="'.$S['nota'].'">'.$xe($ind[2]).'</td><td></td>');
         }
         echo $vr($W);
 
-        // ── Sección 4: Libro de asientos ──
-        echo $tr($td('SECCIÓN 4 — LIBRO DE ASIENTOS CONTABLES','seccion',$W));
+        echo $tr($td('SECCION 4 - LIBRO DE ASIENTOS CONTABLES','seccion',$W));
         echo $tr($td('Complete la fecha, cuenta contable, montos al Debe y Haber de cada asiento del periodo.','nota',$W));
         echo $vr($W);
-        echo $tr($td('N°','cab').$td('Fecha','cab').$td('Cuenta Contable / Descripción','cab').$td('Debe (S/)','cab').$td('Haber (S/)','cab').$td('Referencia','cab'));
+        echo $tr($td('N','cab').$td('Fecha','cab').$td('Cuenta Contable / Descripcion','cab').$td('Debe (S/)','cab').$td('Haber (S/)','cab').$td('Referencia','cab'));
         for ($n=1; $n<=20; $n++) {
             echo $tr('<td style="'.$S['ndc'].'">'.$n.'</td><td style="'.$S['ny'].'">&nbsp;</td><td style="'.$S['ny'].'">&nbsp;</td><td style="'.$S['ny'].'">&nbsp;</td><td style="'.$S['ny'].'">&nbsp;</td><td style="'.$S['ny'].'">&nbsp;</td>');
         }
@@ -335,7 +315,6 @@ class ReporteController extends Controller {
         exit();
     }
 
-        // ── PDF (sin cambios) ────────────────────────────────────────────────────
     public function pdf() {
         $estado      = isset($_GET['estado'])      ? trim($_GET['estado'])      : 'all';
         $fecha_desde = isset($_GET['fecha_desde']) ? trim($_GET['fecha_desde']) : '';
@@ -358,7 +337,6 @@ class ReporteController extends Controller {
         $pdf->SetMargins(10, 30, 10);
         $pdf->SetAutoPageBreak(true, 18);
 
-        // PÁGINA 1: RESERVAS
         $pdf->AddPage();
         $cw = [69, 70, 69, 69];
         $this->titulo($pdf,'RESUMEN DE RESERVAS');
@@ -392,7 +370,6 @@ class ReporteController extends Controller {
         $pdf->Cell($cr[6],6,'S/'.number_format($tot,2),1,0,'R',true);
         $pdf->Cell($cr[7]+$cr[8]+$cr[9],6,'',1,1,'C',true);
 
-        // PÁGINA 2: PAQUETES + CÓDIGOS
         $pdf->AddPage(); $pdf->SetTextColor(0,0,0);
         $cp=[140,69,68]; $hp=['Paquete','Total Reservas','Ingresos (S/)'];
         $this->titulo($pdf,'RESUMEN POR PAQUETE');
@@ -431,7 +408,7 @@ class ReporteController extends Controller {
         exit();
     }
 
-    // ── Helpers PDF ───────────────────────────────────────────────────────────
+    // ── Helpers PDF ──────────────────────────────────────────────────────────
     private function titulo($pdf,$texto) {
         $pdf->SetFont('Arial','B',10); $pdf->SetFillColor(127,0,255); $pdf->SetTextColor(255,255,255);
         $pdf->Cell(self::PW,7,$texto,1,1,'C',true); $pdf->SetTextColor(0,0,0);
@@ -450,35 +427,5 @@ class ReporteController extends Controller {
     private function t($texto,$max) {
         $texto=(string)$texto;
         return mb_strlen($texto)>$max ? mb_substr($texto,0,$max-2).'..' : $texto;
-    }
-
-    // ── Helpers Excel XML ────────────────────────────────────────────────────
-    private function xe($str) {
-        return htmlspecialchars((string)$str, ENT_XML1, 'UTF-8');
-    }
-
-    private function estilo($id, $bgColor, $fgColor, $size, $bold, $align) {
-        $b = $bold ? '<Font ss:Bold="1" ss:Size="' . $size . '" ss:Color="#' . $fgColor . '"/>'
-                   : '<Font ss:Size="' . $size . '" ss:Color="#' . $fgColor . '"/>';
-        return '<Style ss:ID="' . $id . '">
-            <Alignment ss:Horizontal="' . $align . '" ss:Vertical="Center" ss:WrapText="0"/>
-            ' . $b . '
-            <Interior ss:Color="#' . $bgColor . '" ss:Pattern="Solid"/>
-            <Borders>
-                <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#CCCCCC"/>
-                <Border ss:Position="Right"  ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#CCCCCC"/>
-            </Borders>
-        </Style>' . "\n";
-    }
-
-    private function filaVacia() {
-        return '<Row ss:Height="8"><Cell ss:StyleID="s_normal"><Data ss:Type="String"></Data></Cell></Row>' . "\n";
-    }
-
-    private function filaMeta($lbl, $val) {
-        return '<Row ss:Height="14">
-            <Cell ss:StyleID="s_meta_lbl"><Data ss:Type="String">' . $this->xe($lbl) . '</Data></Cell>
-            <Cell ss:StyleID="s_meta" ss:MergeAcross="3"><Data ss:Type="String">' . $this->xe($val) . '</Data></Cell>
-        </Row>' . "\n";
     }
 }
