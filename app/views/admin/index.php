@@ -544,5 +544,6 @@
     }
 })();
 </script>
+<script src="<?php echo URLROOT; ?>/js/chatbot_admin.js"></script>
 </body>
 </html>
