@@ -507,7 +507,7 @@
         document.getElementById('hj-chat-enviar').disabled = true;
         var cargando = agregarMensaje('Consultando datos...', 'cargando');
 
-        fetch(urlBase + '/chatbot/enviar', {
+        fetch(urlBase + '/happyjumping/public/chatbot/enviar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ pregunta: texto, historial: historial })
