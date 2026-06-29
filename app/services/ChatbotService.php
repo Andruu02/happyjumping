@@ -4,73 +4,73 @@ require_once '../app/core/Model.php';
 class ChatbotService extends Model {
     
     public function procesarPregunta($pregunta) {
-        $respuesta = "Lo siento, no entendí tu consulta. Puedes preguntarme cosas como 'reservas hoy' o 'pagos pendientes'.";
-        $contexto_sql = null;
+        // Obtenemos la clave desde el entorno, no quemada en el código
+        $apiKey = getenv('GEMINI_API_KEY'); 
 
-        // 1. LÓGICA DE PALABRAS CLAVE
+        if (!$apiKey) {
+            return ["error" => "No se encontró la API Key en el entorno."];
+        }
+
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$apiKey";
+
+        // 2. Obtenemos datos clave para que la IA tenga contexto real de tu BD
+        $datos = $this->obtenerDatosDashboard();
+
+        // 3. Prompt (Instrucciones) que le damos a la IA
+        $instrucciones = "Eres el asistente administrativo de Happy Jumping Peru. 
+        Responde basándote estrictamente en estos datos actuales:
+        - Reservas pendientes hoy: {$datos['pendientes']}
+        - Ingresos confirmados este mes: S/ {$datos['ingresos']}
         
-        // Sugerencia: "¿Cuántas reservas tenemos hoy?"
-        if (strpos($pregunta, 'reservas') !== false && strpos($pregunta, 'hoy') !== false) {
-            $sql = "SELECT COUNT(*) as total FROM reservas WHERE DATE(fecha_reserva) = CURDATE()";
-            $stmt = $this->db->query($sql);
-            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            $respuesta = "Hoy se han registrado " . $resultado['total'] . " reservas en total.";
-            $contexto_sql = json_encode(["query" => $sql, "action" => "reservas_hoy"]);
-        }
+        Pregunta del admin: '$pregunta'. 
+        Si la pregunta requiere un dato que no está aquí, intenta responder de forma amable como asistente administrativo.";
+
+        // 4. Llamada a la API
+        $data = ["contents" => [["parts" => [["text" => $instrucciones]]]]];
         
-        // Sugerencia: "¿Qué pagos están pendientes?"
-        elseif (strpos($pregunta, 'pagos') !== false && strpos($pregunta, 'pendientes') !== false) {
-            $sql = "SELECT COUNT(*) as total, SUM(monto) as monto_total FROM pagos WHERE estado = 'pendiente'";
-            $stmt = $this->db->query($sql);
-            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            $monto = $resultado['monto_total'] ? $resultado['monto_total'] : '0.00';
-            $respuesta = "Actualmente hay " . $resultado['total'] . " pagos pendientes, que suman un total de S/ " . $monto . ".";
-            $contexto_sql = json_encode(["query" => $sql, "action" => "pagos_pendientes"]);
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        
+        $response = curl_exec($ch);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            return ["error" => "No se pudo conectar con el servicio de IA."];
         }
 
-        // Sugerencia: "¿Cuál es el paquete más vendido?" (Paquete top)
-        elseif (strpos($pregunta, 'paquete') !== false && (strpos($pregunta, 'top') !== false || strpos($pregunta, 'vendido') !== false)) {
-            $sql = "SELECT p.nombre, COUNT(r.id_reserva) as total_reservas 
-                    FROM reservas r 
-                    JOIN paquetes p ON r.id_paquete = p.id_paquete 
-                    GROUP BY r.id_paquete 
-                    ORDER BY total_reservas DESC LIMIT 1";
-            $stmt = $this->db->query($sql);
-            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            if($resultado) {
-                $respuesta = "El paquete más vendido es '" . $resultado['nombre'] . "' con " . $resultado['total_reservas'] . " reservas.";
-                $contexto_sql = json_encode(["query" => $sql, "action" => "paquete_top"]);
-            }
-        }
+        $result = json_decode($response, true);
+        $respuestaIA = $result['candidates'][0]['content']['parts'][0]['text'] ?? "No pude generar una respuesta.";
 
-        // Sugerencia: "¿Cuánto hemos ingresado este mes?"
-        elseif (strpos($pregunta, 'ingresos') !== false || strpos($pregunta, 'mes') !== false) {
-            $sql = "SELECT SUM(monto) as total_ingresos FROM pagos WHERE estado = 'confirmada' AND MONTH(fecha_pago) = MONTH(CURDATE()) AND YEAR(fecha_pago) = YEAR(CURDATE())";
-            $stmt = $this->db->query($sql);
-            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            $ingresos = $resultado['total_ingresos'] ? $resultado['total_ingresos'] : '0.00';
-            $respuesta = "Los ingresos confirmados de este mes suman S/ " . $ingresos . ".";
-            $contexto_sql = json_encode(["query" => $sql, "action" => "ingresos_mes"]);
-        }
+        // 5. Guardar en historial
+        $this->guardarHistorial($pregunta, $respuestaIA, json_encode(["fuente" => "Gemini AI"]));
 
-        // 2. GUARDAR EN LA BASE DE DATOS
-        $this->guardarHistorial($pregunta, $respuesta, $contexto_sql);
-
-        // 3. RETORNAR LA RESPUESTA AL CONTROLADOR
-        return ["respuesta" => $respuesta];
+        return ["respuesta" => $respuestaIA];
     }
 
-    private function guardarHistorial($pregunta, $respuesta, $contexto_sql) {
+    // Método privado para traer datos de la BD y alimentar a la IA
+    private function obtenerDatosDashboard() {
+        // Reservas pendientes
+        $stmt1 = $this->db->query("SELECT COUNT(*) as total FROM reservas WHERE estado = 'pendiente'");
+        $pendientes = $stmt1->fetch(PDO::FETCH_ASSOC)['total'];
+
+        // Ingresos del mes
+        $stmt2 = $this->db->query("SELECT SUM(monto) as total FROM pagos WHERE estado = 'confirmada' AND MONTH(fecha_pago) = MONTH(CURDATE())");
+        $ingresos = $stmt2->fetch(PDO::FETCH_ASSOC)['total'] ?? '0.00';
+
+        return ['pendientes' => $pendientes, 'ingresos' => $ingresos];
+    }
+
+    private function guardarHistorial($pregunta, $respuesta, $contexto) {
         $sql = "INSERT INTO chatbot_historial (pregunta, respuesta, contexto_sql) VALUES (:pregunta, :respuesta, :contexto)";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             ':pregunta' => $pregunta,
             ':respuesta' => $respuesta,
-            ':contexto' => $contexto_sql
+            ':contexto' => $contexto
         ]);
     }
 }
