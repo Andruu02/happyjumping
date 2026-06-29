@@ -5,10 +5,13 @@ class ChatbotService extends Model {
     
     public function procesarPregunta($pregunta) {
         // Obtenemos la clave desde el entorno, no quemada en el código
-        $apiKey = getenv('GEMINI_API_KEY'); 
+        $apiKey = getenv('GEMINI_API_KEY');
 
-        if (!$apiKey) {
-            return ["error" => "No se encontró la API Key en el entorno."];
+        // TEST RÁPIDO: Quita el comentario a la siguiente línea para probar
+        // die("La clave leída es: " . $apiKey); 
+
+        if (empty($apiKey)) {
+            return ["error" => "La clave API no se cargó. Revisa tu archivo .env"];
         }
 
         $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$apiKey";
