@@ -426,7 +426,6 @@
     window.HJ_URL_ROOT = '<?php echo URL_ROOT; ?>'; 
 </script>
 <!-- Cargamos el archivo externo que ya tiene todo el diseño y la lógica -->
-<script src="<?php echo URL_ROOT; ?>/js/chatbot_admin.js"></script>
 <script src="<?php echo URLROOT; ?>/js/chatbot_admin.js"></script>
 </body>
 </html>
