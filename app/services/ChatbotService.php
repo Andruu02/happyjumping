@@ -8,7 +8,7 @@ class ChatbotService extends Model {
         $apiKey = getenv('GEMINI_API_KEY');
 
         // TEST RÁPIDO: Quita el comentario a la siguiente línea para probar
-        // die("La clave leída es: " . $apiKey); 
+        die("La clave leída es: " . $apiKey); 
 
         if (empty($apiKey)) {
             return ["error" => "La clave API no se cargó. Revisa tu archivo .env"];
