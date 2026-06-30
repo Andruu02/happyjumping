@@ -26,7 +26,7 @@ class ChatbotService extends Model {
         if (!$apiKey) $apiKey = getenv('GEMINI_API_KEY');
 
         // DEBUG: Si esto sigue fallando, descomenta la línea de abajo para ver qué pasa
-        return ["error" => "Ruta buscada: " . $envPath . " - API Key encontrada: " . ($apiKey ? "SI" : "NO")];
+        //return ["error" => "Ruta buscada: " . $envPath . " - API Key encontrada: " . ($apiKey ? "SI" : "NO")];
 
         if (empty($apiKey)) {
             return ["error" => "No se encontró la API Key en el archivo .env"];
