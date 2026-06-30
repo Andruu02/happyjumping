@@ -34,4 +34,6 @@ define('DB_PASS', 'HappyBd2025');
  */
 define('DB_CHARSET', 'utf8mb4');
 
+define('apikey', 'AQ.Ab8RN6IOViaaXbjs-ac9ydanUmxi-J9AzA6yZJiqDKpvsqEfuA'); // Reemplaza con tu clave real de la API de Gemini
+
 ?>

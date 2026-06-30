@@ -3,10 +3,11 @@ require_once '../app/core/Model.php';
 
 class ChatbotService extends Model {
     public function procesarPregunta($pregunta) {
-        $apiKey = getenv('GEMINI_API_KEY'); // Se lee de tu .env
-        
+        $apiKey = getenv('GEMINI_API_KEY') ?: $_ENV['GEMINI_API_KEY'] ?? null;
+
         if (!$apiKey) {
-            return ["error" => "Error de configuración: API KEY no encontrada."];
+            // Esto es lo que estás viendo en pantalla ahora mismo
+            return ["respuesta" => "Error técnico: La clave API no está configurada en el servidor."];
         }
 
         $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$apiKey";
