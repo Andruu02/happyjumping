@@ -39,7 +39,7 @@ class ChatbotService extends Model {
         $ingresos = $resultadoIngresos->total ?? '0.00';
 
         // 3. PREPARAR LA LLAMADA A LA IA
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=$apiKey";
+        $url = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=$apiKey";
 
         $instrucciones = "Eres un asistente administrativo experto del panel Happy Jumping. 
         Responde a la pregunta basándote de forma precisa en estos datos reales del sistema:
