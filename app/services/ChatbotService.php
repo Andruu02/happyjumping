@@ -5,7 +5,7 @@ class ChatbotService extends Model {
 
     public function procesarPregunta($pregunta) {
         // =====================================================================
-        // 1. OBTENER Y LIMPIAR LA API KEY EXTREMADAMENTE BIEN (MANTENIDO INTACTO)
+        // 1. OBTENER Y LIMPIAR LA API KEY 
         // =====================================================================
         $envPath = dirname(__DIR__, 2) . '/.env'; 
         $apiKey = '';
@@ -15,14 +15,12 @@ class ChatbotService extends Model {
             foreach ($lines as $line) {
                 if (strpos(trim($line), 'GEMINI_API_KEY=') === 0) {
                     $valor = str_replace('GEMINI_API_KEY=', '', trim($line));
-                    // Limpiamos espacios, saltos de línea, retornos de carro y comillas
                     $apiKey = trim($valor, " \t\n\r\0\x0B\"'");
                     break;
                 }
             }
         }
 
-        // Si no la encontró en el archivo, busca en el servidor
         if (empty($apiKey)) {
             $apiKey = trim(getenv('GEMINI_API_KEY'), " \t\n\r\0\x0B\"'");
         }
@@ -32,7 +30,7 @@ class ChatbotService extends Model {
         }
 
         // =====================================================================
-        // 2. DEFINIR EL ESQUEMA DE TU BASE DE DATOS PARA LA IA
+        // 2. DEFINIR EL ESQUEMA DE TU BASE DE DATOS
         // =====================================================================
         $esquema = "
         Tablas disponibles en MySQL:
@@ -54,31 +52,36 @@ class ChatbotService extends Model {
         
         REGLAS:
         - Si es un saludo, despedida o pregunta general, responde en este JSON: {\"tipo\":\"chat\", \"respuesta\":\"tu respuesta amigable\"}
-        - Si la pregunta requiere buscar datos en la base de datos, genera una consulta SQL válida (SOLO usa SELECT, usa JOIN si es necesario para relacionar IDs con nombres, limita a 10 resultados si son listas) en este JSON: {\"tipo\":\"sql\", \"query\":\"SELECT ...\"}
+        - Si la pregunta requiere buscar datos en la base de datos, genera una consulta SQL válida (SOLO usa SELECT, usa JOIN si es necesario, limita a 10 resultados) en este JSON: {\"tipo\":\"sql\", \"query\":\"SELECT ...\"}
         
-        OBLIGATORIO: Devuelve SOLO el JSON crudo. Sin formato markdown (```json) ni texto adicional.";
+        OBLIGATORIO: Devuelve SOLO el JSON crudo.";
 
-        // Llamamos a Gemini para que decida qué hacer
+        // Llamamos a Gemini
         $respuestaCruda = $this->llamarGemini($prompt1, $apiKey);
         
-        // Limpiamos la respuesta por si Gemini le añade formato Markdown
-        $respuestaLimpia = str_replace(['```json', '```'], '', $respuestaCruda);
-        $json = json_decode(trim($respuestaLimpia), true);
+        // --- LA SOLUCIÓN: EXTRAER ESTRICTAMENTE EL JSON ---
+        $json = null;
+        $inicio = strpos($respuestaCruda, '{');
+        $fin = strrpos($respuestaCruda, '}');
+        
+        if ($inicio !== false && $fin !== false) {
+            $jsonString = substr($respuestaCruda, $inicio, $fin - $inicio + 1);
+            $json = json_decode($jsonString, true);
+        }
 
         if (!$json || !isset($json['tipo'])) {
+            // Si quieres ver qué dijo Gemini que rompió el JSON, temporalmente puedes cambiar el mensaje a: return ["respuesta" => "Debug: " . $respuestaCruda];
             return ["respuesta" => "Lo siento, tuve un problema analizando tu consulta. Intentemos de nuevo."];
         }
 
         // =====================================================================
-        // 4. LÓGICA DE DECISIÓN (Ejecutar SQL o Conversar)
+        // 4. LÓGICA DE DECISIÓN
         // =====================================================================
         if ($json['tipo'] === 'chat') {
-            // Es una charla normal, guardamos historial y respondemos
             $this->guardarHistorial($pregunta, $json['respuesta'], null);
             return ["respuesta" => $json['respuesta']];
             
         } elseif ($json['tipo'] === 'sql') {
-            // Es una consulta a la BD, procedemos a ejecutarla
             return $this->ejecutarYTraducirSQL($json['query'], $pregunta, $apiKey);
         }
 
@@ -91,32 +94,26 @@ class ChatbotService extends Model {
      * =====================================================================
      */
     private function ejecutarYTraducirSQL($sql, $pregunta, $apiKey) {
-        // Seguridad básica: solo permitimos consultas de lectura (SELECT)
         if (stripos(trim($sql), 'SELECT') !== 0) {
             return ["respuesta" => "Por seguridad, solo estoy autorizado a realizar consultas de lectura en la base de datos."];
         }
 
         try {
-            // Ejecutar la consulta en la BD usando tu Model.php
             $this->query($sql);
             $resultados = $this->resultSet();
             
-            // Convertimos a texto para enviarlo a la IA
             $datosBD = json_encode($resultados);
 
-            // SEGUNDO PROMPT: TRADUCCIÓN A LENGUAJE NATURAL
             $prompt2 = "Pregunta del administrador: '$pregunta'.
-            Resultado crudo de la base de datos: $datosBD.
+            Resultado de la base de datos: $datosBD.
             
-            Instrucción: Como asistente de Happy Jumping, redacta una respuesta natural, profesional y útil entregando esta información al usuario.
+            Instrucción: Redacta una respuesta natural, profesional y útil para el administrador.
             - Si el resultado está vacío ([]), di amablemente que no se encontraron registros.
-            - NUNCA menciones la palabra 'JSON', 'array', 'SQL' ni 'base de datos'. Actúa como si tú mismo hubieras revisado el sistema.
-            - Interpreta los datos y dalos de forma conversacional y fácil de leer.";
+            - NUNCA menciones la palabra 'JSON', 'array', 'SQL' ni 'base de datos'.
+            - Interpreta los datos y dalos de forma conversacional.";
 
-            // Volvemos a llamar a Gemini con los datos crudos
             $respuestaFinal = $this->llamarGemini($prompt2, $apiKey);
 
-            // Guardar historial para auditoría (incluyendo el SQL generado)
             $this->guardarHistorial($pregunta, $respuestaFinal, $sql);
 
             return ["respuesta" => $respuestaFinal];
@@ -132,7 +129,8 @@ class ChatbotService extends Model {
      * =====================================================================
      */
     private function llamarGemini($prompt, $apiKey) {
-        $url = "[https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=](https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=)" . $apiKey;
+        // NOTA: Se actualizó el modelo a "gemini-1.5-flash"
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
         
         $data = [
             "contents" => [["parts" => [["text" => $prompt]]]]
@@ -171,7 +169,6 @@ class ChatbotService extends Model {
         $this->bind(':pregunta', $pregunta);
         $this->bind(':respuesta', $respuesta);
         
-        // Guardamos el JSON del contexto SQL para cumplir con tu esquema
         $jsonContexto = $contexto_sql ? json_encode(["query" => $contexto_sql]) : json_encode(["fuente" => "Gemini Chat"]);
         $this->bind(':contexto', $jsonContexto);
         
