@@ -89,13 +89,58 @@ class AdminModel extends Model {
         return $this->resultSet();
     }
 
-    // Actualizar estado de una reserva
-    public function actualizarEstadoReserva($id_reserva, $nuevo_estado) {
-        $this->query("UPDATE pagos SET estado = :estado WHERE id_reserva = :id_reserva");
-        $this->bind(':estado',     $nuevo_estado,    PDO::PARAM_STR);
-        $this->bind(':id_reserva', (int)$id_reserva, PDO::PARAM_INT);
-        $this->execute();
-        return true;
+    public function actualizarEstadoReserva($id_reserva, $nuevo_estado)
+    {
+        try {
+
+            $this->dbh->beginTransaction();
+
+            // ---------- PAGOS ----------
+            $this->query("
+                UPDATE pagos
+                SET estado = :estado
+                WHERE id_reserva = :id
+            ");
+
+            $this->bind(':estado', $nuevo_estado);
+            $this->bind(':id', $id_reserva);
+
+            $this->execute();
+
+            $filasPago = $this->rowCount();
+
+            // ---------- RESERVAS ----------
+            $this->query("
+                UPDATE reservas
+                SET estado = :estado
+                WHERE id_reserva = :id
+            ");
+
+            $this->bind(':estado', $nuevo_estado);
+            $this->bind(':id', $id_reserva);
+
+            $this->execute();
+
+            $filasReserva = $this->rowCount();
+
+            $this->dbh->commit();
+
+            error_log("Reserva {$id_reserva}");
+            error_log("Pagos afectados: ".$filasPago);
+            error_log("Reservas afectadas: ".$filasReserva);
+
+            return ($filasPago > 0 || $filasReserva > 0);
+
+        } catch (Exception $e) {
+
+            if ($this->dbh->inTransaction()) {
+                $this->dbh->rollBack();
+            }
+
+            error_log($e->getMessage());
+
+            return false;
+        }
     }
 
     // Obtener una reserva por ID (para enviar correo de confirmación)
