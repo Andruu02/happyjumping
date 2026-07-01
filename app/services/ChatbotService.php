@@ -54,12 +54,14 @@ class ChatbotService extends Model {
         - Si requiere datos: {\"tipo\":\"sql\", \"query\":\"SELECT ... LIMIT 10\"}";
 
         // CAMBIO AQUÍ: Usamos el modelo exacto que te funcionaba
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" . $apiKey;
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
         
         $data = [
-            "contents" => [["parts" => [["text" => $prompt1]]]],
+            "contents" => [["parts" => [["text" => $instrucciones]]]],
             "generationConfig" => [
-                "response_mime_type" => "application/json"
+                "response_mime_type" => "application/json",
+                "temperature" => 0.2, // Una temperatura baja hace que sea más rápido y preciso
+                "maxOutputTokens" => 200 // Limitar la longitud ayuda a que la respuesta termine antes
             ]
         ];
 
@@ -120,7 +122,7 @@ class ChatbotService extends Model {
             Instrucción: Redacta una respuesta natural para el administrador. NO menciones 'JSON', 'array' ni 'SQL'. Si está vacío, dilo amablemente.";
 
             // CAMBIO AQUÍ TAMBIÉN: Usamos el modelo exacto que te funcionaba
-            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" . $apiKey;
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
             
             $data = ["contents" => [["parts" => [["text" => $prompt2]]]]];
 
