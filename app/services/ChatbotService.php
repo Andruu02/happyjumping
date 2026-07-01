@@ -5,7 +5,7 @@ class ChatbotService extends Model {
 
     public function procesarPregunta($pregunta) {
         // =====================================================================
-        // 1. OBTENER Y LIMPIAR LA API KEY 
+        // 1. OBTENER API KEY
         // =====================================================================
         $envPath = dirname(__DIR__, 2) . '/.env'; 
         $apiKey = '';
@@ -33,45 +33,58 @@ class ChatbotService extends Model {
         // 2. DEFINIR EL ESQUEMA DE TU BASE DE DATOS
         // =====================================================================
         $esquema = "
-        Tablas disponibles en MySQL:
+        Tablas en MySQL de Happy Jumping:
         1. usuarios (id_usuario, correo, rol, fecha_registro, nombre, is_verificado)
         2. reservas (id_reserva, id_usuario, id_paquete, id_horario, cantidad_personas, extra_pintura, extra_destruccion, fecha_reserva, estado, observaciones, nombre_cumpleanero, edad_cumpleanero)
         3. pagos (id_pago, id_reserva, monto, fecha_pago, estado)
         4. paquetes (id_paquete, nombre, descripcion, precio_semana, precio_fin_semana, duracion, estado)
         5. horarios_disponibles (id_horario, fecha, hora_inicio, hora_fin, disponible)
         6. promociones (id_promocion, nombre, puntos_necesarios)
-        7. vista_puntos_usuario (id_usuario, nombre, correo, puntos_totales, partidas_jugadas, mejor_puntaje)
         ";
 
         // =====================================================================
         // 3. PRIMER PROMPT: ENRUTAMIENTO Y TEXT-TO-SQL
         // =====================================================================
-        $prompt1 = "Eres el asistente administrativo experto de Happy Jumping.
-        Esquema de BD: $esquema
+        $prompt1 = "Eres el asistente administrativo de Happy Jumping.
+        Esquema de la base de datos: $esquema
         Pregunta del administrador: '$pregunta'
         
-        REGLAS:
-        - Si es un saludo, despedida o pregunta general, responde en este JSON: {\"tipo\":\"chat\", \"respuesta\":\"tu respuesta amigable\"}
-        - Si la pregunta requiere buscar datos en la base de datos, genera una consulta SQL válida (SOLO usa SELECT, usa JOIN si es necesario, limita a 10 resultados) en este JSON: {\"tipo\":\"sql\", \"query\":\"SELECT ...\"}
-        
-        OBLIGATORIO: Devuelve SOLO el JSON crudo.";
+        DEBES devolver un objeto JSON con esta estructura exacta:
+        - Si es un saludo o no requiere base de datos: {\"tipo\":\"chat\", \"respuesta\":\"tu respuesta amigable\"}
+        - Si requiere datos: {\"tipo\":\"sql\", \"query\":\"SELECT ... LIMIT 10\"}";
 
-        // Llamamos a Gemini
-        $respuestaCruda = $this->llamarGemini($prompt1, $apiKey);
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
         
-        // --- LA SOLUCIÓN: EXTRAER ESTRICTAMENTE EL JSON ---
-        $json = null;
-        $inicio = strpos($respuestaCruda, '{');
-        $fin = strrpos($respuestaCruda, '}');
-        
-        if ($inicio !== false && $fin !== false) {
-            $jsonString = substr($respuestaCruda, $inicio, $fin - $inicio + 1);
-            $json = json_decode($jsonString, true);
-        }
+        $data = [
+            "contents" => [["parts" => [["text" => $prompt1]]]],
+            // MAGIA AQUÍ: Obligamos a la API a devolver siempre un JSON válido
+            "generationConfig" => [
+                "response_mime_type" => "application/json"
+            ]
+        ];
 
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        
+        $response = curl_exec($ch);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) return ["error" => "Error cURL: " . $error];
+
+        $result = json_decode($response, true);
+        if (isset($result['error'])) return ["error" => "Error API: " . $result['error']['message']];
+
+        $respuestaCruda = $result['candidates'][0]['content']['parts'][0]['text'] ?? "";
+        $json = json_decode(trim($respuestaCruda), true);
+
+        // SALVAVIDAS (Fallback): Si la IA ignora las reglas, mostramos su texto crudo.
         if (!$json || !isset($json['tipo'])) {
-            // Si quieres ver qué dijo Gemini que rompió el JSON, temporalmente puedes cambiar el mensaje a: return ["respuesta" => "Debug: " . $respuestaCruda];
-            return ["respuesta" => "Lo siento, tuve un problema analizando tu consulta. Intentemos de nuevo."];
+            $this->guardarHistorial($pregunta, $respuestaCruda, null);
+            return ["respuesta" => $respuestaCruda];
         }
 
         // =====================================================================
@@ -95,68 +108,39 @@ class ChatbotService extends Model {
      */
     private function ejecutarYTraducirSQL($sql, $pregunta, $apiKey) {
         if (stripos(trim($sql), 'SELECT') !== 0) {
-            return ["respuesta" => "Por seguridad, solo estoy autorizado a realizar consultas de lectura en la base de datos."];
+            return ["respuesta" => "Por seguridad, solo realizo consultas de lectura (SELECT)."];
         }
 
         try {
             $this->query($sql);
             $resultados = $this->resultSet();
-            
             $datosBD = json_encode($resultados);
 
             $prompt2 = "Pregunta del administrador: '$pregunta'.
-            Resultado de la base de datos: $datosBD.
-            
-            Instrucción: Redacta una respuesta natural, profesional y útil para el administrador.
-            - Si el resultado está vacío ([]), di amablemente que no se encontraron registros.
-            - NUNCA menciones la palabra 'JSON', 'array', 'SQL' ni 'base de datos'.
-            - Interpreta los datos y dalos de forma conversacional.";
+            Resultado BD: $datosBD.
+            Instrucción: Redacta una respuesta natural para el administrador. NO menciones 'JSON', 'array' ni 'SQL'. Si está vacío, dilo amablemente.";
 
-            $respuestaFinal = $this->llamarGemini($prompt2, $apiKey);
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
+            $data = ["contents" => [["parts" => [["text" => $prompt2]]]]];
+
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+            $response = curl_exec($ch);
+            curl_close($ch);
+
+            $result = json_decode($response, true);
+            $respuestaFinal = $result['candidates'][0]['content']['parts'][0]['text'] ?? "Error leyendo los datos.";
 
             $this->guardarHistorial($pregunta, $respuestaFinal, $sql);
 
             return ["respuesta" => $respuestaFinal];
 
         } catch (Exception $e) {
-            return ["respuesta" => "Ocurrió un error al consultar los datos en el sistema: " . $e->getMessage()];
+            return ["respuesta" => "Error de SQL: " . $e->getMessage()];
         }
-    }
-
-    /**
-     * =====================================================================
-     * HELPER: ENVIAR PETICIÓN cURL A GEMINI
-     * =====================================================================
-     */
-    private function llamarGemini($prompt, $apiKey) {
-        // NOTA: Se actualizó el modelo a "gemini-1.5-flash"
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
-        
-        $data = [
-            "contents" => [["parts" => [["text" => $prompt]]]]
-        ];
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        
-        $response = curl_exec($ch);
-        $error = curl_error($ch);
-        curl_close($ch);
-
-        if ($error) {
-            return "Error de conexión cURL: " . $error;
-        }
-
-        $result = json_decode($response, true);
-        
-        if (isset($result['error'])) {
-            return "Error de la API: " . $result['error']['message'];
-        }
-
-        return $result['candidates'][0]['content']['parts'][0]['text'] ?? "Error en la IA.";
     }
 
     /**
