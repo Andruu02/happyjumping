@@ -21,10 +21,7 @@ class ChatbotService extends Model {
         Si es un saludo o conversación, responde SOLO con este JSON: {\"tipo\":\"chat\", \"respuesta\":\"...\"}.
         No incluyas explicaciones previas, solo el JSON crudo.";
 
-        $data = [
-            "contents" => [["parts" => [["text" => $prompt]]]],
-            "generationConfig" => ["response_mime_type" => "application/json"]
-        ];
+        $data = $this->armarPayload($prompt, true); // true = forzar JSON
 
         $respuestaCruda = $this->llamarApi($key, $data);
         $json = json_decode($respuestaCruda, true);
@@ -80,7 +77,7 @@ class ChatbotService extends Model {
             $promptTrad = "Pregunta del admin: '$pregunta'. Datos crudos de la BD: $datosBD. 
             Instrucción: Redacta una respuesta natural, profesional y clara dando esta información. NO menciones la palabra JSON, SQL ni array.";
             
-            $data = ["contents" => [["parts" => [["text" => $promptTrad]]]]];
+            $data = $this->armarPayload($promptTrad, false);
             $respuestaFinal = $this->llamarApi($apiKey, $data);
             
             $this->guardarHistorial($pregunta, $respuestaFinal, $sql);
@@ -93,43 +90,65 @@ class ChatbotService extends Model {
     }
 
     private function llamarApi($key, $data) {
-        // Modelo que funciona correctamente en tu cuenta
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" . $key;
-        
+        // xAI (Grok) usa un endpoint estilo OpenAI: /v1/chat/completions
+        $url = "https://api.x.ai/v1/chat/completions";
+
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $key
+        ]);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Grok suele responder rápido; 30s es holgado
+
         $resp = curl_exec($ch);
-        
+
         // Capturar errores de cURL
-        if(curl_errno($ch)) {
+        if (curl_errno($ch)) {
             $error = curl_error($ch);
             curl_close($ch);
             return '{"error": "cURL Error: ' . $error . '"}';
         }
-        
+
         curl_close($ch);
-        
-        // Ver si la API devolvió un error JSON
+
         $decoded = json_decode($resp, true);
         if (isset($decoded['error'])) {
-            return '{"error": "API Error: ' . $decoded['error']['message'] . '"}';
+            $msg = is_array($decoded['error']) ? ($decoded['error']['message'] ?? json_encode($decoded['error'])) : $decoded['error'];
+            return '{"error": "API Error: ' . addslashes($msg) . '"}';
         }
-        
-        return $decoded['candidates'][0]['content']['parts'][0]['text'] ?? '{"error": "Respuesta vacía de Gemini"}';
+
+        return $decoded['choices'][0]['message']['content'] ?? '{"error": "Respuesta vacía de Grok"}';
+    }
+
+    /**
+     * Construye el payload estilo OpenAI/xAI a partir de un prompt de texto plano.
+     * $jsonMode = true fuerza response_format json_object (para el paso de clasificación).
+     */
+    private function armarPayload($prompt, $jsonMode = false) {
+        $data = [
+            "model" => "grok-4.3",
+            "messages" => [
+                ["role" => "user", "content" => $prompt]
+            ],
+            "temperature" => 0.3
+        ];
+        if ($jsonMode) {
+            $data["response_format"] = ["type" => "json_object"];
+        }
+        return $data;
     }
 
     private function obtenerApiKey() {
         $envPath = dirname(__DIR__, 2) . '/.env';
-        $key = trim(getenv('GEMINI_API_KEY') ?: '', " \t\n\r\0\x0B\"'");
+        $key = trim(getenv('XAI_API_KEY') ?: '', " \t\n\r\0\x0B\"'");
         if (empty($key) && file_exists($envPath)) {
             $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             foreach ($lines as $l) {
-                if (strpos(trim($l), 'GEMINI_API_KEY=') === 0) {
-                    $key = trim(str_replace('GEMINI_API_KEY=', '', trim($l)), " \t\n\r\0\x0B\"'");
+                if (strpos(trim($l), 'XAI_API_KEY=') === 0) {
+                    $key = trim(str_replace('XAI_API_KEY=', '', trim($l)), " \t\n\r\0\x0B\"'");
                     break;
                 }
             }
@@ -141,7 +160,7 @@ class ChatbotService extends Model {
         $this->query("INSERT INTO chatbot_historial (pregunta, respuesta, contexto_sql) VALUES (:p, :r, :c)");
         $this->bind(':p', $pregunta);
         $this->bind(':r', $respuesta);
-        $this->bind(':c', $sql ? json_encode(["query" => $sql]) : json_encode(["fuente" => "Gemini"]));
+        $this->bind(':c', $sql ? json_encode(["query" => $sql]) : json_encode(["fuente" => "Grok"]));
         
         try {
             $this->execute();
