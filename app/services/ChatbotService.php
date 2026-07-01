@@ -120,7 +120,7 @@ class ChatbotService extends Model {
             Resultado BD: $datosBD.
             Instrucción: Redacta una respuesta natural para el administrador. NO menciones 'JSON', 'array' ni 'SQL'. Si está vacío, dilo amablemente.";
 
-            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" . $apiKey;
             $data = ["contents" => [["parts" => [["text" => $prompt2]]]]];
 
             $ch = curl_init($url);
