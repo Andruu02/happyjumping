@@ -53,11 +53,11 @@ class ChatbotService extends Model {
         - Si es un saludo o no requiere base de datos: {\"tipo\":\"chat\", \"respuesta\":\"tu respuesta amigable\"}
         - Si requiere datos: {\"tipo\":\"sql\", \"query\":\"SELECT ... LIMIT 10\"}";
 
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
+        // CAMBIO AQUÍ: Usamos el modelo exacto que te funcionaba
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" . $apiKey;
         
         $data = [
             "contents" => [["parts" => [["text" => $prompt1]]]],
-            // MAGIA AQUÍ: Obligamos a la API a devolver siempre un JSON válido
             "generationConfig" => [
                 "response_mime_type" => "application/json"
             ]
@@ -81,7 +81,6 @@ class ChatbotService extends Model {
         $respuestaCruda = $result['candidates'][0]['content']['parts'][0]['text'] ?? "";
         $json = json_decode(trim($respuestaCruda), true);
 
-        // SALVAVIDAS (Fallback): Si la IA ignora las reglas, mostramos su texto crudo.
         if (!$json || !isset($json['tipo'])) {
             $this->guardarHistorial($pregunta, $respuestaCruda, null);
             return ["respuesta" => $respuestaCruda];
@@ -120,7 +119,9 @@ class ChatbotService extends Model {
             Resultado BD: $datosBD.
             Instrucción: Redacta una respuesta natural para el administrador. NO menciones 'JSON', 'array' ni 'SQL'. Si está vacío, dilo amablemente.";
 
+            // CAMBIO AQUÍ TAMBIÉN: Usamos el modelo exacto que te funcionaba
             $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" . $apiKey;
+            
             $data = ["contents" => [["parts" => [["text" => $prompt2]]]]];
 
             $ch = curl_init($url);
