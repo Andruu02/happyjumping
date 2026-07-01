@@ -175,6 +175,10 @@ function confirmarCambio(form) {
     return confirm('¿Marcar el código #' + id + ' como "' + estadoNuevo + '"?');
 }
 </script>
+<script>
+window.HJ_URL_ROOT = "<?php echo URL_ROOT; ?>";
+</script>
+
 <script src="<?php echo URL_ROOT; ?>/js/chatbot_admin.js"></script>
 </body>
 </html>
