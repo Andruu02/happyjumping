@@ -24,13 +24,15 @@ class ChatbotService extends Model {
         $data = $this->armarPayload($prompt, true); // true = forzar JSON
 
         $respuestaCruda = $this->llamarApi($key, $data);
-        $json = json_decode($respuestaCruda, true);
+        $json = json_decode($this->limpiarJson($respuestaCruda), true);
 
         if (!$json || !isset($json['tipo'])) {
             // Si hay un error de la API (ej. clave inválida), lo mostramos directamente
-            $errorOculto = json_decode($respuestaCruda, true);
-            if(isset($errorOculto['error'])) return ["respuesta" => $respuestaCruda];
-            
+            if (isset($json['error'])) return ["respuesta" => $respuestaCruda];
+
+            // Dejamos rastro en el log del servidor para poder diagnosticar qué mandó Grok
+            error_log("ChatbotService: respuesta no parseable de Grok -> " . $respuestaCruda);
+
             return ["respuesta" => "Lo siento, tuve un problema analizando tu solicitud."];
         }
 
@@ -121,6 +123,19 @@ class ChatbotService extends Model {
         }
 
         return $decoded['choices'][0]['message']['content'] ?? '{"error": "Respuesta vacía de Grok"}';
+    }
+
+    /**
+     * A veces los modelos (incluido Grok) envuelven el JSON en fences de markdown
+     * (```json ... ```) aunque se pida response_format json_object. Esto lo limpia
+     * antes de json_decode().
+     */
+    private function limpiarJson($texto) {
+        $texto = trim($texto);
+        // Quita ```json al inicio y ``` al final (o solo ``` en cualquiera de los dos)
+        $texto = preg_replace('/^```(json)?\s*/i', '', $texto);
+        $texto = preg_replace('/\s*```$/', '', $texto);
+        return trim($texto);
     }
 
     /**
