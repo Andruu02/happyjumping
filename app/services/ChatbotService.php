@@ -150,13 +150,22 @@ class ChatbotService extends Model {
      * =====================================================================
      */
     private function guardarHistorial($pregunta, $respuesta, $contexto_sql) {
-        $this->query("INSERT INTO chatbot_historial (pregunta, respuesta, contexto_sql) VALUES (:pregunta, :respuesta, :contexto)");
+        // Usamos comillas invertidas ` para asegurar que los nombres de columnas no choquen con palabras reservadas
+        $sql = "INSERT INTO `chatbot_historial` (`pregunta`, `respuesta`, `contexto_sql`) VALUES (:pregunta, :respuesta, :contexto)";
+        
+        $this->query($sql);
         $this->bind(':pregunta', $pregunta);
         $this->bind(':respuesta', $respuesta);
         
+        // El contexto es un JSON. Si es null, guardamos un JSON vacío
         $jsonContexto = $contexto_sql ? json_encode(["query" => $contexto_sql]) : json_encode(["fuente" => "Gemini Chat"]);
         $this->bind(':contexto', $jsonContexto);
         
-        $this->execute();
+        try {
+            $this->execute();
+        } catch (Exception $e) {
+            // Esto es solo para debugging si vuelve a fallar
+            error_log("Error al guardar historial: " . $e->getMessage());
+        }
     }
 }
