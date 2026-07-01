@@ -30,14 +30,14 @@ class ChatbotService extends Model {
             // Si hay un error de la API (ej. clave inválida), lo mostramos directamente
             if (isset($json['error'])) return ["respuesta" => $respuestaCruda];
 
-            // Dejamos rastro en el log del servidor para poder diagnosticar qué mandó Grok
-            error_log("ChatbotService: respuesta no parseable de Grok -> " . $respuestaCruda);
+            // Dejamos rastro en el log del servidor para poder diagnosticar qué mandó Groq
+            error_log("ChatbotService: respuesta no parseable de Groq -> " . $respuestaCruda);
 
             // --- MODO DEBUG TEMPORAL ---
-            // Muestra la respuesta cruda de Grok directo en el chat para poder ver
+            // Muestra la respuesta cruda de Groq directo en el chat para poder ver
             // qué está devolviendo sin tener que ir a buscar logs del servidor.
             // Quita este bloque (y deja solo el return de abajo) una vez resuelto.
-            return ["respuesta" => "[DEBUG] Grok respondió esto (no es JSON válido): " . $respuestaCruda];
+            return ["respuesta" => "[DEBUG] Groq respondió esto (no es JSON válido): " . $respuestaCruda];
             // return ["respuesta" => "Lo siento, tuve un problema analizando tu solicitud."];
         }
 
@@ -80,7 +80,7 @@ class ChatbotService extends Model {
                 return ["respuesta" => $respuestaVacia];
             }
             
-            // Pedimos a Gemini que traduzca el JSON crudo a una respuesta humana
+            // Pedimos a la IA que traduzca el JSON crudo a una respuesta humana
             $promptTrad = "Pregunta del admin: '$pregunta'. Datos crudos de la BD: $datosBD. 
             Instrucción: Redacta una respuesta natural, profesional y clara dando esta información. NO menciones la palabra JSON, SQL ni array.";
             
@@ -97,8 +97,8 @@ class ChatbotService extends Model {
     }
 
     private function llamarApi($key, $data) {
-        // xAI (Grok) usa un endpoint estilo OpenAI: /v1/chat/completions
-        $url = "https://api.x.ai/v1/chat/completions";
+        // Groq usa un endpoint estilo OpenAI: /openai/v1/chat/completions
+        $url = "https://api.groq.com/openai/v1/chat/completions";
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -108,7 +108,7 @@ class ChatbotService extends Model {
             'Authorization: Bearer ' . $key
         ]);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Grok suele responder rápido; 30s es holgado
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Groq suele responder muy rápido; 30s es holgado
 
         $resp = curl_exec($ch);
 
@@ -127,11 +127,11 @@ class ChatbotService extends Model {
             return '{"error": "API Error: ' . addslashes($msg) . '"}';
         }
 
-        return $decoded['choices'][0]['message']['content'] ?? '{"error": "Respuesta vacía de Grok"}';
+        return $decoded['choices'][0]['message']['content'] ?? '{"error": "Respuesta vacía de Groq"}';
     }
 
     /**
-     * Extrae el primer bloque JSON válido de un texto, sin importar si Grok
+     * Extrae el primer bloque JSON válido de un texto, sin importar si la IA
      * lo envolvió en fences de markdown (```json ... ```) o le agregó
      * explicaciones antes/después a pesar de las instrucciones del prompt.
      */
@@ -168,7 +168,7 @@ class ChatbotService extends Model {
 
     private function armarPayload($prompt, $jsonMode = false) {
         $data = [
-            "model" => "grok-4.3",
+            "model" => "llama-3.3-70b-versatile",
             "messages" => [
                 ["role" => "user", "content" => $prompt]
             ],
@@ -182,12 +182,12 @@ class ChatbotService extends Model {
 
     private function obtenerApiKey() {
         $envPath = dirname(__DIR__, 2) . '/.env';
-        $key = trim(getenv('XAI_API_KEY') ?: '', " \t\n\r\0\x0B\"'");
+        $key = trim(getenv('GROQ_API_KEY') ?: '', " \t\n\r\0\x0B\"'");
         if (empty($key) && file_exists($envPath)) {
             $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             foreach ($lines as $l) {
-                if (strpos(trim($l), 'XAI_API_KEY=') === 0) {
-                    $key = trim(str_replace('XAI_API_KEY=', '', trim($l)), " \t\n\r\0\x0B\"'");
+                if (strpos(trim($l), 'GROQ_API_KEY=') === 0) {
+                    $key = trim(str_replace('GROQ_API_KEY=', '', trim($l)), " \t\n\r\0\x0B\"'");
                     break;
                 }
             }
@@ -199,7 +199,7 @@ class ChatbotService extends Model {
         $this->query("INSERT INTO chatbot_historial (pregunta, respuesta, contexto_sql) VALUES (:p, :r, :c)");
         $this->bind(':p', $pregunta);
         $this->bind(':r', $respuesta);
-        $this->bind(':c', $sql ? json_encode(["query" => $sql]) : json_encode(["fuente" => "Grok"]));
+        $this->bind(':c', $sql ? json_encode(["query" => $sql]) : json_encode(["fuente" => "Groq"]));
         
         try {
             $this->execute();
