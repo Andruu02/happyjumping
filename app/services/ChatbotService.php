@@ -15,11 +15,11 @@ class ChatbotService extends Model {
         pagos(id_pago, id_reserva, monto, estado), 
         paquetes(id_paquete, nombre, precio_semana, precio_fin_semana).";
 
-        // 2. Prompt con configuración de respuesta JSON
-        $prompt = "Eres el asistente administrativo de Happy Jumping. Esquema: $esquema. Pregunta: '$pregunta'. 
-        Si la pregunta requiere base de datos, responde SOLO con este JSON: {\"tipo\":\"sql\", \"query\":\"SELECT...\"}. 
+        // 2. Prompt con configuración de respuesta JSON (y advertencia de seguridad)
+        $prompt = "Eres el asistente analista de Happy Jumping. Tu única función es consultar datos. Esquema: $esquema. Pregunta: '$pregunta'. 
+        Si la pregunta requiere base de datos, responde SOLO con este JSON: {\"tipo\":\"sql\", \"query\":\"SELECT...\"}. NUNCA generes comandos de modificación.
         Si es un saludo o conversación, responde SOLO con este JSON: {\"tipo\":\"chat\", \"respuesta\":\"...\"}.
-        No incluyas explicaciones previas, solo el JSON.";
+        No incluyas explicaciones previas, solo el JSON crudo.";
 
         $data = [
             "contents" => [["parts" => [["text" => $prompt]]]],
@@ -30,6 +30,10 @@ class ChatbotService extends Model {
         $json = json_decode($respuestaCruda, true);
 
         if (!$json || !isset($json['tipo'])) {
+            // Si hay un error de la API (ej. clave inválida), lo mostramos directamente
+            $errorOculto = json_decode($respuestaCruda, true);
+            if(isset($errorOculto['error'])) return ["respuesta" => $respuestaCruda];
+            
             return ["respuesta" => "Lo siento, tuve un problema analizando tu solicitud."];
         }
 
@@ -42,28 +46,54 @@ class ChatbotService extends Model {
     }
 
     private function ejecutarYTraducirSQL($sql, $pregunta, $apiKey) {
-        if (stripos(trim($sql), 'SELECT') !== 0) {
-            return ["respuesta" => "Solo puedo realizar consultas de lectura."];
+        // --- BLINDAJE DE SEGURIDAD EXTREMO ---
+        $sqlUpper = strtoupper(trim($sql));
+        
+        // 1. Debe empezar obligatoriamente con SELECT
+        if (strpos($sqlUpper, 'SELECT') !== 0) {
+            return ["respuesta" => "Acción denegada: Solo estoy autorizado para realizar consultas de lectura (SELECT)."];
         }
 
+        // 2. No debe contener ninguna palabra destructiva en ninguna parte de la consulta
+        $prohibidas = ['DELETE', 'UPDATE', 'DROP', 'INSERT', 'ALTER', 'CREATE', 'GRANT', 'TRUNCATE', 'REPLACE'];
+        foreach ($prohibidas as $palabra) {
+            // Usamos \b para asegurar que es la palabra exacta y no parte de un nombre (ej. tabla "drop_points")
+            if (preg_match('/\b' . $palabra . '\b/', $sqlUpper)) {
+                return ["respuesta" => "Acción denegada: Se detectó un comando no permitido por seguridad ($palabra)."];
+            }
+        }
+        // --- FIN DEL BLINDAJE ---
+
         try {
+            // Ejecutamos la consulta validada
             $this->query($sql);
             $datosBD = json_encode($this->resultSet());
             
-            $promptTrad = "Pregunta: '$pregunta'. Datos de BD: $datosBD. Responde al administrador de forma natural y profesional.";
-            $data = ["contents" => [["parts" => [["text" => $promptTrad]]]]];
+            // Si no hay datos, le ahorramos trabajo a la IA
+            if ($datosBD === "[]" || empty($this->resultSet())) {
+                $respuestaVacia = "No encontré ningún registro en la base de datos para esa consulta.";
+                $this->guardarHistorial($pregunta, $respuestaVacia, $sql);
+                return ["respuesta" => $respuestaVacia];
+            }
             
+            // Pedimos a Gemini que traduzca el JSON crudo a una respuesta humana
+            $promptTrad = "Pregunta del admin: '$pregunta'. Datos crudos de la BD: $datosBD. 
+            Instrucción: Redacta una respuesta natural, profesional y clara dando esta información. NO menciones la palabra JSON, SQL ni array.";
+            
+            $data = ["contents" => [["parts" => [["text" => $promptTrad]]]]];
             $respuestaFinal = $this->llamarApi($apiKey, $data);
+            
             $this->guardarHistorial($pregunta, $respuestaFinal, $sql);
             
             return ["respuesta" => $respuestaFinal];
+            
         } catch (Exception $e) {
-            return ["respuesta" => "Error de consulta: " . $e->getMessage()];
+            return ["respuesta" => "Error al consultar la base de datos: " . $e->getMessage()];
         }
     }
 
     private function llamarApi($key, $data) {
-        // Volvemos al modelo exacto que SÍ te funcionó hace unos momentos
+        // Modelo que funciona correctamente en tu cuenta
         $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" . $key;
         
         $ch = curl_init($url);
@@ -74,7 +104,7 @@ class ChatbotService extends Model {
         
         $resp = curl_exec($ch);
         
-        // --- DEPURACIÓN: Capturar errores de cURL ---
+        // Capturar errores de cURL
         if(curl_errno($ch)) {
             $error = curl_error($ch);
             curl_close($ch);
@@ -83,7 +113,7 @@ class ChatbotService extends Model {
         
         curl_close($ch);
         
-        // --- DEPURACIÓN: Ver si la API devolvió un error JSON ---
+        // Ver si la API devolvió un error JSON
         $decoded = json_decode($resp, true);
         if (isset($decoded['error'])) {
             return '{"error": "API Error: ' . $decoded['error']['message'] . '"}';
@@ -112,6 +142,12 @@ class ChatbotService extends Model {
         $this->bind(':p', $pregunta);
         $this->bind(':r', $respuesta);
         $this->bind(':c', $sql ? json_encode(["query" => $sql]) : json_encode(["fuente" => "Gemini"]));
-        $this->execute();
+        
+        try {
+            $this->execute();
+        } catch (Exception $e) {
+            // Evitamos que un error al guardar el historial rompa la respuesta principal
+            error_log("Error guardando historial del chatbot: " . $e->getMessage());
+        }
     }
 }
