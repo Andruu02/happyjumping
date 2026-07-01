@@ -69,10 +69,25 @@ class ChatbotService extends Model {
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        
         $resp = curl_exec($ch);
+        
+        // --- DEPURACIÓN: Capturar errores de cURL ---
+        if(curl_errno($ch)) {
+            $error = curl_error($ch);
+            curl_close($ch);
+            return '{"error": "cURL Error: ' . $error . '"}';
+        }
+        
         curl_close($ch);
+        
+        // --- DEPURACIÓN: Ver si la API devolvió un error JSON ---
         $decoded = json_decode($resp, true);
-        return $decoded['candidates'][0]['content']['parts'][0]['text'] ?? '{"tipo":"chat", "respuesta":"Error de IA"}';
+        if (isset($decoded['error'])) {
+            return '{"error": "API Error: ' . $decoded['error']['message'] . '"}';
+        }
+        
+        return $decoded['candidates'][0]['content']['parts'][0]['text'] ?? '{"error": "Respuesta vacía de Gemini"}';
     }
 
     private function obtenerApiKey() {
