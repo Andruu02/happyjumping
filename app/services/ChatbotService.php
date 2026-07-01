@@ -63,7 +63,9 @@ class ChatbotService extends Model {
     }
 
     private function llamarApi($key, $data) {
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $key;
+        // Volvemos al modelo exacto que SÍ te funcionó hace unos momentos
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" . $key;
+        
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
