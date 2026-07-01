@@ -24,7 +24,7 @@ class ChatbotService extends Model {
         $data = $this->armarPayload($prompt, true); // true = forzar JSON
 
         $respuestaCruda = $this->llamarApi($key, $data);
-        $json = json_decode($this->limpiarJson($respuestaCruda), true);
+        $json = json_decode($this->extraerJson($respuestaCruda), true);
 
         if (!$json || !isset($json['tipo'])) {
             // Si hay un error de la API (ej. clave inválida), lo mostramos directamente
@@ -33,7 +33,12 @@ class ChatbotService extends Model {
             // Dejamos rastro en el log del servidor para poder diagnosticar qué mandó Grok
             error_log("ChatbotService: respuesta no parseable de Grok -> " . $respuestaCruda);
 
-            return ["respuesta" => "Lo siento, tuve un problema analizando tu solicitud."];
+            // --- MODO DEBUG TEMPORAL ---
+            // Muestra la respuesta cruda de Grok directo en el chat para poder ver
+            // qué está devolviendo sin tener que ir a buscar logs del servidor.
+            // Quita este bloque (y deja solo el return de abajo) una vez resuelto.
+            return ["respuesta" => "[DEBUG] Grok respondió esto (no es JSON válido): " . $respuestaCruda];
+            // return ["respuesta" => "Lo siento, tuve un problema analizando tu solicitud."];
         }
 
         if ($json['tipo'] === 'chat') {
@@ -126,22 +131,41 @@ class ChatbotService extends Model {
     }
 
     /**
-     * A veces los modelos (incluido Grok) envuelven el JSON en fences de markdown
-     * (```json ... ```) aunque se pida response_format json_object. Esto lo limpia
-     * antes de json_decode().
+     * Extrae el primer bloque JSON válido de un texto, sin importar si Grok
+     * lo envolvió en fences de markdown (```json ... ```) o le agregó
+     * explicaciones antes/después a pesar de las instrucciones del prompt.
      */
-    private function limpiarJson($texto) {
+    private function extraerJson($texto) {
         $texto = trim($texto);
-        // Quita ```json al inicio y ``` al final (o solo ``` en cualquiera de los dos)
-        $texto = preg_replace('/^```(json)?\s*/i', '', $texto);
-        $texto = preg_replace('/\s*```$/', '', $texto);
-        return trim($texto);
+
+        // Caso simple: ya es JSON puro
+        if (json_decode($texto, true) !== null) {
+            return $texto;
+        }
+
+        // Quitar fences de markdown si existen
+        $sinFences = preg_replace('/^```(json)?\s*/i', '', $texto);
+        $sinFences = preg_replace('/\s*```$/', '', $sinFences);
+        $sinFences = trim($sinFences);
+        if (json_decode($sinFences, true) !== null) {
+            return $sinFences;
+        }
+
+        // Último recurso: agarrar desde la primera { hasta la última }
+        $inicio = strpos($texto, '{');
+        $fin = strrpos($texto, '}');
+        if ($inicio !== false && $fin !== false && $fin > $inicio) {
+            $candidato = substr($texto, $inicio, $fin - $inicio + 1);
+            if (json_decode($candidato, true) !== null) {
+                return $candidato;
+            }
+        }
+
+        // No se pudo extraer nada parseable; se devuelve tal cual para que
+        // el error se registre con el texto original.
+        return $texto;
     }
 
-    /**
-     * Construye el payload estilo OpenAI/xAI a partir de un prompt de texto plano.
-     * $jsonMode = true fuerza response_format json_object (para el paso de clasificación).
-     */
     private function armarPayload($prompt, $jsonMode = false) {
         $data = [
             "model" => "grok-4.3",
