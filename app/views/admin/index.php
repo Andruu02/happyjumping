@@ -544,6 +544,12 @@
     }
 })();
 </script>
-<script src="<?php echo URLROOT; ?>/js/chatbot_admin.js"></script>
+<script>
+
+window.HJ_URL_ROOT="<?= URL_ROOT ?>";
+
+</script>
+
+<script src="<?= URL_ROOT ?>/js/chatbot_admin_v2.js"></script>
 </body>
 </html>

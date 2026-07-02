@@ -179,6 +179,12 @@ function confirmarCambio(form) {
 window.HJ_URL_ROOT = "<?php echo URL_ROOT; ?>";
 </script>
 
-<script src="<?php echo URL_ROOT; ?>/js/chatbot_admin.js"></script>
+<script>
+
+window.HJ_URL_ROOT="<?= URL_ROOT ?>";
+
+</script>
+
+<script src="<?= URL_ROOT ?>/js/chatbot_admin_v2.js"></script>
 </body>
 </html>
