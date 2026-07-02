@@ -2,7 +2,7 @@
 
 // ===== CORS =====
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: Content-Type, Authorization, X-App-Key");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Content-Type: application/json");
 
@@ -16,35 +16,7 @@ class ApiController extends Controller {
     private $usuarioModel;
 
     public function __construct() {
-        $this->verificarAppKey(); // se ejecuta ANTES de cualquier método (index, login, etc.)
         $this->usuarioModel = $this->model('UsuarioModel');
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | SEGURIDAD — Verifica que la petición venga de la app móvil
-    |--------------------------------------------------------------------------
-    */
-    private function verificarAppKey() {
-        $headers = getallheaders();
-
-        // getallheaders() puede devolver las claves con distinta capitalización
-        // según el servidor, así que normalizamos
-        $headers = array_change_key_case($headers, CASE_LOWER);
-
-        $apiKeyRecibida = $headers['x-app-key'] ?? null;
-        $apiKeyValida   = getenv('API_APP_KEY');
-
-        if (!$apiKeyValida) {
-            // Si no configuraste la variable de entorno, bloquea todo por seguridad
-            http_response_code(500);
-            exit;
-        }
-
-        if (!$apiKeyRecibida || !hash_equals($apiKeyValida, $apiKeyRecibida)) {
-            http_response_code(404); // simula que la ruta no existe
-            exit; // no se imprime absolutamente nada
-        }
     }
 
     /*
@@ -56,7 +28,17 @@ class ApiController extends Controller {
     public function index() {
         echo json_encode([
             "success" => true,
-            "message" => "API Happy Jumping"
+            "message" => "API Happy Jumping",
+            "endpoints" => [
+                "POST /api/login",
+                "GET  /api/promociones",
+                "GET  /api/personajes",
+                "POST /api/partidas",
+                "GET  /api/partidas/{id_usuario}",
+                "GET  /api/partidas/puntos/{id_usuario}",
+                "POST /api/codigos-promocion/canjear",
+                "GET  /api/codigos-promocion/{id_usuario}"
+            ]
         ]);
     }
 
@@ -129,18 +111,21 @@ class ApiController extends Controller {
 
         $partidaModel = $this->model('PartidaModel');
 
+        // GET /api/partidas/puntos/1  → $param1='puntos', $param2='1'
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $param1 === 'puntos' && $param2) {
             $puntos = $partidaModel->obtenerPuntosTotales((int) $param2);
             echo json_encode(["success" => true, "puntos_totales" => $puntos]);
             return;
         }
 
+        // GET /api/partidas/1  → $param1='1', $param2=null
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $param1 && !$param2) {
             $historial = $partidaModel->obtenerHistorial((int) $param1);
             echo json_encode(["success" => true, "data" => $historial]);
             return;
         }
 
+        // POST /api/partidas
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $input = json_decode(file_get_contents("php://input"), true);
 
@@ -189,6 +174,7 @@ class ApiController extends Controller {
 
         $promocionModel = $this->model('PromocionModel');
 
+        // POST /api/codigos-promocion/canjear
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && $param1 === 'canjear') {
             $input        = json_decode(file_get_contents("php://input"), true);
             $id_usuario   = $input['id_usuario']   ?? null;
@@ -213,6 +199,7 @@ class ApiController extends Controller {
             return;
         }
 
+        // GET /api/codigos-promocion/1
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $param1) {
             $codigos = $promocionModel->obtenerCodigosDeUsuario((int) $param1);
             echo json_encode(["success" => true, "data" => $codigos]);
