@@ -8,16 +8,35 @@ class ChatbotService extends Model {
         if (isset($apiKey['error'])) return $apiKey;
         $key = $apiKey['key'];
 
-        // 1. Esquema detallado para que la IA entienda tus tablas
-        $esquema = "Tablas: 
-        usuarios(id_usuario, nombre, correo), 
-        reservas(id_reserva, id_usuario, id_paquete, estado, fecha_reserva, nombre_cumpleanero), 
-        pagos(id_pago, id_reserva, monto, estado), 
-        paquetes(id_paquete, nombre, precio_semana, precio_fin_semana).";
+        // 1. Esquema detallado + REGLAS DE NEGOCIO para que la IA no se equivoque
+        $esquema = "
+TABLAS Y RELACIONES:
+- usuarios(id_usuario, nombre, correo)
+- reservas(id_reserva, id_usuario, id_paquete, estado, fecha_reserva, nombre_cumpleanero)
+  * estado puede ser: 'pendiente', 'confirmado', 'cancelado'
+- pagos(id_pago, id_reserva, monto, estado)
+  * monto = dinero asociado a esa reserva (relacionar con reservas.id_reserva)
+- paquetes(id_paquete, nombre, precio_semana, precio_fin_semana)
+
+REGLAS DE NEGOCIO OBLIGATORIAS (aplícalas SIEMPRE, aunque el admin no las mencione explícitamente):
+1. Una reserva solo representa dinero real cuando reservas.estado = 'confirmado'. El admin la confirma manualmente al verificar el comprobante de pago (Yape/Plin). Las reservas 'pendiente' o 'cancelado' NUNCA deben sumarse como ingresos.
+2. Para calcular INGRESOS, DINERO RECAUDADO, VENTAS, GANANCIAS o cualquier pregunta relacionada con dinero de la empresa: usa SUM(pagos.monto), haciendo INNER JOIN entre pagos y reservas por id_reserva, y SIEMPRE filtra WHERE reservas.estado = 'confirmado'.
+3. Para saber qué cliente/usuario ha generado más dinero ('mejor cliente', 'quién más gastó', 'cliente más rentable'): une usuarios + reservas + pagos, filtra reservas.estado = 'confirmado', agrupa por usuario (GROUP BY usuarios.id_usuario), suma pagos.monto, ordena descendente (ORDER BY ... DESC) y usa LIMIT según lo pedido (LIMIT 1 si preguntan por 'el' cliente top).
+4. Si preguntan por reservas 'pendientes' o 'canceladas' explícitamente, ahí sí filtra por ese estado en vez de 'confirmado'.
+5. Si la pregunta no especifica estado y no es sobre dinero (ej. '¿cuántas reservas hay hoy?'), no apliques el filtro de estado a menos que sea razonable asumir que se refiere a reservas activas/confirmadas — en caso de duda, incluye todas y aclara los estados en la respuesta final.
+
+EJEMPLOS DE CONSULTAS CORRECTAS:
+- Pregunta: '¿Cuánto hemos recaudado en total?'
+  SQL: SELECT SUM(p.monto) AS total FROM pagos p INNER JOIN reservas r ON r.id_reserva = p.id_reserva WHERE r.estado = 'confirmado'
+
+- Pregunta: '¿Quién es el cliente que más dinero nos ha dado?'
+  SQL: SELECT u.nombre, SUM(p.monto) AS total_gastado FROM usuarios u INNER JOIN reservas r ON r.id_usuario = u.id_usuario INNER JOIN pagos p ON p.id_reserva = r.id_reserva WHERE r.estado = 'confirmado' GROUP BY u.id_usuario, u.nombre ORDER BY total_gastado DESC LIMIT 1
+";
 
         // 2. Prompt con configuración de respuesta JSON (y advertencia de seguridad)
-        $prompt = "Eres el asistente analista de Happy Jumping. Tu única función es consultar datos. Esquema: $esquema. Pregunta: '$pregunta'. 
-        Si la pregunta requiere base de datos, responde SOLO con este JSON: {\"tipo\":\"sql\", \"query\":\"SELECT...\"}. NUNCA generes comandos de modificación.
+        $prompt = "Eres el asistente analista de Happy Jumping. Tu única función es consultar datos. $esquema
+        Pregunta del admin: '$pregunta'.
+        Si la pregunta requiere base de datos, responde SOLO con este JSON: {\"tipo\":\"sql\", \"query\":\"SELECT...\"}. NUNCA generes comandos de modificación. Aplica SIEMPRE las reglas de negocio indicadas arriba antes de construir el SQL.
         Si es un saludo o conversación, responde SOLO con este JSON: {\"tipo\":\"chat\", \"respuesta\":\"...\"}.
         No incluyas explicaciones previas, solo el JSON crudo.";
 
@@ -52,7 +71,7 @@ class ChatbotService extends Model {
     private function ejecutarYTraducirSQL($sql, $pregunta, $apiKey) {
         // --- BLINDAJE DE SEGURIDAD EXTREMO ---
         $sqlUpper = strtoupper(trim($sql));
-        
+
         // 1. Debe empezar obligatoriamente con SELECT
         if (strpos($sqlUpper, 'SELECT') !== 0) {
             return ["respuesta" => "Acción denegada: Solo estoy autorizado para realizar consultas de lectura (SELECT)."];
@@ -72,25 +91,25 @@ class ChatbotService extends Model {
             // Ejecutamos la consulta validada
             $this->query($sql);
             $datosBD = json_encode($this->resultSet());
-            
+
             // Si no hay datos, le ahorramos trabajo a la IA
             if ($datosBD === "[]" || empty($this->resultSet())) {
                 $respuestaVacia = "No encontré ningún registro en la base de datos para esa consulta.";
                 $this->guardarHistorial($pregunta, $respuestaVacia, $sql);
                 return ["respuesta" => $respuestaVacia];
             }
-            
+
             // Pedimos a la IA que traduzca el JSON crudo a una respuesta humana
-            $promptTrad = "Pregunta del admin: '$pregunta'. Datos crudos de la BD: $datosBD. 
-            Instrucción: Redacta una respuesta natural, profesional y clara dando esta información. NO menciones la palabra JSON, SQL ni array.";
-            
+            $promptTrad = "Pregunta del admin: '$pregunta'. Datos crudos de la BD: $datosBD.
+            Instrucción: Redacta una respuesta natural, profesional y clara dando esta información. Si la pregunta era sobre dinero/ingresos, aclara que corresponde solo a reservas confirmadas. NO menciones la palabra JSON, SQL ni array.";
+
             $data = $this->armarPayload($promptTrad, false);
             $respuestaFinal = $this->llamarApi($apiKey, $data);
-            
+
             $this->guardarHistorial($pregunta, $respuestaFinal, $sql);
-            
+
             return ["respuesta" => $respuestaFinal];
-            
+
         } catch (Exception $e) {
             return ["respuesta" => "Error al consultar la base de datos: " . $e->getMessage()];
         }
@@ -200,7 +219,7 @@ class ChatbotService extends Model {
         $this->bind(':p', $pregunta);
         $this->bind(':r', $respuesta);
         $this->bind(':c', $sql ? json_encode(["query" => $sql]) : json_encode(["fuente" => "Groq"]));
-        
+
         try {
             $this->execute();
         } catch (Exception $e) {
