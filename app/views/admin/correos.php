@@ -394,6 +394,6 @@ window.HJ_URL_ROOT="<?= URL_ROOT ?>";
 
 </script>
 
-<script src="<?= URL_ROOT ?>/js/chatbot_admin_v2.js"></script>
+<script src="<?= URL_ROOT ?>/js/chatbot_admin.js"></script>
 </body>
 </html>

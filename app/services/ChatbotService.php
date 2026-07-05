@@ -19,11 +19,12 @@ TABLAS Y RELACIONES:
 - paquetes(id_paquete, nombre, precio_semana, precio_fin_semana)
 
 REGLAS DE NEGOCIO OBLIGATORIAS (aplícalas SIEMPRE, aunque el admin no las mencione explícitamente):
-1. Una reserva solo representa dinero real cuando reservas.estado = 'confirmado'. El admin la confirma manualmente al verificar el comprobante de pago (Yape/Plin). Las reservas 'pendiente' o 'cancelado' NUNCA deben sumarse como ingresos.
-2. Para calcular INGRESOS, DINERO RECAUDADO, VENTAS, GANANCIAS o cualquier pregunta relacionada con dinero de la empresa: usa SUM(pagos.monto), haciendo INNER JOIN entre pagos y reservas por id_reserva, y SIEMPRE filtra WHERE reservas.estado = 'confirmado'.
+1. Una reserva solo representa dinero real o una venta efectiva cuando reservas.estado = 'confirmado'. El admin la confirma manualmente al verificar el comprobante de pago (Yape/Plin). Las reservas 'pendiente' o 'cancelado' NUNCA deben contarse como ingresos ni como ventas.
+2. Para calcular INGRESOS, DINERO RECAUDADO, VENTAS EN SOLES o cualquier pregunta relacionada con dinero de la empresa: usa SUM(pagos.monto), haciendo INNER JOIN entre pagos y reservas por id_reserva, y SIEMPRE filtra WHERE reservas.estado = 'confirmado'.
 3. Para saber qué cliente/usuario ha generado más dinero ('mejor cliente', 'quién más gastó', 'cliente más rentable'): une usuarios + reservas + pagos, filtra reservas.estado = 'confirmado', agrupa por usuario (GROUP BY usuarios.id_usuario), suma pagos.monto, ordena descendente (ORDER BY ... DESC) y usa LIMIT según lo pedido (LIMIT 1 si preguntan por 'el' cliente top).
-4. Si preguntan por reservas 'pendientes' o 'canceladas' explícitamente, ahí sí filtra por ese estado en vez de 'confirmado'.
-5. Si la pregunta no especifica estado y no es sobre dinero (ej. '¿cuántas reservas hay hoy?'), no apliques el filtro de estado a menos que sea razonable asumir que se refiere a reservas activas/confirmadas — en caso de duda, incluye todas y aclara los estados en la respuesta final.
+4. Para PAQUETE MÁS VENDIDO, PAQUETE MÁS POPULAR, PAQUETE TOP o cuántas veces se reservó un paquete: une paquetes + reservas por id_paquete, filtra reservas.estado = 'confirmado' (una reserva pendiente o cancelada no es una venta real), agrupa por paquete (GROUP BY paquetes.id_paquete, paquetes.nombre), cuenta las reservas con COUNT(*), ordena descendente y usa LIMIT según lo pedido (LIMIT 1 si preguntan por 'el' paquete top/más vendido).
+5. Si preguntan por reservas 'pendientes' o 'canceladas' explícitamente, ahí sí filtra por ese estado en vez de 'confirmado'.
+6. Si la pregunta no especifica estado y no es sobre dinero ni ventas (ej. '¿cuántas reservas hay hoy?'), no apliques el filtro de estado a menos que sea razonable asumir que se refiere a reservas activas/confirmadas — en caso de duda, incluye todas y aclara los estados en la respuesta final.
 
 EJEMPLOS DE CONSULTAS CORRECTAS:
 - Pregunta: '¿Cuánto hemos recaudado en total?'
@@ -31,6 +32,9 @@ EJEMPLOS DE CONSULTAS CORRECTAS:
 
 - Pregunta: '¿Quién es el cliente que más dinero nos ha dado?'
   SQL: SELECT u.nombre, SUM(p.monto) AS total_gastado FROM usuarios u INNER JOIN reservas r ON r.id_usuario = u.id_usuario INNER JOIN pagos p ON p.id_reserva = r.id_reserva WHERE r.estado = 'confirmado' GROUP BY u.id_usuario, u.nombre ORDER BY total_gastado DESC LIMIT 1
+
+- Pregunta: '¿Cuál es el paquete más vendido?'
+  SQL: SELECT pa.nombre, COUNT(*) AS veces_reservado FROM paquetes pa INNER JOIN reservas r ON r.id_paquete = pa.id_paquete WHERE r.estado = 'confirmado' GROUP BY pa.id_paquete, pa.nombre ORDER BY veces_reservado DESC LIMIT 1
 ";
 
         // 2. Prompt con configuración de respuesta JSON (y advertencia de seguridad)
@@ -101,7 +105,7 @@ EJEMPLOS DE CONSULTAS CORRECTAS:
 
             // Pedimos a la IA que traduzca el JSON crudo a una respuesta humana
             $promptTrad = "Pregunta del admin: '$pregunta'. Datos crudos de la BD: $datosBD.
-            Instrucción: Redacta una respuesta natural, profesional y clara dando esta información. Si la pregunta era sobre dinero/ingresos, aclara que corresponde solo a reservas confirmadas. NO menciones la palabra JSON, SQL ni array.";
+            Instrucción: Redacta una respuesta natural, profesional y clara dando esta información. Si la pregunta era sobre dinero/ingresos o ventas/paquete más vendido, aclara que corresponde solo a reservas confirmadas. NO menciones la palabra JSON, SQL ni array.";
 
             $data = $this->armarPayload($promptTrad, false);
             $respuestaFinal = $this->llamarApi($apiKey, $data);

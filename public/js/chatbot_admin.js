@@ -48,10 +48,7 @@
                     <span class="hj-avatar-msg">
                         <img class="hj-bot-img hj-bot-img-xs" src="${HJ_IMG_BOT}" alt="HappyBot" />
                     </span>
-                    <div class="hj-msg hj-msg-bot">
-                        ¡Hola! Soy <strong>HappyBot</strong> 🎈 Puedo ayudarte con reservas, pagos,
-                        clientes, paquetes y más. ¿En qué te ayudo hoy?
-                    </div>
+                    <div class="hj-msg hj-msg-bot">¡Hola! Soy <strong>HappyBot</strong> 🎈 Puedo ayudarte con reservas, pagos, clientes, paquetes y más. ¿En qué te ayudo hoy?</div>
                 </div>
             </div>
 
