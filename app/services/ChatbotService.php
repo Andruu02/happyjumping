@@ -10,31 +10,41 @@ class ChatbotService extends Model {
 
         // 1. Esquema detallado + REGLAS DE NEGOCIO para que la IA no se equivoque
         $esquema = "
-TABLAS Y RELACIONES:
-- usuarios(id_usuario, nombre, correo)
-- reservas(id_reserva, id_usuario, id_paquete, estado, fecha_reserva, nombre_cumpleanero)
-  * estado puede ser: 'pendiente', 'confirmado', 'cancelado'
-- pagos(id_pago, id_reserva, monto, estado)
+TABLAS Y RELACIONES (esquema real de la base de datos):
+- usuarios(id_usuario, nombre, correo, rol)
+- reservas(id_reserva, id_usuario, id_paquete, id_horario, cantidad_personas, fecha_reserva, estado, nombre_cumpleanero)
+  * estado puede ser: 'pendiente', 'confirmada', 'cancelada', 'finalizada'
+  * IMPORTANTE: fecha_reserva es la fecha en que se CREÓ el registro de la reserva (cuándo el cliente reservó), NO la fecha de la fiesta/evento.
+- horarios_disponibles(id_horario, fecha, hora_inicio, hora_fin, disponible)
+  * fecha = la fecha REAL de la fiesta/evento. Para saber cuándo es el evento de una reserva, siempre relaciona reservas.id_horario con horarios_disponibles.id_horario y usa horarios_disponibles.fecha.
+- pagos(id_pago, id_reserva, monto, fecha_pago, estado)
   * monto = dinero asociado a esa reserva (relacionar con reservas.id_reserva)
-- paquetes(id_paquete, nombre, precio_semana, precio_fin_semana)
+- paquetes(id_paquete, nombre, descripcion, precio_semana, precio_fin_semana)
 
 REGLAS DE NEGOCIO OBLIGATORIAS (aplícalas SIEMPRE, aunque el admin no las mencione explícitamente):
-1. Una reserva solo representa dinero real o una venta efectiva cuando reservas.estado = 'confirmado'. El admin la confirma manualmente al verificar el comprobante de pago (Yape/Plin). Las reservas 'pendiente' o 'cancelado' NUNCA deben contarse como ingresos ni como ventas.
-2. Para calcular INGRESOS, DINERO RECAUDADO, VENTAS EN SOLES o cualquier pregunta relacionada con dinero de la empresa: usa SUM(pagos.monto), haciendo INNER JOIN entre pagos y reservas por id_reserva, y SIEMPRE filtra WHERE reservas.estado = 'confirmado'.
-3. Para saber qué cliente/usuario ha generado más dinero ('mejor cliente', 'quién más gastó', 'cliente más rentable'): une usuarios + reservas + pagos, filtra reservas.estado = 'confirmado', agrupa por usuario (GROUP BY usuarios.id_usuario), suma pagos.monto, ordena descendente (ORDER BY ... DESC) y usa LIMIT según lo pedido (LIMIT 1 si preguntan por 'el' cliente top).
-4. Para PAQUETE MÁS VENDIDO, PAQUETE MÁS POPULAR, PAQUETE TOP o cuántas veces se reservó un paquete: une paquetes + reservas por id_paquete, filtra reservas.estado = 'confirmado' (una reserva pendiente o cancelada no es una venta real), agrupa por paquete (GROUP BY paquetes.id_paquete, paquetes.nombre), cuenta las reservas con COUNT(*), ordena descendente y usa LIMIT según lo pedido (LIMIT 1 si preguntan por 'el' paquete top/más vendido).
-5. Si preguntan por reservas 'pendientes' o 'canceladas' explícitamente, ahí sí filtra por ese estado en vez de 'confirmado'.
-6. Si la pregunta no especifica estado y no es sobre dinero ni ventas (ej. '¿cuántas reservas hay hoy?'), no apliques el filtro de estado a menos que sea razonable asumir que se refiere a reservas activas/confirmadas — en caso de duda, incluye todas y aclara los estados en la respuesta final.
+1. Una reserva solo representa dinero real o una venta efectiva cuando reservas.estado = 'confirmada'. El admin la confirma manualmente al verificar el comprobante de pago (Yape/Plin). Las reservas 'pendiente' o 'cancelada' NUNCA deben contarse como ingresos ni como ventas.
+2. Para calcular INGRESOS, DINERO RECAUDADO, VENTAS EN SOLES o cualquier pregunta relacionada con dinero de la empresa: usa SUM(pagos.monto), haciendo INNER JOIN entre pagos y reservas por id_reserva, y SIEMPRE filtra WHERE reservas.estado = 'confirmada'.
+3. Para saber qué cliente/usuario ha generado más dinero ('mejor cliente', 'quién más gastó', 'cliente más rentable'): une usuarios + reservas + pagos, filtra reservas.estado = 'confirmada', agrupa por usuario (GROUP BY usuarios.id_usuario), suma pagos.monto, ordena descendente (ORDER BY ... DESC) y usa LIMIT según lo pedido (LIMIT 1 si preguntan por 'el' cliente top).
+4. Para PAQUETE MÁS VENDIDO, PAQUETE MÁS POPULAR, PAQUETE TOP o cuántas veces se reservó un paquete: une paquetes + reservas por id_paquete, filtra reservas.estado = 'confirmada' (una reserva pendiente o cancelada no es una venta real), agrupa por paquete (GROUP BY paquetes.id_paquete, paquetes.nombre), cuenta las reservas con COUNT(*), ordena descendente y usa LIMIT según lo pedido (LIMIT 1 si preguntan por 'el' paquete top/más vendido).
+5. Para preguntas sobre CUÁNDO ES la fiesta/evento, o filtros de fecha como 'reservas de hoy', 'reservas de esta semana', 'reservas de mañana', 'reservas de este mes': la fecha del evento NUNCA está en reservas.fecha_reserva (esa es solo la fecha de creación del registro). SIEMPRE haz INNER JOIN entre reservas y horarios_disponibles por id_horario, y filtra por horarios_disponibles.fecha usando CURDATE() para 'hoy', o los rangos correspondientes para 'esta semana'/'este mes'.
+6. Si preguntan por reservas 'pendientes' o 'canceladas' explícitamente, ahí sí filtra por ese estado en vez de 'confirmada'.
+7. Si la pregunta no especifica estado y no es sobre dinero ni ventas (ej. '¿cuántas reservas hay hoy?'), no apliques el filtro de estado a menos que sea razonable asumir que se refiere a reservas activas/confirmadas — en caso de duda, incluye todas y aclara los estados en la respuesta final.
 
 EJEMPLOS DE CONSULTAS CORRECTAS:
 - Pregunta: '¿Cuánto hemos recaudado en total?'
-  SQL: SELECT SUM(p.monto) AS total FROM pagos p INNER JOIN reservas r ON r.id_reserva = p.id_reserva WHERE r.estado = 'confirmado'
+  SQL: SELECT SUM(p.monto) AS total FROM pagos p INNER JOIN reservas r ON r.id_reserva = p.id_reserva WHERE r.estado = 'confirmada'
 
 - Pregunta: '¿Quién es el cliente que más dinero nos ha dado?'
-  SQL: SELECT u.nombre, SUM(p.monto) AS total_gastado FROM usuarios u INNER JOIN reservas r ON r.id_usuario = u.id_usuario INNER JOIN pagos p ON p.id_reserva = r.id_reserva WHERE r.estado = 'confirmado' GROUP BY u.id_usuario, u.nombre ORDER BY total_gastado DESC LIMIT 1
+  SQL: SELECT u.nombre, SUM(p.monto) AS total_gastado FROM usuarios u INNER JOIN reservas r ON r.id_usuario = u.id_usuario INNER JOIN pagos p ON p.id_reserva = r.id_reserva WHERE r.estado = 'confirmada' GROUP BY u.id_usuario, u.nombre ORDER BY total_gastado DESC LIMIT 1
 
 - Pregunta: '¿Cuál es el paquete más vendido?'
-  SQL: SELECT pa.nombre, COUNT(*) AS veces_reservado FROM paquetes pa INNER JOIN reservas r ON r.id_paquete = pa.id_paquete WHERE r.estado = 'confirmado' GROUP BY pa.id_paquete, pa.nombre ORDER BY veces_reservado DESC LIMIT 1
+  SQL: SELECT pa.nombre, COUNT(*) AS veces_reservado FROM paquetes pa INNER JOIN reservas r ON r.id_paquete = pa.id_paquete WHERE r.estado = 'confirmada' GROUP BY pa.id_paquete, pa.nombre ORDER BY veces_reservado DESC LIMIT 1
+
+- Pregunta: '¿Cuántas reservas tenemos hoy?'
+  SQL: SELECT COUNT(*) AS total FROM reservas r INNER JOIN horarios_disponibles h ON h.id_horario = r.id_horario WHERE h.fecha = CURDATE()
+
+- Pregunta: '¿Qué reservas hay esta semana?'
+  SQL: SELECT r.nombre_cumpleanero, h.fecha FROM reservas r INNER JOIN horarios_disponibles h ON h.id_horario = r.id_horario WHERE h.fecha BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
 ";
 
         // 2. Prompt con configuración de respuesta JSON (y advertencia de seguridad)
