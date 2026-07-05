@@ -7,6 +7,16 @@
 (function () {
     'use strict';
 
+    // ── Evita duplicar el widget si el script se incluye más de una vez ────────
+    // (esto también es lo que suele causar que el botón "no abra nada": quedan
+    // dos elementos con el mismo id y el listener se pega al que no ves)
+    if (document.getElementById('hj-chat-widget')) return;
+
+    // ── Ruta de la imagen del bot ────────────────────────────────────────────
+    // "public" es la raíz web (ahí viven /img, /css, /fonts), así que NO va
+    // como prefijo en la ruta — igual que el logo del sidebar (/img/logo_...)
+    const HJ_IMG_BOT = (window.HJ_URL_ROOT || '') + '/img/happybot.webp';
+
     // ── Historial de la sesión (no persiste en BD directamente, eso lo hace el PHP) ──
     let historial = [];
 
@@ -14,26 +24,16 @@
     const widget = document.createElement('div');
     widget.id = 'hj-chat-widget';
     widget.innerHTML = `
-        <button id="hj-chat-btn" title="HappyBot — Asistente IA">
+        <button id="hj-chat-btn" type="button" title="HappyBot — Asistente IA">
             <span id="hj-chat-btn-halo"></span>
-            <span id="hj-chat-btn-avatar">
-                <span class="hj-bot-face">
-                    <span class="hj-bot-eye"></span>
-                    <span class="hj-bot-eye"></span>
-                    <span class="hj-bot-mouth"></span>
-                </span>
-            </span>
+            <img id="hj-chat-btn-avatar" src="${HJ_IMG_BOT}" alt="HappyBot" />
         </button>
 
         <div id="hj-chat-panel" class="hj-oculto">
             <div id="hj-chat-header">
                 <div id="hj-chat-header-info">
                     <span id="hj-chat-avatar-mini">
-                        <span class="hj-bot-face hj-bot-face-sm">
-                            <span class="hj-bot-eye"></span>
-                            <span class="hj-bot-eye"></span>
-                            <span class="hj-bot-mouth"></span>
-                        </span>
+                        <img class="hj-bot-img hj-bot-img-sm" src="${HJ_IMG_BOT}" alt="HappyBot" />
                     </span>
                     <span id="hj-chat-header-text">
                         <span id="hj-chat-titulo">HappyBot</span>
@@ -46,11 +46,7 @@
             <div id="hj-chat-mensajes">
                 <div class="hj-msg-row hj-msg-row-bot">
                     <span class="hj-avatar-msg">
-                        <span class="hj-bot-face hj-bot-face-xs">
-                            <span class="hj-bot-eye"></span>
-                            <span class="hj-bot-eye"></span>
-                            <span class="hj-bot-mouth"></span>
-                        </span>
+                        <img class="hj-bot-img hj-bot-img-xs" src="${HJ_IMG_BOT}" alt="HappyBot" />
                     </span>
                     <div class="hj-msg hj-msg-bot">
                         ¡Hola! Soy <strong>HappyBot</strong> 🎈 Puedo ayudarte con reservas, pagos,
@@ -127,6 +123,7 @@
             border-radius: 50%;
             border: 2px solid rgba(108,0,255,.35);
             animation: hj-pulso 2.4s ease-out infinite;
+            pointer-events: none; /* nunca debe robar el click al botón */
         }
         @keyframes hj-pulso {
             0%   { transform: scale(0.85); opacity: .8; }
@@ -134,38 +131,24 @@
             100% { transform: scale(1.25); opacity: 0; }
         }
 
-        #hj-chat-btn-avatar { position: relative; z-index: 1; }
-
-        /* ── Carita del bot (avatar reutilizable en 3 tamaños) ───────────── */
-        .hj-bot-face {
+        #hj-chat-btn-avatar {
             position: relative;
-            display: block;
-            width: 30px; height: 30px;
-        }
-        .hj-bot-face-sm { width: 22px; height: 22px; }
-        .hj-bot-face-xs { width: 18px; height: 18px; }
-        .hj-bot-eye {
-            position: absolute;
-            top: 35%;
-            width: 16%; height: 16%;
-            background: #fff;
+            z-index: 1;
+            width: 38px; height: 38px;
             border-radius: 50%;
-            animation: hj-parpadeo 4.5s ease-in-out infinite;
+            object-fit: cover;
+            pointer-events: none;
         }
-        .hj-bot-eye:first-child { left: 22%; }
-        .hj-bot-eye:last-child  { right: 22%; }
-        .hj-bot-mouth {
-            position: absolute;
-            bottom: 24%; left: 50%;
-            width: 42%; height: 16%;
-            border-bottom: 2.5px solid #fff;
-            border-radius: 0 0 50% 50%;
-            transform: translateX(-50%);
+
+        /* ── Avatar del bot (imagen real, reutilizado en 3 tamaños) ──────── */
+        .hj-bot-img {
+            display: block;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #fff;
         }
-        @keyframes hj-parpadeo {
-            0%, 90%, 100% { transform: scaleY(1); }
-            95%           { transform: scaleY(0.15); }
-        }
+        .hj-bot-img-sm { width: 26px; height: 26px; }
+        .hj-bot-img-xs { width: 26px; height: 26px; }
 
         /* ── Panel ────────────────────────────────────────────────────────── */
         #hj-chat-panel {
@@ -253,10 +236,8 @@
 
         .hj-avatar-msg {
             width: 26px; height: 26px;
-            border-radius: 50%;
-            background: linear-gradient(145deg, var(--hj-morado), var(--hj-morado-oscuro));
-            display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
         }
 
         .hj-msg {
@@ -443,11 +424,7 @@
         if (tipo === 'bot') {
             row.innerHTML = `
                 <span class="hj-avatar-msg">
-                    <span class="hj-bot-face hj-bot-face-xs">
-                        <span class="hj-bot-eye"></span>
-                        <span class="hj-bot-eye"></span>
-                        <span class="hj-bot-mouth"></span>
-                    </span>
+                    <img class="hj-bot-img hj-bot-img-xs" src="${HJ_IMG_BOT}" alt="HappyBot" />
                 </span>
                 <div class="hj-msg hj-msg-bot"></div>
             `;
@@ -467,11 +444,7 @@
         row.className = 'hj-msg-row hj-msg-row-bot';
         row.innerHTML = `
             <span class="hj-avatar-msg">
-                <span class="hj-bot-face hj-bot-face-xs">
-                    <span class="hj-bot-eye"></span>
-                    <span class="hj-bot-eye"></span>
-                    <span class="hj-bot-mouth"></span>
-                </span>
+                <img class="hj-bot-img hj-bot-img-xs" src="${HJ_IMG_BOT}" alt="HappyBot" />
             </span>
             <div class="hj-msg hj-msg-bot hj-typing">
                 <span></span><span></span><span></span>
