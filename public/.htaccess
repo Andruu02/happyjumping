@@ -1,6 +1,11 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # Asegura que el header Authorization (Bearer token) llegue a PHP,
+    # ya que muchos hostings (Hostinger incluido) lo filtran por defecto.
+    RewriteCond %{HTTP:Authorization} ^(.*)
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%1]
+
     # Si la petición NO es un archivo existente...
     RewriteCond %{REQUEST_FILENAME} !-f
     # Si la petición NO es un directorio existente...

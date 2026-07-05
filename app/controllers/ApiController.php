@@ -67,8 +67,14 @@ class ApiController extends Controller {
         $usuario = $this->usuarioModel->login($correo, $password);
 
         if ($usuario) {
+            $token = JwtHandler::encode([
+                "id_usuario" => $usuario->id_usuario,
+                "correo"     => $usuario->correo
+            ]);
+
             echo json_encode([
                 "success" => true,
+                "token"   => $token,
                 "usuario" => [
                     "id"     => $usuario->id_usuario,
                     "nombre" => $usuario->nombre,
@@ -82,11 +88,64 @@ class ApiController extends Controller {
 
     /*
     |--------------------------------------------------------------------------
+    | AUTENTICACIÓN (JWT / Bearer token)
+    |--------------------------------------------------------------------------
+    | Corta la ejecución con 401 si no viene un token válido. Se debe llamar
+    | al inicio de cada endpoint que no deba ser público.
+    */
+    private function authenticate() {
+        $header = $this->getAuthorizationHeader();
+
+        if (!$header || stripos($header, 'Bearer ') !== 0) {
+            http_response_code(401);
+            echo json_encode(["success" => false, "message" => "No autorizado. Debes iniciar sesión."]);
+            exit();
+        }
+
+        $token   = trim(substr($header, 7));
+        $payload = JwtHandler::decode($token);
+
+        if (!$payload) {
+            http_response_code(401);
+            echo json_encode(["success" => false, "message" => "Token inválido o expirado."]);
+            exit();
+        }
+
+        return $payload;
+    }
+
+    private function getAuthorizationHeader() {
+        if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+            return trim($_SERVER['HTTP_AUTHORIZATION']);
+        }
+
+        if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+            return trim($_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
+        }
+
+        if (function_exists('apache_request_headers')) {
+            $requestHeaders = apache_request_headers();
+            $requestHeaders = array_combine(
+                array_map('ucwords', array_keys($requestHeaders)),
+                array_values($requestHeaders)
+            );
+            if (isset($requestHeaders['Authorization'])) {
+                return trim($requestHeaders['Authorization']);
+            }
+        }
+
+        return null;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | PROMOCIONES
     | GET /api/promociones
     |--------------------------------------------------------------------------
     */
     public function promociones() {
+
+        $this->authenticate();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
             echo json_encode(["success" => false, "message" => "Método no permitido"]);
@@ -108,6 +167,8 @@ class ApiController extends Controller {
     |--------------------------------------------------------------------------
     */
     public function partidas($param1 = null, $param2 = null) {
+
+        $this->authenticate();
 
         $partidaModel = $this->model('PartidaModel');
 
@@ -172,6 +233,8 @@ class ApiController extends Controller {
     */
     public function codigosPromocion($param1 = null) {
 
+        $this->authenticate();
+
         $promocionModel = $this->model('PromocionModel');
 
         // POST /api/codigos-promocion/canjear
@@ -216,6 +279,8 @@ class ApiController extends Controller {
     |--------------------------------------------------------------------------
     */
     public function personajes() {
+
+        $this->authenticate();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
             echo json_encode(["success" => false, "message" => "Método no permitido"]);

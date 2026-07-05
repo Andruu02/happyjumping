@@ -32,9 +32,11 @@ define('URL_ROOT', 'https://happyjumpingperu.com');
 
 // 3. Cargar la configuración y el núcleo
 require_once APP_ROOT . '/config/database.php';
+require_once APP_ROOT . '/config/jwt.php';
 require_once APP_ROOT . '/core/App.php';
 require_once APP_ROOT . '/core/Controller.php';
 require_once APP_ROOT . '/core/Model.php';
+require_once APP_ROOT . '/core/JwtHandler.php';
 
 // 5. Iniciar la aplicación
 $app = new App();
