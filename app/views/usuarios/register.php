@@ -46,10 +46,20 @@
             <p class="title">Crear cuenta</p>
 
             <form action="<?php echo URL_ROOT; ?>/usuarios/register" method="POST" novalidate> <div class="mb-3">
+                    <label for="dni">DNI</label>
+                    <input type="text" id="dni" name="dni" inputmode="numeric" maxlength="8"
+                           class="form-control <?php echo (!empty($datos['dni_error'])) ? 'is-invalid' : ''; ?>"
+                           placeholder="Ingresa tu DNI (8 dígitos)"
+                           value="<?php echo $datos['dni']; ?>" required>
+                    <span class="invalid-feedback" id="dni-feedback"><?php echo $datos['dni_error']; ?></span>
+                    <small id="dni-status" style="display:block;margin-top:4px;"></small>
+                </div>
+
+                <div class="mb-3">
                     <label for="nombre">Nombre completo</label>
-                    <input type="text" id="nombre" name="nombre" 
-                           class="form-control <?php echo (!empty($datos['nombre_error'])) ? 'is-invalid' : ''; ?>" 
-                           placeholder="Ingresa tu nombre completo" 
+                    <input type="text" id="nombre" name="nombre"
+                           class="form-control <?php echo (!empty($datos['nombre_error'])) ? 'is-invalid' : ''; ?>"
+                           placeholder="Se autocompleta al ingresar tu DNI"
                            value="<?php echo $datos['nombre']; ?>" required>
                     <span class="invalid-feedback"><?php echo $datos['nombre_error']; ?></span>
                 </div>
@@ -145,6 +155,53 @@
             this.classList.remove('is-invalid');
             const err = document.getElementById('correo-gmail-error');
             if (err) err.textContent = '';
+        });
+
+        // Autocompletar nombre a partir del DNI (RENIEC vía APIsPERU)
+        const dniInput    = document.getElementById('dni');
+        const nombreInput = document.getElementById('nombre');
+        const dniStatus   = document.getElementById('dni-status');
+        const dniFeedback = document.getElementById('dni-feedback');
+
+        dniInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 8);
+            this.classList.remove('is-invalid');
+            dniFeedback.textContent = '';
+            dniStatus.textContent = '';
+        });
+
+        dniInput.addEventListener('blur', function() {
+            const dni = this.value.trim();
+            if (dni.length !== 8) return;
+
+            dniStatus.style.color = '#888';
+            dniStatus.textContent = 'Buscando...';
+            nombreInput.readOnly = true;
+
+            fetch(`<?php echo URL_ROOT; ?>/api/dni/${dni}`)
+                .then(res => res.json())
+                .then(json => {
+                    if (json.success && json.data) {
+                        const nombreCompleto = [
+                            json.data.nombres,
+                            json.data.apellidoPaterno,
+                            json.data.apellidoMaterno
+                        ].filter(Boolean).join(' ');
+                        nombreInput.value = nombreCompleto;
+                        dniStatus.style.color = 'green';
+                        dniStatus.textContent = 'DNI verificado.';
+                    } else {
+                        dniStatus.style.color = '#c0392b';
+                        dniStatus.textContent = 'No se pudo verificar el DNI. Ingresa tu nombre manualmente.';
+                    }
+                })
+                .catch(() => {
+                    dniStatus.style.color = '#c0392b';
+                    dniStatus.textContent = 'No se pudo verificar el DNI. Ingresa tu nombre manualmente.';
+                })
+                .finally(() => {
+                    nombreInput.readOnly = false;
+                });
         });
     </script>
 </body>

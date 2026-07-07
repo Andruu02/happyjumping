@@ -67,11 +67,19 @@ class UsuariosController extends Controller {
                 'titulo'                 => 'Crear Cuenta - Happy&Jumping',
                 'nombre'                 => trim($_POST['nombre']),
                 'correo'                 => trim($_POST['correo']),
+                'dni'                    => trim($_POST['dni'] ?? ''),
                 'password'               => trim($_POST['password']),
                 'confirm_password'       => trim($_POST['confirm_password']),
-                'nombre_error'           => '', 'correo_error'           => '',
+                'nombre_error'           => '', 'correo_error'           => '', 'dni_error' => '',
                 'password_error'         => '', 'confirm_password_error' => ''
             ];
+
+            if (empty($datos['dni']))
+                $datos['dni_error'] = 'Por favor, ingresa tu DNI.';
+            elseif (!preg_match('/^\d{8}$/', $datos['dni']))
+                $datos['dni_error'] = 'El DNI debe tener 8 dígitos.';
+            elseif ($this->usuarioModel->findUserByDni($datos['dni']))
+                $datos['dni_error'] = 'Este DNI ya está registrado.';
 
             if (empty($datos['nombre']))
                 $datos['nombre_error'] = 'Por favor, ingresa tu nombre.';
@@ -97,6 +105,7 @@ class UsuariosController extends Controller {
 
             $sinErrores = empty($datos['nombre_error'])
                        && empty($datos['correo_error'])
+                       && empty($datos['dni_error'])
                        && empty($datos['password_error'])
                        && empty($datos['confirm_password_error']);
 
@@ -127,9 +136,9 @@ class UsuariosController extends Controller {
         } else {
             $this->view('usuarios/register', [
                 'titulo'                 => 'Crear Cuenta - Happy&Jumping',
-                'nombre'                 => '', 'correo'                 => '',
+                'nombre'                 => '', 'correo'                 => '', 'dni' => '',
                 'password'               => '', 'confirm_password'       => '',
-                'nombre_error'           => '', 'correo_error'           => '',
+                'nombre_error'           => '', 'correo_error'           => '', 'dni_error' => '',
                 'password_error'         => '', 'confirm_password_error' => ''
             ]);
         }

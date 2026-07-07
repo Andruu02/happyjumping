@@ -14,13 +14,21 @@ class UsuarioModel extends Model {
     }
 
     public function register($datos) {
-        $this->query("INSERT INTO usuarios (nombre, correo, password, is_verificado, codigo_verificacion)
-                      VALUES (:nombre, :correo, :password, 0, :codigo)");
+        $this->query("INSERT INTO usuarios (nombre, correo, dni, password, is_verificado, codigo_verificacion)
+                      VALUES (:nombre, :correo, :dni, :password, 0, :codigo)");
         $this->bind(':nombre',  $datos['nombre']);
         $this->bind(':correo',  $datos['correo']);
+        $this->bind(':dni',     $datos['dni']);
         $this->bind(':password',$datos['password']);
         $this->bind(':codigo',  $datos['codigo']);
         return $this->execute();
+    }
+
+    public function findUserByDni($dni) {
+        $this->query("SELECT id_usuario FROM usuarios WHERE dni = :dni");
+        $this->bind(':dni', $dni);
+        $this->single();
+        return $this->rowCount() > 0;
     }
 
     public function verificarCodigo($correo, $codigo) {

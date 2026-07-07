@@ -274,6 +274,40 @@ class ApiController extends Controller {
 
     /*
     |--------------------------------------------------------------------------
+    | CONSULTA DNI (RENIEC vía APIsPERU)
+    | GET /api/dni/{numero}
+    |--------------------------------------------------------------------------
+    | Pública (sin JWT): se usa desde el formulario de registro, antes de que
+    | exista una cuenta. Solo valida el formato para no desperdiciar cupo de
+    | la API externa.
+    */
+    public function dni($numero = null) {
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+            echo json_encode(["success" => false, "message" => "Método no permitido"]);
+            return;
+        }
+
+        if (!$numero || !preg_match('/^\d{8}$/', $numero)) {
+            http_response_code(400);
+            echo json_encode(["success" => false, "message" => "DNI inválido"]);
+            return;
+        }
+
+        $dniModel = $this->model('DniModel');
+        $persona  = $dniModel->consultar($numero);
+
+        if (!$persona) {
+            http_response_code(404);
+            echo json_encode(["success" => false, "message" => "DNI no encontrado"]);
+            return;
+        }
+
+        echo json_encode(["success" => true, "data" => $persona]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | PERSONAJES
     | GET /api/personajes
     |--------------------------------------------------------------------------
