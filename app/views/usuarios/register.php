@@ -47,19 +47,25 @@
 
             <form action="<?php echo URL_ROOT; ?>/usuarios/register" method="POST" novalidate> <div class="mb-3">
                     <label for="dni">DNI</label>
-                    <input type="text" id="dni" name="dni" inputmode="numeric" maxlength="8"
-                           class="form-control <?php echo (!empty($datos['dni_error'])) ? 'is-invalid' : ''; ?>"
-                           placeholder="Ingresa tu DNI (8 dígitos)"
-                           value="<?php echo $datos['dni']; ?>" required>
+                    <div class="d-flex gap-2">
+                        <input type="text" id="dni" name="dni" inputmode="numeric" maxlength="8"
+                               class="form-control <?php echo (!empty($datos['dni_error'])) ? 'is-invalid' : ''; ?>"
+                               placeholder="Ingresa tu DNI (8 dígitos)"
+                               value="<?php echo $datos['dni']; ?>" required>
+                        <button type="button" id="btn-verificar-dni" class="btn-purple" style="width:auto;padding:0 18px;white-space:nowrap;">
+                            Verificar <i class="bi bi-arrow-right-circle-fill"></i>
+                        </button>
+                    </div>
                     <span class="invalid-feedback" id="dni-feedback"><?php echo $datos['dni_error']; ?></span>
                     <small id="dni-status" style="display:block;margin-top:4px;"></small>
                 </div>
 
                 <div class="mb-3">
                     <label for="nombre">Nombre completo</label>
-                    <input type="text" id="nombre" name="nombre"
+                    <input type="text" id="nombre" name="nombre" readonly
                            class="form-control <?php echo (!empty($datos['nombre_error'])) ? 'is-invalid' : ''; ?>"
-                           placeholder="Se autocompleta al ingresar tu DNI"
+                           style="background-color:#f0f0f0;"
+                           placeholder="Se autocompleta al verificar tu DNI"
                            value="<?php echo $datos['nombre']; ?>" required>
                     <span class="invalid-feedback"><?php echo $datos['nombre_error']; ?></span>
                 </div>
@@ -132,25 +138,52 @@
         setupPasswordToggle('toggleConfirmar', 'confirmar', 'toggleIconConfirmar');
 
         // Autocompletar nombre a partir del DNI (RENIEC vía APIsPERU)
-        const dniInput    = document.getElementById('dni');
-        const nombreInput = document.getElementById('nombre');
-        const dniStatus   = document.getElementById('dni-status');
-        const dniFeedback = document.getElementById('dni-feedback');
+        const dniInput      = document.getElementById('dni');
+        const nombreInput   = document.getElementById('nombre');
+        const dniStatus     = document.getElementById('dni-status');
+        const dniFeedback   = document.getElementById('dni-feedback');
+        const btnVerificar  = document.getElementById('btn-verificar-dni');
 
         dniInput.addEventListener('input', function() {
             this.value = this.value.replace(/\D/g, '').slice(0, 8);
             this.classList.remove('is-invalid');
             dniFeedback.textContent = '';
             dniStatus.textContent = '';
+            nombreInput.value = '';
         });
 
-        dniInput.addEventListener('blur', function() {
-            const dni = this.value.trim();
-            if (dni.length !== 8) return;
+        // Permite verificar con Enter sin enviar el formulario
+        dniInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                verificarDni();
+            }
+        });
+
+        btnVerificar.addEventListener('click', verificarDni);
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+            if (!nombreInput.value.trim()) {
+                e.preventDefault();
+                dniStatus.style.color = '#c0392b';
+                dniStatus.textContent = 'Verifica tu DNI antes de registrarte.';
+                dniInput.focus();
+            }
+        });
+
+        function verificarDni() {
+            const dni = dniInput.value.trim();
+
+            if (dni.length !== 8) {
+                dniStatus.style.color = '#c0392b';
+                dniStatus.textContent = 'El DNI debe tener 8 dígitos.';
+                return;
+            }
 
             dniStatus.style.color = '#888';
             dniStatus.textContent = 'Buscando...';
-            nombreInput.readOnly = true;
+            btnVerificar.disabled = true;
+            nombreInput.value = '';
 
             fetch(`<?php echo URL_ROOT; ?>/api/dni/${dni}`)
                 .then(res => res.json())
@@ -166,17 +199,17 @@
                         dniStatus.textContent = 'DNI verificado.';
                     } else {
                         dniStatus.style.color = '#c0392b';
-                        dniStatus.textContent = 'No se pudo verificar el DNI. Ingresa tu nombre manualmente.';
+                        dniStatus.textContent = 'No se pudo verificar el DNI. Revisa el número e inténtalo de nuevo.';
                     }
                 })
                 .catch(() => {
                     dniStatus.style.color = '#c0392b';
-                    dniStatus.textContent = 'No se pudo verificar el DNI. Ingresa tu nombre manualmente.';
+                    dniStatus.textContent = 'No se pudo verificar el DNI. Revisa el número e inténtalo de nuevo.';
                 })
                 .finally(() => {
-                    nombreInput.readOnly = false;
+                    btnVerificar.disabled = false;
                 });
-        });
+        }
     </script>
 </body>
 </html>
