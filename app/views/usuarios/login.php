@@ -79,26 +79,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Validar que el correo sea @gmail.com antes de enviar
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const correo = document.getElementById('correo').value.trim().toLowerCase();
-            if (correo !== 'admin@happyjumping.com' && !correo.endsWith('@gmail.com')) {
-                e.preventDefault();
-                const feedback = document.querySelector('#correo').nextElementSibling ||
-                                 document.querySelector('.invalid-feedback');
-                document.getElementById('correo').classList.add('is-invalid');
-                // Show error
-                let errEl = document.getElementById('correo-gmail-error');
-                if (!errEl) {
-                    errEl = document.createElement('span');
-                    errEl.id = 'correo-gmail-error';
-                    errEl.className = 'invalid-feedback';
-                    document.getElementById('correo').insertAdjacentElement('afterend', errEl);
-                }
-                errEl.textContent = 'Solo se aceptan correos @gmail.com';
-            }
-        });
-
         const togglePassword = document.getElementById('togglePassword');
         const password = document.getElementById('clave');
         const icon = document.getElementById('toggleIcon');

@@ -65,7 +65,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="correo">Correo electrónico <small style="color:#aaa;font-weight:400;">(solo @gmail.com)</small></label>
+                    <label for="correo">Correo electrónico</label>
                     <input type="email" id="correo" name="correo" 
                            class="form-control <?php echo (!empty($datos['correo_error'])) ? 'is-invalid' : ''; ?>" 
                            placeholder="Ingresa tu correo" 
@@ -130,32 +130,6 @@
         }
         setupPasswordToggle('toggleClave', 'clave', 'toggleIconClave');
         setupPasswordToggle('toggleConfirmar', 'confirmar', 'toggleIconConfirmar');
-
-        // Validar @gmail.com antes de enviar
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const correoInput = document.getElementById('correo');
-            const correo = correoInput.value.trim().toLowerCase();
-            if (!correo.endsWith('@gmail.com')) {
-                e.preventDefault();
-                correoInput.classList.add('is-invalid');
-                let errEl = document.getElementById('correo-gmail-error');
-                if (!errEl) {
-                    errEl = document.createElement('span');
-                    errEl.id = 'correo-gmail-error';
-                    errEl.className = 'invalid-feedback';
-                    correoInput.insertAdjacentElement('afterend', errEl);
-                }
-                errEl.textContent = 'Solo se aceptan correos @gmail.com';
-                correoInput.focus();
-            }
-        });
-
-        // Limpiar error al escribir
-        document.getElementById('correo').addEventListener('input', function() {
-            this.classList.remove('is-invalid');
-            const err = document.getElementById('correo-gmail-error');
-            if (err) err.textContent = '';
-        });
 
         // Autocompletar nombre a partir del DNI (RENIEC vía APIsPERU)
         const dniInput    = document.getElementById('dni');

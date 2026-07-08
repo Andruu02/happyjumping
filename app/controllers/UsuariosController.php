@@ -25,9 +25,6 @@ class UsuariosController extends Controller {
 
             if (empty($datos['correo']))
                 $datos['correo_error'] = 'Por favor, ingresa tu correo.';
-            elseif (strtolower(trim($datos['correo'])) !== 'admin@happyjumping.com'
-                    && !str_ends_with(strtolower($datos['correo']), '@gmail.com'))
-                $datos['correo_error'] = 'Solo se aceptan correos @gmail.com.';
 
             if (empty($datos['password']))
                 $datos['password_error'] = 'Por favor, ingresa tu contraseña.';
@@ -88,8 +85,6 @@ class UsuariosController extends Controller {
                 $datos['correo_error'] = 'Por favor, ingresa tu correo.';
             elseif (!filter_var($datos['correo'], FILTER_VALIDATE_EMAIL))
                 $datos['correo_error'] = 'El correo no es válido.';
-            elseif (!str_ends_with(strtolower($datos['correo']), '@gmail.com'))
-                $datos['correo_error'] = 'Solo se aceptan correos @gmail.com.';
             elseif ($this->usuarioModel->findUserByEmail($datos['correo']))
                 $datos['correo_error'] = 'Este correo ya está registrado.';
 
