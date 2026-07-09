@@ -27,7 +27,19 @@ define('PUBLIC_ROOT', __DIR__);
 
 // --- ¡EL CAMBIO MÁS IMPORTANTE ESTÁ AQUÍ! ---
 // La URL base de tu sitio ya NO incluye "/public"
-define('URL_ROOT', 'https://happyjumpingperu.com');
+// Se detecta dinámicamente (host + protocolo de la petición) para que
+// funcione igual en producción (happyjumpingperu.com), en Cloud Run
+// (*.run.app) o en local. Si se define la variable de entorno URL_ROOT,
+// esa tiene prioridad (útil para forzar un dominio específico).
+if (getenv('URL_ROOT')) {
+    define('URL_ROOT', rtrim(getenv('URL_ROOT'), '/'));
+} else {
+    $esHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+    $protocolo = $esHttps ? 'https' : 'http';
+    $host      = $_SERVER['HTTP_HOST'] ?? 'happyjumpingperu.com';
+    define('URL_ROOT', $protocolo . '://' . $host);
+}
 // ------------------------------------------
 
 // 3. Cargar la configuración y el núcleo

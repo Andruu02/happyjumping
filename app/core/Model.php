@@ -22,7 +22,7 @@ class Model {
     protected $error;
  
     public function __construct() {
-        $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=' . DB_CHARSET;
+        $dsn = $this->construirDsn();
         $options = [
             PDO::ATTR_PERSISTENT => true,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -85,7 +85,7 @@ class Model {
 
     /** Reabre la conexión PDO si se perdió */
     protected function reconectar() {
-        $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=' . DB_CHARSET;
+        $dsn = $this->construirDsn();
         $options = [
             PDO::ATTR_PERSISTENT => true,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -94,7 +94,20 @@ class Model {
         $this->dbh = new PDO($dsn, DB_USER, DB_PASS, $options);
         $this->dbh->exec("SET time_zone = '-05:00'");
     }
- 
+
+    /**
+     * Arma el DSN de conexión. Si DB_SOCKET está definido (Cloud SQL en
+     * Cloud Run), se conecta por socket Unix; si no, por host/puerto TCP
+     * (comportamiento de siempre en Hostinger).
+     */
+    private function construirDsn() {
+        if (defined('DB_SOCKET') && DB_SOCKET !== '') {
+            return 'mysql:unix_socket=' . DB_SOCKET . ';dbname=' . DB_NAME . ';charset=' . DB_CHARSET;
+        }
+        $puerto = defined('DB_PORT') && DB_PORT !== '' ? ';port=' . DB_PORT : '';
+        return 'mysql:host=' . DB_HOST . $puerto . ';dbname=' . DB_NAME . ';charset=' . DB_CHARSET;
+    }
+
     /** Obtiene un solo registro */
     public function single() {
         $this->execute();
