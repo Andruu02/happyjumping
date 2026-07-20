@@ -18,7 +18,7 @@ require_once APP_ROOT . '/config/vapid.php';
     <link rel="manifest" href="<?php echo URL_ROOT; ?>/manifest.json">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/style.css">
 </head>
 <body <?php echo ($viewName == 'index/index') ? 'class="body-index"' : ''; ?>>
@@ -44,11 +44,6 @@ require_once APP_ROOT . '/config/vapid.php';
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="<?php echo URL_ROOT; ?>/#conocenos">Conócenos</a>
-                </li>
-                <li class="nav-item d-flex align-items-center">
-                    <button type="button" id="btn-notificaciones" class="btn-notificaciones" title="Activar notificaciones">
-                        <i class="bi bi-bell"></i>
-                    </button>
                 </li>
 
                 <?php if(isset($_SESSION['id_usuario'])): ?>
@@ -84,5 +79,6 @@ require_once APP_ROOT . '/config/vapid.php';
     window.HJ_VAPID_PUBLIC_KEY = "<?php echo VAPID_PUBLIC_KEY; ?>";
 </script>
 <script src="<?php echo URL_ROOT; ?>/js/push.js"></script>
+<script src="<?php echo URL_ROOT; ?>/js/scroll-suave.js"></script>
 
 <main class="main-container">

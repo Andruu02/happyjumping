@@ -1,10 +1,10 @@
-// Activa las notificaciones push del navegador (bandeja del sistema).
+// Suscribe el dispositivo a las notificaciones push automáticamente,
+// sin botón visible: el admin envía notificaciones desde /admin/notificaciones
+// y le llegan al celular de quien tenga el sitio instalado como app.
 // Requiere que window.HJ_URL_ROOT y window.HJ_VAPID_PUBLIC_KEY ya estén definidos.
 
 (function () {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
-
-    const btn = document.getElementById('btn-notificaciones');
 
     function urlBase64ToUint8Array(base64String) {
         const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -15,30 +15,26 @@
         return arr;
     }
 
-    function actualizarBoton(suscrito) {
-        if (!btn) return;
-        btn.classList.toggle('activa', suscrito);
-        btn.setAttribute('title', suscrito ? 'Desactivar notificaciones' : 'Activar notificaciones');
-        btn.innerHTML = suscrito ? '<i class="bi bi-bell-fill"></i>' : '<i class="bi bi-bell"></i>';
+    function estaInstalada() {
+        return window.matchMedia('(display-mode: standalone)').matches
+            || window.navigator.standalone === true; // iOS
     }
 
     async function registrar() {
         return navigator.serviceWorker.register(window.HJ_URL_ROOT + '/sw.js');
     }
 
-    async function estadoActual() {
+    async function suscribirSiHaceFalta() {
         const registro = await registrar();
-        const sub = await registro.pushManager.getSubscription();
-        actualizarBoton(!!sub);
-        return sub;
-    }
+        let sub = await registro.pushManager.getSubscription();
+        if (sub) return; // ya suscrito
 
-    async function suscribir() {
+        if (Notification.permission === 'denied') return;
+
         const permiso = await Notification.requestPermission();
         if (permiso !== 'granted') return;
 
-        const registro = await registrar();
-        const sub = await registro.pushManager.subscribe({
+        sub = await registro.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: urlBase64ToUint8Array(window.HJ_VAPID_PUBLIC_KEY),
         });
@@ -48,35 +44,14 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(sub.toJSON()),
         });
-
-        actualizarBoton(true);
     }
 
-    async function desuscribir() {
-        const registro = await registrar();
-        const sub = await registro.pushManager.getSubscription();
-        if (!sub) return;
+    // Caso 1: el usuario ya tiene la app instalada (abre el sitio desde el
+    // ícono agregado a su pantalla de inicio).
+    document.addEventListener('DOMContentLoaded', function () {
+        if (estaInstalada()) suscribirSiHaceFalta();
+    });
 
-        await fetch(window.HJ_URL_ROOT + '/api/push/desuscribir', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ endpoint: sub.endpoint }),
-        });
-        await sub.unsubscribe();
-        actualizarBoton(false);
-    }
-
-    if (btn) {
-        btn.addEventListener('click', async function () {
-            const registro = await registrar();
-            const sub = await registro.pushManager.getSubscription();
-            if (sub) {
-                await desuscribir();
-            } else {
-                await suscribir();
-            }
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', estadoActual);
+    // Caso 2: el usuario acaba de instalarla ahora mismo.
+    window.addEventListener('appinstalled', suscribirSiHaceFalta);
 })();

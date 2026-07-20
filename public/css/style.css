@@ -25,17 +25,11 @@ body {
     --morado: #7b2ff7;
 }
 
-/* FUENTE PERSONALIZADA (Bouncy) */
-@font-face {
-    font-family: 'Bouncy';
-    /* Ruta relativa desde /public/css/ (donde está este archivo)
-      hasta /public/fonts/ (donde subiste la fuente)
-    */
-    src: url('../fonts/Bouncy-Thin-PERSONAL_USE_ONLY.otf') format('truetype');
-}
-
+/* FUENTE DE TÍTULOS: Fredoka (redondeada y juguetona, acorde a un parque
+   de trampolines), cargada desde Google Fonts en el <head>. */
 .fuente_bouncy {
-    font-family: 'Bouncy', sans-serif;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
 }
 
 
@@ -67,28 +61,6 @@ body {
 }
 .navbar-nav .nav-link:hover {
     color: var(--amarillo) !important;
-}
-
-/* BOTÓN DE NOTIFICACIONES PUSH */
-.btn-notificaciones {
-    background: rgba(255,255,255,0.15);
-    border: none;
-    color: white;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    font-size: 1.1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 10px;
-    transition: background 0.3s, color 0.3s;
-}
-.btn-notificaciones:hover {
-    background: rgba(255,255,255,0.3);
-}
-.btn-notificaciones.activa {
-    color: var(--amarillo);
 }
 
 /* HERO */
@@ -157,66 +129,14 @@ body {
 }
 
 .section-title {
+    font-family: 'Fredoka', sans-serif;
     text-align: center;
-    font-weight: 700;
-    margin-top: 70px;
+    font-weight: 600;
+    margin-top: 20px;
     margin-bottom: 40px;
     color: var(--morado);
     text-transform: uppercase;
-}
-
-/* SECCIONES */
-.info-section {
-    padding: 30px 0;
-    position: relative;
-}
-
-.info-card {
-    position: relative;
-    background: #fff;
-    border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 40px;
-    flex-wrap: wrap;
-    padding: 40px 60px; /* ← Ajusta aquí el espacio interior (padding general) */
-    max-width: 1000px; /* ← AJUSTA AQUÍ el ancho total de la tarjeta */
-    margin: 0 auto;
-    transition: transform 0.4s ease, box-shadow 0.4s ease;
-    z-index: 2;
-}
-
-.info-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 30px rgba(0,0,0,0.15);
-}
-
-.info-card img {
-    border-radius: 15px;
-    width: 100%;
-    max-width: 340px; /* ← AJUSTA AQUÍ el tamaño máximo de la imagen */
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-    object-fit: cover;
-}
-
-.info-card .text {
-    flex: 1;
-    max-width: 460px;
-}
-
-.info-card h3 {
-    color: var(--rosa);
-    font-weight: 700;
-    font-size: 2.5rem;
-    margin-bottom: 15px;
-}
-
-.info-card p {
-    font-size: 1.1rem;
-    color: #555;
+    letter-spacing: 0.5px;
 }
 
 /* MANCHAS EXTERNAS */
@@ -334,7 +254,6 @@ footer a:hover i {
         border-bottom: 1px solid rgba(255,255,255,0.2);
     }
     .btn-outline-light { width: 100%; margin-top: 10px; text-align: center; }
-    .btn-notificaciones { margin: 6px 0; }
 
     /* HERO */
     .hero { height: 60vh; min-height: 320px; }
@@ -342,17 +261,6 @@ footer a:hover i {
     .hero p  { font-size: 0.95rem; margin-top: 8px; padding: 0 10px; }
     .hero-content { padding: 0 16px; }
     .hero-cta { padding: 13px 32px; font-size: 1rem; margin-top: 20px; }
-
-    /* INFO CARDS (index) */
-    .info-card {
-        flex-direction: column !important;
-        padding: 22px 18px;
-        gap: 20px;
-    }
-    .info-card img  { max-width: 100%; width: 100%; }
-    .info-card .text { max-width: 100%; text-align: center; }
-    .info-card h3   { font-size: 1.7rem; }
-    .info-card p    { font-size: 0.95rem; }
 
     /* Manchas: ocultar en móvil */
     .paint { display: none; }
@@ -365,6 +273,4 @@ footer a:hover i {
 @media (min-width: 769px) and (max-width: 1024px) {
     .navbar-brand img { height: 60px; }
     .hero h1 { font-size: 3.5rem; }
-    .info-card { padding: 28px 32px; gap: 22px; }
-    .info-card h3 { font-size: 2rem; }
 }

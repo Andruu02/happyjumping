@@ -15,22 +15,24 @@ require_once APP_ROOT . '/views/includes/header.php';
     </div>
 </section>
 
-<section class="info-section container position-relative">
-    <div class="info-card card-gsap flex-row-reverse">
-        <img src="<?php echo URL_ROOT; ?>/img/CUMPLEHJ.webp" alt="Cumpleaños Happy Jumping">
-        <div class="text">
-            <h3 class="fuente_bouncy">¡Celebra tu día con estilo!</h3>
-            <p>Vive un cumpleaños inolvidable con nuestro <strong>Paquete Jumping Party</strong>. Incluye decoración temática, zona exclusiva, animación, bebidas y pastel personalizado. Un ambiente lleno de color, risas y saltos que harán brillar tu día especial.</p>
+<section class="container position-relative py-5">
+    <div class="package-card card-gsap">
+        <div class="row g-0 align-items-center flex-md-row-reverse">
+            <div class="col-md-5 package-img" style="background-image:url('<?php echo URL_ROOT; ?>/img/CUMPLEHJ.webp');"></div>
+            <div class="col-md-7 package-body">
+                <h3 class="fuente_bouncy">¡Celebra tu día con estilo!</h3>
+                <p>Vive un cumpleaños inolvidable con nuestro <strong>Paquete Jumping Party</strong>. Incluye decoración temática, zona exclusiva, animación, bebidas y pastel personalizado. Un ambiente lleno de color, risas y saltos que harán brillar tu día especial.</p>
+            </div>
         </div>
     </div>
-</section>
 
-<section class="info-section container position-relative" style="background-color:#fdf9ff;">
-    <div class="info-card card-gsap">
-        <img src="<?php echo URL_ROOT; ?>/img/HAPPY INICIO 1.webp" alt="Entradas Happy Jumping">
-        <div class="text">
-            <h3 class="fuente_bouncy">¡Ven a vivir la experiencia Happy&Jumping!</h3>
-            <p>Disfruta de un día lleno de energía, saltos y diversión. Observa los detalles de tu entrada y siente la emoción de saltar en un ambiente seguro, lleno de color y buena vibra. ¡Perfecto para grandes y pequeños!</p>
+    <div class="package-card card-gsap">
+        <div class="row g-0 align-items-center">
+            <div class="col-md-5 package-img" style="background-image:url('<?php echo URL_ROOT; ?>/img/HAPPY INICIO 1.webp');"></div>
+            <div class="col-md-7 package-body">
+                <h3 class="fuente_bouncy">¡Ven a vivir la experiencia Happy&Jumping!</h3>
+                <p>Disfruta de un día lleno de energía, saltos y diversión. Observa los detalles de tu entrada y siente la emoción de saltar en un ambiente seguro, lleno de color y buena vibra. ¡Perfecto para grandes y pequeños!</p>
+            </div>
         </div>
     </div>
 </section>

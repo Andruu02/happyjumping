@@ -20,6 +20,8 @@
     box-shadow: 0 8px 26px rgba(0,0,0,0.15);
     transition: transform 0.3s ease;
     line-height: 0; /* evita cualquier espacio en blanco bajo la imagen */
+    max-width: 340px;
+    margin: 0 auto;
 }
 .card-grande:hover {
     transform: scale(1.02);
@@ -189,6 +191,7 @@
    RESPONSIVE MOBILE
    ========================================= */
 @media (max-width: 768px) {
+    .card-grande { max-width: 280px; }
     .card-grande img { aspect-ratio: 4 / 3; }
     .package-img  { height: 200px; }
     .package-body { padding: 18px; }
