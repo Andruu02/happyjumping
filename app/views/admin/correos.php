@@ -67,7 +67,7 @@
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-    <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.png" alt="Logo">
+    <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.webp" alt="Logo">
     <a href="<?php echo URL_ROOT; ?>/admin"><i class="bi bi-house-door-fill"></i> Dashboard</a>
     <a href="<?php echo URL_ROOT; ?>/admin/reservas"><i class="bi bi-calendar-fill"></i> Reservas</a>
     <a href="<?php echo URL_ROOT; ?>/admin/codigos"><i class="bi bi-ticket-perforated-fill"></i> Códigos</a>
@@ -110,7 +110,6 @@
                         $plantillas_ui = [
                             ['key'=>'recordatorio', 'emoji'=>'🎂', 'titulo'=>'Recordatorio de reserva', 'desc'=>'Avisa a los clientes que su fiesta se acerca pronto.', 'color'=>'#FF6B6B'],
                             ['key'=>'promo',        'emoji'=>'🎉', 'titulo'=>'Promoción especial',      'desc'=>'Anuncia una oferta, descuento o 2x1.',              'color'=>'#7F00FF'],
-                            ['key'=>'codigo',       'emoji'=>'🎁', 'titulo'=>'Código de descuento',     'desc'=>'Entrega un código promo a los clientes elegidos.',  'color'=>'#11998e'],
                             ['key'=>'puntos',       'emoji'=>'🏆', 'titulo'=>'Puntos acumulados',       'desc'=>'Recuérdales que tienen puntos listos para canjear.','color'=>'#f7971e'],
                             ['key'=>'personalizado','emoji'=>'💬', 'titulo'=>'Mensaje personalizado',   'desc'=>'Escribe un mensaje totalmente libre para tus clientes.','color'=>'#E100FF'],
                         ];
@@ -141,23 +140,6 @@
                             placeholder="Ej: ¡Esta semana 2x1 en todos los paquetes! Válido del 10 al 15 de junio."
                             maxlength="400"></textarea>
                         <div class="form-text">Hasta 400 caracteres. Este texto aparece dentro del recuadro destacado del correo.</div>
-                    </div>
-
-                    <!-- Extras: CÓDIGO -->
-                    <div class="extras-panel" id="extras-codigo">
-                        <div class="row g-3">
-                            <div class="col-md-5">
-                                <label class="form-label fw-semibold">Código de descuento <span class="text-danger">*</span></label>
-                                <input type="text" name="codigo_descuento" class="form-control text-uppercase fw-bold"
-                                    placeholder="Ej: HAPPY20" maxlength="20"
-                                    oninput="this.value=this.value.toUpperCase()">
-                            </div>
-                            <div class="col-md-7">
-                                <label class="form-label fw-semibold">Descripción del código</label>
-                                <input type="text" name="descripcion_codigo" class="form-control"
-                                    placeholder="Ej: 20% de descuento en tu próxima reserva." maxlength="150">
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Extras: PERSONALIZADO -->
@@ -211,9 +193,14 @@
                     <div class="d-flex align-items-center gap-2 mb-3">
                         <div class="form-check form-switch mb-0">
                             <input class="form-check-input" type="checkbox" id="toggle-todos" onchange="toggleTodos(this)">
-                            <label class="form-check-label fw-semibold" for="toggle-todos">Enviar a todos los clientes</label>
+                            <label class="form-check-label fw-semibold" for="toggle-todos" id="label-todos">Enviar a todos los clientes</label>
                         </div>
                         <input type="hidden" name="todos" id="input-todos" value="0">
+                    </div>
+
+                    <div class="alert alert-info py-2 px-3 mb-3" id="aviso-recordatorio" style="display:none;font-size:.85rem;">
+                        <i class="bi bi-info-circle-fill me-1"></i>
+                        Solo se muestran los clientes con una <strong>reserva confirmada</strong> próxima.
                     </div>
 
                     <!-- Búsqueda -->
@@ -239,7 +226,7 @@
                                 <tr><td colspan="3" class="text-center text-muted py-3">No hay clientes registrados.</td></tr>
                                 <?php else: ?>
                                 <?php foreach ($clientes as $c): ?>
-                                <tr class="cliente-row">
+                                <tr class="cliente-row" data-recordatorio="<?php echo in_array($c->id_usuario, $ids_recordatorio) ? '1' : '0'; ?>">
                                     <td>
                                         <input type="checkbox" name="destinatarios[]"
                                             value="<?php echo $c->id_usuario; ?>"
@@ -301,7 +288,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    let plantillaActual = '';
+    let plantillaActual  = '';
+    let modoRecordatorio = false;
 
     function seleccionarPlantilla(key, el) {
         // Quitar clase activa de todos
@@ -320,15 +308,36 @@
         const panel = document.getElementById('extras-' + key);
         if (panel) panel.classList.add('visible');
 
-        actualizarBoton();
+        modoRecordatorio = (key === 'recordatorio');
+        document.getElementById('aviso-recordatorio').style.display = modoRecordatorio ? 'block' : 'none';
+        document.getElementById('label-todos').textContent = modoRecordatorio
+            ? 'Enviar a todos los clientes con reserva confirmada'
+            : 'Enviar a todos los clientes';
+
+        aplicarFiltroRecordatorio();
+        actualizarContador();
+    }
+
+    // Oculta y desmarca a los clientes sin reserva confirmada cuando la
+    // plantilla activa es "recordatorio".
+    function aplicarFiltroRecordatorio() {
+        if (modoRecordatorio) {
+            document.querySelectorAll('#tabla-clientes tbody tr.cliente-row').forEach(row => {
+                if (row.dataset.recordatorio !== '1') {
+                    row.querySelector('.chk-cliente').checked = false;
+                }
+            });
+        }
+        filtrarClientes(document.getElementById('buscador-cliente').value);
     }
 
     function toggleTodos(chk) {
         const val = chk.checked ? '1' : '0';
         document.getElementById('input-todos').value = val;
         document.querySelectorAll('.chk-cliente').forEach(c => {
-            c.checked = chk.checked;
-            c.disabled = chk.checked;
+            const elegible = !modoRecordatorio || c.closest('tr').dataset.recordatorio === '1';
+            c.checked  = chk.checked && elegible;
+            c.disabled = chk.checked && elegible;
         });
         actualizarContador();
     }
@@ -336,7 +345,9 @@
     function actualizarContador() {
         const todos = document.getElementById('toggle-todos').checked;
         if (todos) {
-            const total = document.querySelectorAll('.chk-cliente').length;
+            const total = modoRecordatorio
+                ? document.querySelectorAll('#tabla-clientes tbody tr.cliente-row[data-recordatorio="1"]').length
+                : document.querySelectorAll('.chk-cliente').length;
             document.getElementById('contador-sel').textContent = total + ' (todos)';
         } else {
             const sel = document.querySelectorAll('.chk-cliente:checked').length;
@@ -369,6 +380,10 @@
     function filtrarClientes(q) {
         q = q.toLowerCase();
         document.querySelectorAll('#tabla-clientes tbody tr.cliente-row').forEach(row => {
+            if (modoRecordatorio && row.dataset.recordatorio !== '1') {
+                row.style.display = 'none';
+                return;
+            }
             const texto = row.textContent.toLowerCase();
             row.style.display = texto.includes(q) ? '' : 'none';
         });

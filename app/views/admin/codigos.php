@@ -41,7 +41,7 @@
 <body>
 
 <div class="sidebar">
-    <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.png" alt="Logo">
+    <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.webp" alt="Logo">
     <a href="<?php echo URL_ROOT; ?>/admin"><i class="bi bi-house-door-fill"></i> Dashboard</a>
     <a href="<?php echo URL_ROOT; ?>/admin/reservas"><i class="bi bi-calendar-fill"></i> Reservas</a>
     <a href="<?php echo URL_ROOT; ?>/admin/codigos" class="active"><i class="bi bi-ticket-perforated-fill"></i> Códigos</a>

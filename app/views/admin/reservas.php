@@ -37,12 +37,14 @@
     .sel-pendiente  { background-color: #fff3cd !important; color: #856404 !important; border-color: #ffc107 !important; font-weight: bold; }
     .sel-confirmada { background-color: #d1e7dd !important; color: #0a3622 !important; border-color: #198754 !important; font-weight: bold; }
     .sel-cancelada  { background-color: #f8d7da !important; color: #58151c !important; border-color: #dc3545 !important; font-weight: bold; }
+    .filtros-card { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 0 14px rgba(0,0,0,0.06); margin-bottom: 20px; }
+    .pagina-info { font-size: .9rem; color: #666; }
 </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.png" alt="Logo">
+    <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.webp" alt="Logo">
     <a href="<?php echo URL_ROOT; ?>/admin"><i class="bi bi-house-door-fill"></i> Dashboard</a>
     <a href="<?php echo URL_ROOT; ?>/admin/reservas" class="active"><i class="bi bi-calendar-fill"></i> Reservas</a>
     <a href="<?php echo URL_ROOT; ?>/admin/codigos"><i class="bi bi-ticket-perforated-fill"></i> Códigos</a>
@@ -63,16 +65,52 @@
         </div>
     <?php endif; ?>
 
-    <div class="mb-4 d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">Reservas encontradas: <strong><?php echo count($reservas); ?></strong></h4>
-        <form method="GET" action="<?php echo URL_ROOT; ?>/admin/reservas" class="d-flex align-items-center gap-2">
-            <label class="mb-0 fw-bold">Filtrar:</label>
-            <select name="estado" class="form-select w-auto" onchange="this.form.submit()">
-                <option value="all"        <?php echo $estado_filtro === 'all'        ? 'selected' : ''; ?>>Todas</option>
-                <option value="pendiente"  <?php echo $estado_filtro === 'pendiente'  ? 'selected' : ''; ?>>Pendiente</option>
-                <option value="confirmada" <?php echo $estado_filtro === 'confirmada' ? 'selected' : ''; ?>>Confirmada</option>
-                <option value="cancelada"  <?php echo $estado_filtro === 'cancelada'  ? 'selected' : ''; ?>>Cancelada</option>
-            </select>
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Reservas encontradas: <strong><?php echo $totalReservas; ?></strong></h4>
+    </div>
+
+    <div class="filtros-card">
+        <form method="GET" action="<?php echo URL_ROOT; ?>/admin/reservas" class="row g-2 align-items-end">
+            <div class="col-6 col-md-2">
+                <label class="form-label fw-bold mb-1">Estado</label>
+                <select name="estado" class="form-select form-select-sm">
+                    <option value="all"        <?php echo $filtros['estado'] === 'all'        ? 'selected' : ''; ?>>Todas</option>
+                    <option value="pendiente"  <?php echo $filtros['estado'] === 'pendiente'  ? 'selected' : ''; ?>>Pendiente</option>
+                    <option value="confirmada" <?php echo $filtros['estado'] === 'confirmada' ? 'selected' : ''; ?>>Confirmada</option>
+                    <option value="cancelada"  <?php echo $filtros['estado'] === 'cancelada'  ? 'selected' : ''; ?>>Cancelada</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label fw-bold mb-1">Paquete</label>
+                <select name="id_paquete" class="form-select form-select-sm">
+                    <option value="">Todos</option>
+                    <?php foreach ($paquetes as $paquete): ?>
+                        <option value="<?php echo $paquete->id_paquete; ?>" <?php echo (string) $filtros['id_paquete'] === (string) $paquete->id_paquete ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($paquete->nombre); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label fw-bold mb-1">Desde</label>
+                <input type="date" name="fecha_desde" class="form-control form-control-sm" value="<?php echo htmlspecialchars($filtros['fecha_desde']); ?>">
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label fw-bold mb-1">Hasta</label>
+                <input type="date" name="fecha_hasta" class="form-control form-control-sm" value="<?php echo htmlspecialchars($filtros['fecha_hasta']); ?>">
+            </div>
+            <div class="col-8 col-md-2">
+                <label class="form-label fw-bold mb-1">Cliente</label>
+                <input type="text" name="buscar" class="form-control form-control-sm" placeholder="Nombre o correo" value="<?php echo htmlspecialchars($filtros['buscar']); ?>">
+            </div>
+            <div class="col-4 col-md-1 d-grid">
+                <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-funnel-fill"></i> Filtrar</button>
+            </div>
+            <?php if ($filtros['estado'] !== 'all' || $filtros['id_paquete'] !== '' || $filtros['fecha_desde'] !== '' || $filtros['fecha_hasta'] !== '' || $filtros['buscar'] !== ''): ?>
+            <div class="col-12">
+                <a href="<?php echo URL_ROOT; ?>/admin/reservas" class="small text-muted"><i class="bi bi-x-circle"></i> Limpiar filtros</a>
+            </div>
+            <?php endif; ?>
         </form>
     </div>
 
@@ -149,6 +187,26 @@
                 </tbody>
             </table>
         </div>
+
+        <?php if ($totalPaginas > 1): ?>
+        <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+            <span class="pagina-info">Página <?php echo $pagina; ?> de <?php echo $totalPaginas; ?></span>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    <?php
+                    $qs = $_GET;
+                    for ($p = 1; $p <= $totalPaginas; $p++):
+                        $qs['pagina'] = $p;
+                        $activa = $p === $pagina;
+                    ?>
+                        <li class="page-item <?php echo $activa ? 'active' : ''; ?>">
+                            <a class="page-link" href="?<?php echo http_build_query($qs); ?>" <?php echo $activa ? 'style="background:#7F00FF;border-color:#7F00FF;"' : ''; ?>><?php echo $p; ?></a>
+                        </li>
+                    <?php endfor; ?>
+                </ul>
+            </nav>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 

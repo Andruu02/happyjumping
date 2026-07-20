@@ -5,6 +5,7 @@
  * =========================================
  */
 $viewName = basename($_SERVER['PHP_SELF'], '.php');
+require_once APP_ROOT . '/config/vapid.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -13,7 +14,8 @@ $viewName = basename($_SERVER['PHP_SELF'], '.php');
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $titulo; ?></title> 
     
-    <link rel="icon" type="image/png" href="<?php echo URL_ROOT; ?>/img/logo_escupitajo-removebg-preview.png">
+    <link rel="icon" type="image/webp" href="<?php echo URL_ROOT; ?>/img/logo_escupitajo-removebg-preview.webp">
+    <link rel="manifest" href="<?php echo URL_ROOT; ?>/manifest.json">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -24,7 +26,7 @@ $viewName = basename($_SERVER['PHP_SELF'], '.php');
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
     <div class="container">
         <a class="navbar-brand" href="<?php echo URL_ROOT; ?>">
-            <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.png" alt="Logo Happy Jumping">
+            <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.webp" alt="Logo Happy Jumping">
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -32,18 +34,23 @@ $viewName = basename($_SERVER['PHP_SELF'], '.php');
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo URL_ROOT; ?>">Iniciox</a>
+                    <a class="nav-link" href="<?php echo URL_ROOT; ?>/">Inicio</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo URL_ROOT; ?>/paquetes/entradas">Entradas</a>
+                    <a class="nav-link" href="<?php echo URL_ROOT; ?>/#entradas">Entradas</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo URL_ROOT; ?>/paquetes/cumpleanos">Cumpleaños</a>
+                    <a class="nav-link" href="<?php echo URL_ROOT; ?>/#cumpleanos">Cumpleaños</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo URL_ROOT; ?>/pagina/conocenos">Conócenos</a>
+                    <a class="nav-link" href="<?php echo URL_ROOT; ?>/#conocenos">Conócenos</a>
                 </li>
-                
+                <li class="nav-item d-flex align-items-center">
+                    <button type="button" id="btn-notificaciones" class="btn-notificaciones" title="Activar notificaciones">
+                        <i class="bi bi-bell"></i>
+                    </button>
+                </li>
+
                 <?php if(isset($_SESSION['id_usuario'])): ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -71,5 +78,11 @@ $viewName = basename($_SERVER['PHP_SELF'], '.php');
         </div>
     </div>
 </nav>
+
+<script>
+    window.HJ_URL_ROOT = "<?php echo URL_ROOT; ?>";
+    window.HJ_VAPID_PUBLIC_KEY = "<?php echo VAPID_PUBLIC_KEY; ?>";
+</script>
+<script src="<?php echo URL_ROOT; ?>/js/push.js"></script>
 
 <main class="main-container">

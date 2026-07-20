@@ -52,8 +52,51 @@ class AdminModel extends Model {
         return $this->resultSet();
     }
 
-    // Reservas filtradas por estado para la tabla
-    public function getReservasFiltradas($estado = 'all') {
+    /**
+     * Arma el WHERE + los binds comunes a getReservasFiltradas() y
+     * contarReservasFiltradas(), para no duplicar la lógica de filtros.
+     */
+    private function condicionesReservasFiltradas($filtros) {
+        $estado       = $filtros['estado']       ?? 'all';
+        $id_paquete   = $filtros['id_paquete']    ?? '';
+        $fecha_desde  = $filtros['fecha_desde']   ?? '';
+        $fecha_hasta  = $filtros['fecha_hasta']   ?? '';
+        $buscar       = $filtros['buscar']        ?? '';
+
+        $where  = [];
+        $params = [];
+
+        if ($estado !== 'all' && $estado !== '') {
+            $where[] = "COALESCE(NULLIF(pg.estado, ''), 'pendiente') = :estado";
+            $params[':estado'] = $estado;
+        }
+        if ($id_paquete !== '') {
+            $where[] = "r.id_paquete = :id_paquete";
+            $params[':id_paquete'] = (int) $id_paquete;
+        }
+        if ($fecha_desde !== '') {
+            $where[] = "h.fecha >= :fecha_desde";
+            $params[':fecha_desde'] = $fecha_desde;
+        }
+        if ($fecha_hasta !== '') {
+            $where[] = "h.fecha <= :fecha_hasta";
+            $params[':fecha_hasta'] = $fecha_hasta;
+        }
+        if ($buscar !== '') {
+            $where[] = "(u.nombre LIKE :buscar OR u.correo LIKE :buscar OR r.nombre_cumpleanero LIKE :buscar)";
+            $params[':buscar'] = '%' . $buscar . '%';
+        }
+
+        return [
+            'sql'    => $where ? (' WHERE ' . implode(' AND ', $where)) : '',
+            'params' => $params,
+        ];
+    }
+
+    // Reservas filtradas para la tabla, con paginación
+    public function getReservasFiltradas($filtros = [], $porPagina = 0, $pagina = 1) {
+        $cond = $this->condicionesReservasFiltradas($filtros);
+
         $sql = "SELECT
                     r.id_reserva,
                     h.fecha,
@@ -72,21 +115,45 @@ class AdminModel extends Model {
                 INNER JOIN usuarios u             ON r.id_usuario  = u.id_usuario
                 INNER JOIN paquetes p             ON r.id_paquete  = p.id_paquete
                 INNER JOIN pagos pg               ON r.id_reserva  = pg.id_reserva
-                INNER JOIN horarios_disponibles h ON r.id_horario  = h.id_horario";
+                INNER JOIN horarios_disponibles h ON r.id_horario  = h.id_horario"
+                . $cond['sql'] .
+                " ORDER BY r.id_reserva DESC";
 
-        if ($estado !== 'all' && $estado !== '') {
-            $sql .= " WHERE COALESCE(NULLIF(pg.estado, ''), 'pendiente') = :estado";
+        if ($porPagina > 0) {
+            $offset = max(0, ($pagina - 1) * $porPagina);
+            $sql .= " LIMIT :limite OFFSET :offset";
         }
-
-        $sql .= " ORDER BY r.id_reserva ASC";
 
         $this->query($sql);
 
-        if ($estado !== 'all' && $estado !== '') {
-            $this->bind(':estado', $estado);
+        foreach ($cond['params'] as $param => $valor) {
+            $this->bind($param, $valor);
+        }
+        if ($porPagina > 0) {
+            $this->bind(':limite', (int) $porPagina, PDO::PARAM_INT);
+            $this->bind(':offset', (int) $offset, PDO::PARAM_INT);
         }
 
         return $this->resultSet();
+    }
+
+    // Total de reservas que cumplen los mismos filtros (para la paginación)
+    public function contarReservasFiltradas($filtros = []) {
+        $cond = $this->condicionesReservasFiltradas($filtros);
+
+        $sql = "SELECT COUNT(*) AS total
+                FROM reservas r
+                INNER JOIN usuarios u             ON r.id_usuario  = u.id_usuario
+                INNER JOIN paquetes p             ON r.id_paquete  = p.id_paquete
+                INNER JOIN pagos pg               ON r.id_reserva  = pg.id_reserva
+                INNER JOIN horarios_disponibles h ON r.id_horario  = h.id_horario"
+                . $cond['sql'];
+
+        $this->query($sql);
+        foreach ($cond['params'] as $param => $valor) {
+            $this->bind($param, $valor);
+        }
+        return (int) $this->single()->total;
     }
 
     public function actualizarEstadoReserva($id_reserva, $nuevo_estado)

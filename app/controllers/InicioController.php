@@ -6,37 +6,26 @@
 */
 
 class InicioController extends Controller {
-    
+
+    private $paqueteModel;
+
     public function __construct() {
-        // ... (tu constructor actual)
+        $this->paqueteModel = $this->model('PaqueteModel');
     }
 
     /**
-     * Método por defecto (index).
+     * Página principal: incluye, en una sola página con scroll, el
+     * contenido de Entradas, Cumpleaños y Conócenos (antes eran rutas
+     * separadas en PaquetesController/InicioController::conocenos()).
      */
     public function index() {
         $datos = [
-            'titulo' => 'Happy&Jumping - Diversión sin límites',
-            'active_page' => 'inicio' // Para el link activo del nav
+            'titulo'      => 'Happy&Jumping - Diversión sin límites',
+            'active_page' => 'inicio',
+            'paquetes'    => $this->paqueteModel->obtenerPaquetesActivos(),
         ];
 
-        // Carga la vista 'inicio/index'
         $this->view('inicio/index', $datos);
-    }
-
-    /*
-     * ======================================================
-     * AÑADE ESTE NUEVO MÉTODO PARA "CONÓCENOS"
-     * ======================================================
-     */
-    public function conocenos() {
-        $datos = [
-            'titulo' => 'Conócenos - Happy&Jumping',
-            'active_page' => 'conocenos' // Para el link activo del nav
-        ];
-
-        // Carga la vista 'app/views/inicio/conocenos.php'
-        $this->view('inicio/conocenos', $datos);
     }
 }
 ?>

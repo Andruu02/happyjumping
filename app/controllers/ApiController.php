@@ -37,9 +37,59 @@ class ApiController extends Controller {
                 "GET  /api/partidas/{id_usuario}",
                 "GET  /api/partidas/puntos/{id_usuario}",
                 "POST /api/codigos-promocion/canjear",
-                "GET  /api/codigos-promocion/{id_usuario}"
+                "GET  /api/codigos-promocion/{id_usuario}",
+                "POST /api/push/suscribir",
+                "POST /api/push/desuscribir"
             ]
         ]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | NOTIFICACIONES PUSH (Web Push / VAPID)
+    | POST /api/push/suscribir    → guarda la suscripción del navegador
+    | POST /api/push/desuscribir  → borra la suscripción
+    |--------------------------------------------------------------------------
+    | Pública (sin JWT): cualquier visitante puede activar notificaciones,
+    | incluso sin haber iniciado sesión.
+    */
+    public function push($accion = null) {
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(["success" => false, "message" => "Método no permitido"]);
+            return;
+        }
+
+        $input    = json_decode(file_get_contents("php://input"), true);
+        $endpoint = $input['endpoint'] ?? '';
+
+        if (empty($endpoint)) {
+            echo json_encode(["success" => false, "message" => "Falta el endpoint de la suscripción"]);
+            return;
+        }
+
+        $pushModel = $this->model('PushModel');
+
+        if ($accion === 'desuscribir') {
+            $pushModel->eliminarSuscripcion($endpoint);
+            echo json_encode(["success" => true]);
+            return;
+        }
+
+        $p256dh = $input['keys']['p256dh'] ?? '';
+        $auth   = $input['keys']['auth']   ?? '';
+
+        if (empty($p256dh) || empty($auth)) {
+            echo json_encode(["success" => false, "message" => "Suscripción inválida"]);
+            return;
+        }
+
+        $idUsuario = isset($_SESSION['id_usuario']) ? (int) $_SESSION['id_usuario'] : null;
+        $userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255);
+
+        $ok = $pushModel->guardarSuscripcion($endpoint, $p256dh, $auth, $idUsuario, $userAgent);
+
+        echo json_encode(["success" => (bool) $ok]);
     }
 
     /*

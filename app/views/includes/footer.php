@@ -11,9 +11,9 @@
             <div class="col-md-4">
                 <h5>Enlaces útiles</h5>
                 <ul class="list-unstyled">
-                    <li><a href="<?php echo URL_ROOT; ?>/paquetes/cumpleanos">Paquetes de Cumpleaños</a></li>
-                    <li><a href="<?php echo URL_ROOT; ?>/paquetes/entradas">Entradas</a></li>
-                    <li><a href="<?php echo URL_ROOT; ?>/inicio/conocenos">Conócenos</a></li>
+                    <li><a href="<?php echo URL_ROOT; ?>/#cumpleanos">Paquetes de Cumpleaños</a></li>
+                    <li><a href="<?php echo URL_ROOT; ?>/#entradas">Entradas</a></li>
+                    <li><a href="<?php echo URL_ROOT; ?>/#conocenos">Conócenos</a></li>
                     <li><a href="<?php echo URL_ROOT; ?>/usuarios/login">Iniciar Sesión</a></li>
                 </ul>
             </div>

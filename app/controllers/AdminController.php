@@ -88,13 +88,32 @@ class AdminController extends Controller {
             }
         }
 
-        $estado_filtro = isset($_GET['estado']) ? $_GET['estado'] : 'all';
-        $reservas      = $this->adminModel->getReservasFiltradas($estado_filtro);
+        $filtros = [
+            'estado'      => isset($_GET['estado'])      ? trim($_GET['estado'])      : 'all',
+            'id_paquete'  => isset($_GET['id_paquete'])  ? trim($_GET['id_paquete'])  : '',
+            'fecha_desde' => isset($_GET['fecha_desde']) ? trim($_GET['fecha_desde']) : '',
+            'fecha_hasta' => isset($_GET['fecha_hasta']) ? trim($_GET['fecha_hasta']) : '',
+            'buscar'      => isset($_GET['buscar'])      ? trim($_GET['buscar'])      : '',
+        ];
+
+        $porPagina  = 15;
+        $pagina     = isset($_GET['pagina']) ? max(1, (int) $_GET['pagina']) : 1;
+        $total      = $this->adminModel->contarReservasFiltradas($filtros);
+        $totalPaginas = max(1, (int) ceil($total / $porPagina));
+        $pagina     = min($pagina, $totalPaginas);
+
+        $reservas = $this->adminModel->getReservasFiltradas($filtros, $porPagina, $pagina);
+        $paquetes = $this->model('PaqueteModel')->obtenerPaquetesActivos();
 
         $datos = [
             'titulo'        => 'Gestionar Reservas',
             'reservas'      => $reservas,
-            'estado_filtro' => $estado_filtro,
+            'paquetes'      => $paquetes,
+            'filtros'       => $filtros,
+            'estado_filtro' => $filtros['estado'],
+            'pagina'        => $pagina,
+            'totalPaginas'  => $totalPaginas,
+            'totalReservas' => $total,
             'mensaje'       => $mensaje
         ];
         $this->view('admin/reservas', $datos);
@@ -167,29 +186,46 @@ class AdminController extends Controller {
             ['emoji' => '🏆',  'titulo' => 'Fin de semana',  'mensaje' => '¡Viernes! 50% de descuento en nuestras tarifas. 🏆'],
         ];
 
+        $pushModel = $this->model('PushModel');
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty(trim($_POST['mensaje'] ?? ''))) {
             $mensaje = trim(strip_tags($_POST['mensaje']));
 
             if (strlen($mensaje) > 200) {
                 $resultado = ['tipo' => 'warning', 'texto' => 'El mensaje no puede superar los 200 caracteres.'];
             } else {
-                require_once APP_ROOT . '/../vendor/firebase/Firebase.php';
-                require_once APP_ROOT . '/config/firebase.php';
+                require_once APP_ROOT . '/core/WebPush.php';
+                require_once APP_ROOT . '/config/vapid.php';
 
-                $firebase = new Firebase(FIREBASE_DB_URL, FIREBASE_CREDENTIALS);
-
-                $ok = $firebase->push('notificaciones', [
-                    'mensaje'   => $mensaje,
-                    'timestamp' => time(),
-                    'leido'     => false,
+                $payload = json_encode([
+                    'title' => 'Happy Jumping Peru 🎈',
+                    'body'  => $mensaje,
+                    'url'   => URL_ROOT,
                 ]);
 
-                if ($ok) {
-                    $this->adminModel->guardarNotificacion($mensaje, $_SESSION['usuario_id'] ?? 0);
-                    $resultado = ['tipo' => 'success', 'texto' => '✅ Notificación enviada correctamente a la app móvil.'];
+                $enviados = 0;
+                foreach ($pushModel->obtenerSuscripciones() as $sub) {
+                    $r = WebPush::enviar(
+                        ['endpoint' => $sub->endpoint, 'p256dh' => $sub->p256dh, 'auth' => $sub->auth],
+                        $payload,
+                        VAPID_PUBLIC_KEY,
+                        VAPID_PRIVATE_KEY,
+                        VAPID_SUBJECT
+                    );
+                    if ($r === 'expirada') {
+                        $pushModel->eliminarSuscripcion($sub->endpoint);
+                    } elseif ($r === true) {
+                        $enviados++;
+                    }
+                }
+
+                $this->adminModel->guardarNotificacion($mensaje, $_SESSION['id_usuario'] ?? 0);
+
+                if ($enviados > 0) {
+                    $resultado = ['tipo' => 'success', 'texto' => "✅ Notificación enviada a <strong>{$enviados}</strong> dispositivo(s)."];
                 } else {
                     $mensajeAnterior = $mensaje;
-                    $resultado = ['tipo' => 'danger', 'texto' => '❌ Error al conectar con Firebase. Revisá las credenciales.'];
+                    $resultado = ['tipo' => 'warning', 'texto' => '⚠️ No hay dispositivos suscritos a las notificaciones todavía.'];
                 }
             }
         }
@@ -200,6 +236,7 @@ class AdminController extends Controller {
             'historial'       => $this->adminModel->getHistorialNotificaciones(),
             'resultado'       => $resultado,
             'mensajeAnterior' => $mensajeAnterior,
+            'totalSuscritos'  => $pushModel->contarSuscripciones(),
         ];
 
         $this->view('admin/notificaciones', $datos);
@@ -218,6 +255,18 @@ class AdminController extends Controller {
             $destinatarios_ids  = isset($_POST['destinatarios']) ? (array)$_POST['destinatarios'] : [];
             $clientes           = [];
 
+            // Si la plantilla es "recordatorio", traemos TODAS las reservas próximas
+            // de una sola vez ANTES del foreach, para no hacer una query SQL
+            // por cada cliente mientras se están enviando correos por SMTP
+            // (eso agotaba la conexión a la BD y causaba "MySQL server has gone away").
+            $proximas_index = [];
+            if ($plantilla === 'recordatorio') {
+                $proximas = $this->adminModel->getClientesConReservaProxima();
+                foreach ($proximas as $p) {
+                    $proximas_index[$p->id_usuario] = $p;
+                }
+            }
+
             // Si se marcó "todos", obtener todos los correos
             if (isset($_POST['todos']) && $_POST['todos'] === '1') {
                 $clientes = $this->adminModel->getClientesParaCorreo('');
@@ -232,6 +281,14 @@ class AdminController extends Controller {
                 }
             }
 
+            // La plantilla "recordatorio" solo debe llegar a clientes con una
+            // reserva confirmada próxima: se descarta a cualquier otro destinatario.
+            if ($resultado === null && $plantilla === 'recordatorio') {
+                $clientes = array_filter($clientes, function($c) use ($proximas_index) {
+                    return isset($proximas_index[$c->id_usuario]);
+                });
+            }
+
             if ($resultado === null && empty($clientes)) {
                 $resultado = ['tipo' => 'warning', 'texto' => '⚠️ No hay destinatarios para enviar.'];
             }
@@ -241,18 +298,6 @@ class AdminController extends Controller {
                 $enviados   = 0;
                 $fallidos   = 0;
                 $asunto_log = '';
-
-                // Si la plantilla es "recordatorio", traemos TODAS las reservas próximas
-                // de una sola vez ANTES del foreach, para no hacer una query SQL
-                // por cada cliente mientras se están enviando correos por SMTP
-                // (eso agotaba la conexión a la BD y causaba "MySQL server has gone away").
-                $proximas_index = [];
-                if ($plantilla === 'recordatorio') {
-                    $proximas = $this->adminModel->getClientesConReservaProxima();
-                    foreach ($proximas as $p) {
-                        $proximas_index[$p->id_usuario] = $p;
-                    }
-                }
 
                 foreach ($clientes as $cliente) {
                     try {
@@ -273,13 +318,6 @@ class AdminController extends Controller {
                                 if (empty($detalle)) { $detalle = '¡Oferta especial disponible esta semana!'; }
                                 $ok = Mailer::enviarPromoEspecial($cliente->correo, $cliente->nombre, $detalle);
                                 $asunto_log = '🎉 Promoción especial';
-                                break;
-
-                            case 'codigo':
-                                $codigo   = isset($_POST['codigo_descuento'])   ? strtoupper(trim($_POST['codigo_descuento'])) : 'HAPPY10';
-                                $desc_cod = isset($_POST['descripcion_codigo']) ? trim($_POST['descripcion_codigo'])  : '10% de descuento en tu próxima reserva.';
-                                $ok = Mailer::enviarCodigoDescuento($cliente->correo, $cliente->nombre, $codigo, $desc_cod);
-                                $asunto_log = '🎁 Código de descuento: ' . $codigo;
                                 break;
 
                             case 'puntos':
@@ -328,16 +366,23 @@ class AdminController extends Controller {
             }
         }
 
-        $buscar_clientes = isset($_GET['buscar']) ? trim($_GET['buscar']) : '';
-        $clientes_lista  = $this->adminModel->getClientesParaCorreo($buscar_clientes);
-        $historial       = $this->adminModel->getHistorialCorreos();
+        $buscar_clientes    = isset($_GET['buscar']) ? trim($_GET['buscar']) : '';
+        $clientes_lista     = $this->adminModel->getClientesParaCorreo($buscar_clientes);
+        $historial          = $this->adminModel->getHistorialCorreos();
+
+        // IDs de clientes con reserva confirmada próxima: la plantilla
+        // "recordatorio" solo puede enviarse a ellos.
+        $ids_recordatorio = array_map(function($p) {
+            return $p->id_usuario;
+        }, $this->adminModel->getClientesConReservaProxima());
 
         $datos = [
-            'titulo'    => 'Correos Masivos — Admin',
-            'clientes'  => $clientes_lista,
-            'historial' => $historial,
-            'buscar'    => $buscar_clientes,
-            'resultado' => $resultado,
+            'titulo'            => 'Correos Masivos — Admin',
+            'clientes'          => $clientes_lista,
+            'historial'         => $historial,
+            'buscar'            => $buscar_clientes,
+            'resultado'         => $resultado,
+            'ids_recordatorio'  => $ids_recordatorio,
         ];
 
         $this->view('admin/correos', $datos);

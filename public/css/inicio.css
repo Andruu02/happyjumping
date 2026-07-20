@@ -1,0 +1,199 @@
+/*
+ * =========================================
+ * ESTILOS DE LA PÁGINA DE INICIO (fusionada)
+ * =========================================
+ * Contiene el contenido de lo que antes eran las páginas separadas
+ * "Entradas", "Cumpleaños" y "Conócenos", ahora secciones de /inicio.
+ */
+
+/* Offset para que el navbar fijo no tape el título al saltar con el ancla */
+#entradas, #cumpleanos, #conocenos {
+    scroll-margin-top: 90px;
+}
+
+/* =========================================
+   ENTRADAS (tarjetas grandes de precios/promos)
+   ========================================= */
+.card-grande {
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 8px 26px rgba(0,0,0,0.15);
+    transition: transform 0.3s ease;
+    line-height: 0; /* evita cualquier espacio en blanco bajo la imagen */
+}
+.card-grande:hover {
+    transform: scale(1.02);
+}
+.card-grande img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    aspect-ratio: 3 / 4;
+}
+
+/* =========================================
+   CUMPLEAÑOS (tarjetas de paquetes)
+   ========================================= */
+.package-card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    overflow: hidden;
+    margin-bottom: 50px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    z-index: 2;
+}
+.package-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+.package-img {
+    height: 400px;
+    background-size: cover;
+    background-position: center;
+}
+.package-body {
+    padding: 35px 40px;
+}
+.package-body h3 {
+    color: var(--morado);
+    font-weight: 700;
+    margin-bottom: 18px;
+    font-size: 1.6rem;
+}
+
+/* Lista de contenido del paquete, con icono en vez de viñeta plana */
+.package-features {
+    list-style: none;
+    margin: 0 0 18px;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+}
+.package-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: #555;
+    line-height: 1.4;
+}
+.package-features li i {
+    color: var(--verde);
+    font-size: 1.05rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.package-price-tag {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    background: #fff4e8;
+    border-radius: 14px;
+    padding: 10px 18px;
+    font-weight: 700;
+    color: var(--naranja);
+    font-size: 1rem;
+    margin-bottom: 6px;
+}
+.package-price-tag .separador {
+    color: #d9a679;
+    font-weight: 400;
+}
+
+.btn-contratar {
+    background: linear-gradient(90deg, var(--rosa), var(--naranja));
+    color: white;
+    font-weight: 600;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 30px;
+    transition: background 0.3s ease;
+}
+.btn-contratar:hover {
+    background: linear-gradient(90deg, var(--naranja), var(--rosa));
+}
+
+/* Tarjeta extra colorida (cuartos de experiencia) */
+.extra-card {
+    background: linear-gradient(135deg, var(--morado), var(--rosa));
+    border-radius: 18px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    max-width: 900px;
+}
+
+.disclaimers {
+    font-size: 0.95rem;
+}
+
+/* =========================================
+   CONÓCENOS (misión / visión + mapa)
+   ========================================= */
+.mision-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 36px 32px;
+    height: 100%;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    border-top: 6px solid var(--morado);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.mision-card:nth-child(2) {
+    border-top-color: var(--celeste);
+}
+.mision-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 32px rgba(0,0,0,0.16);
+}
+.mision-card .icono {
+    font-size: 2.4rem;
+    margin-bottom: 10px;
+}
+.mision-card h2 {
+    color: var(--morado);
+    font-weight: 700;
+    margin-bottom: 14px;
+    font-size: 1.6rem;
+}
+.mision-card:nth-child(2) h2 {
+    color: var(--celeste);
+}
+.mision-card p {
+    color: #555;
+    line-height: 1.7;
+    margin: 0;
+}
+
+.map-container {
+    margin-top: 60px;
+    text-align: center;
+}
+.map-container h2 {
+    color: var(--celeste);
+    font-weight: 700;
+    margin-bottom: 30px;
+    font-size: 2.2rem;
+}
+.map-container iframe {
+    width: 100%;
+    height: 400px;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+/* =========================================
+   RESPONSIVE MOBILE
+   ========================================= */
+@media (max-width: 768px) {
+    .card-grande img { aspect-ratio: 4 / 3; }
+    .package-img  { height: 200px; }
+    .package-body { padding: 18px; }
+    .package-body h3 { font-size: 1.3rem; }
+    .map-container iframe { height: 240px; }
+    .map-container h2 { font-size: 1.6rem; }
+    .mision-card { padding: 26px 22px; }
+}

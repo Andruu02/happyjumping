@@ -174,41 +174,6 @@ class Mailer {
         return $m->send();
     }
 
-    // ── Plantilla 3: Código de descuento ─────────────────────────────────────
-    public static function enviarCodigoDescuento($correo, $nombre, $codigo, $descripcion_codigo) {
-        $m = self::instancia();
-        $m->addAddress($correo, $nombre);
-        $m->Subject = '🎁 ¡Tienes un código de descuento en Happy Jumping Peru!';
-        $m->Body = '<!DOCTYPE html>
-<html lang="es"><head><meta charset="UTF-8"></head>
-<body style="font-family:Poppins,Arial,sans-serif;background:#f4f8ff;margin:0;padding:20px;">
-  <div style="max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1);">
-    <div style="background:linear-gradient(90deg,#11998e,#38ef7d);padding:30px;text-align:center;">
-      <div style="font-size:3rem;">🎁</div>
-      <h1 style="color:white;margin:8px 0 0;font-size:1.7rem;">¡Un regalo para ti!</h1>
-      <p style="color:rgba(255,255,255,.9);margin:6px 0 0;">Happy Jumping Peru</p>
-    </div>
-    <div style="padding:30px;">
-      <p style="font-size:1.05rem;color:#333;">Hola <strong>' . htmlspecialchars($nombre) . '</strong>,</p>
-      <p style="color:#555;line-height:1.6;">Hemos generado un código de descuento especial para ti. Úsalo al momento de reservar tu próxima fiesta.</p>
-      <div style="background:#e8fdf5;border-radius:16px;padding:28px;text-align:center;margin:24px 0;">
-        <p style="margin:0 0 8px;color:#11998e;font-weight:700;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;">Tu código de descuento</p>
-        <div style="font-size:2.4rem;font-weight:900;letter-spacing:8px;color:#11998e;font-family:monospace;background:#fff;border-radius:10px;padding:16px;border:2px dashed #11998e;margin:12px 0;">' . htmlspecialchars(strtoupper($codigo)) . '</div>
-        <p style="margin:0;color:#555;font-size:.9rem;">' . htmlspecialchars($descripcion_codigo) . '</p>
-      </div>
-      <div style="text-align:center;margin:20px 0;">
-        <a href="https://happyjumpingperu.com" style="background:#11998e;color:white;text-decoration:none;padding:14px 36px;border-radius:30px;font-weight:700;font-size:1rem;display:inline-block;">¡Usar mi código! 🎈</a>
-      </div>
-      <p style="color:#888;font-size:.85rem;text-align:center;">*Válido para una sola reserva. No transferible.</p>
-    </div>
-    <div style="background:#f4f8ff;padding:16px;text-align:center;border-top:1px solid #eee;">
-      <p style="margin:0;color:#aaa;font-size:.8rem;">Happy Jumping Peru — happyjumpingperu.com</p>
-    </div>
-  </div>
-</body></html>';
-        return $m->send();
-    }
-
     // ── Plantilla 4: Puntos acumulados listos para canjear ───────────────────
     public static function enviarRecordatorioPuntos($correo, $nombre, $puntos) {
         $m = self::instancia();

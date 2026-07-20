@@ -20,7 +20,7 @@
 <body>
 
     <div class="login-card">
-        <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.png" alt="Logo" class="logo">
+        <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.webp" alt="Logo" class="logo">
         <h2>Acceso Administrador</h2>
         
         <form action="<?php echo URL_ROOT; ?>/admin/procesarLogin" method="POST">

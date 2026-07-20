@@ -42,23 +42,24 @@
     }
     .historial-item .hora { font-size: 0.75rem; color: #999; }
     #preview-box {
-        background: linear-gradient(135deg, #FF6B6B, #FF8E53);
-        border-radius: 20px; padding: 20px; color: white;
-        max-width: 260px; text-align: center; box-shadow: 0 4px 14px rgba(255,107,0,0.3);
+        background: #fff; border: 1px solid #e6e6e6;
+        border-radius: 16px; padding: 14px 16px; color: #1c1c1c;
+        max-width: 320px; box-shadow: 0 6px 18px rgba(0,0,0,0.12);
     }
-    #preview-box .emoji-preview { font-size: 2.5rem; }
-    #preview-box .titulo-preview { font-weight: bold; font-size: 1rem; margin-top: 6px; }
-    #preview-box .msg-preview { font-size: 0.88rem; margin-top: 8px; opacity: 0.95; line-height: 1.4; }
-    #preview-box .btn-preview {
-        background: white; color: #FF6B6B; font-weight: bold;
-        border: none; border-radius: 30px; padding: 8px 24px; margin-top: 14px; font-size: 0.9rem;
+    #preview-box .preview-cabecera {
+        display: flex; align-items: center; gap: 8px;
+        font-size: 0.75rem; color: #777; margin-bottom: 6px;
     }
+    #preview-box .preview-cabecera img { width: 16px; height: 16px; border-radius: 4px; }
+    #preview-box .preview-cabecera .preview-ahora { margin-left: auto; }
+    #preview-box .titulo-preview { font-weight: 700; font-size: 0.92rem; }
+    #preview-box .msg-preview { font-size: 0.85rem; margin-top: 2px; line-height: 1.4; color: #333; }
 </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.png" alt="Logo">
+    <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.webp" alt="Logo">
     <a href="<?php echo URL_ROOT; ?>/admin"><i class="bi bi-house-door-fill"></i> Dashboard</a>
     <a href="<?php echo URL_ROOT; ?>/admin/reservas"><i class="bi bi-calendar-fill"></i> Reservas</a>
     <a href="<?php echo URL_ROOT; ?>/admin/codigos"><i class="bi bi-ticket-perforated-fill"></i> Códigos</a>
@@ -69,7 +70,10 @@
 
 <div class="content">
     <p class="title"><i class="bi bi-bell-fill me-2"></i>Notificaciones</p>
-    <p class="text-muted fs-5">Envía alertas y promos directamente a la app móvil.</p>
+    <p class="text-muted fs-5">
+        Envía notificaciones push reales al celular de tus clientes (aparecen en la bandeja del sistema, aunque el sitio esté cerrado).
+        <span class="badge rounded-pill" style="background:#f3e5ff;color:#7F00FF;"><i class="bi bi-phone-fill me-1"></i><?php echo $totalSuscritos; ?> dispositivo(s) suscrito(s)</span>
+    </p>
 
     <?php if (isset($resultado)): ?>
         <div class="alert alert-<?php echo $resultado['tipo']; ?> alert-dismissible fade show">
@@ -87,7 +91,7 @@
                 <h5 class="fw-bold mb-1" style="color:#7F00FF">
                     <i class="bi bi-send-fill me-2"></i>Nueva notificación
                 </h5>
-                <p class="text-muted small mb-4">El mensaje llegará a todos los usuarios con la app abierta.</p>
+                <p class="text-muted small mb-4">El mensaje llegará como notificación del sistema a todos los dispositivos suscritos, tengan o no el sitio abierto.</p>
 
                 <p class="fw-semibold mb-2">⚡ Plantillas rápidas</p>
                 <div class="row g-2 mb-4">
@@ -127,13 +131,16 @@
 
         <!-- Preview + Historial -->
         <div class="col-lg-5">
-            <div class="notif-card mb-4 text-center">
-                <p class="fw-semibold mb-3">📱 Así se verá en el celular</p>
+            <div class="notif-card mb-4">
+                <p class="fw-semibold mb-3 text-center">📱 Así se verá en la bandeja de notificaciones</p>
                 <div id="preview-box" class="mx-auto">
-                    <div class="emoji-preview">🎉</div>
-                    <div class="titulo-preview">¡Oferta Especial!</div>
+                    <div class="preview-cabecera">
+                        <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.webp" alt="Happy Jumping">
+                        <span>Happy Jumping Peru</span>
+                        <span class="preview-ahora">ahora</span>
+                    </div>
+                    <div class="titulo-preview">Happy Jumping Peru 🎈</div>
                     <div class="msg-preview" id="preview-texto">Tu mensaje aparecerá aquí...</div>
-                    <button class="btn-preview">¡Entendido!</button>
                 </div>
             </div>
 

@@ -11,7 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $datos['titulo']; ?></title>
     
-    <link rel="icon" type="image/png" href="<?php echo URL_ROOT; ?>/img/logo_escupitajo-removebg-preview.png">
+    <link rel="icon" type="image/png" href="<?php echo URL_ROOT; ?>/img/logo_escupitajo-removebg-preview.webp">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -42,7 +42,7 @@
         
         <div class="register-card">
             
-            <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.png" class="top-logo" alt="Happy&Jumping Logo">
+            <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.webp" class="top-logo" alt="Happy&Jumping Logo">
             <p class="title">Crear cuenta</p>
 
             <form action="<?php echo URL_ROOT; ?>/usuarios/register" method="POST" novalidate> <div class="mb-3">

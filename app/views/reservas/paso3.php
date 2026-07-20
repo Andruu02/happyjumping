@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $titulo; ?></title>
     
-    <link rel="icon" type="image/png" href="<?php echo URL_ROOT; ?>/img/logo_escupitajo-removebg-preview.png">
+    <link rel="icon" type="image/png" href="<?php echo URL_ROOT; ?>/img/logo_escupitajo-removebg-preview.webp">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -32,7 +32,7 @@
                 <div class="col-lg-6">
                     <div class="qr-code-wrapper">
                         <h4>Monto a Pagar: <span id="monto_pagar">S/0.00</span></h4>
-                        <img src="<?php echo URL_ROOT; ?>/img/yape_qr.jpeg" alt="Código QR de Yape">
+                        <img src="<?php echo URL_ROOT; ?>/img/yape_qr.webp" alt="Código QR de Yape">
                         <p class="mt-3">
                             Escanea el código para pagar.
                             <br>
