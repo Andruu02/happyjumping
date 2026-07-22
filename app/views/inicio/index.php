@@ -301,24 +301,6 @@ function pintarLetrasArcoiris(string $texto): string {
 </section>
 
 <!-- ============================================================
-     GALERÍA
-     ============================================================ -->
-<section class="section" style="padding-top:0;">
-    <div class="wrap">
-        <div class="section-head">
-            <h2 class="section-title fuente_bouncy titulo-arcoiris"><?php echo pintarLetrasArcoiris('Así se ve un buen salto'); ?></h2>
-        </div>
-        <div class="gallery">
-            <div class="g1"><img src="<?php echo URL_ROOT; ?>/img/CUMPLEHJ.webp" alt="Cumpleaños Happy Jumping"><span>Celebra tu cumpleaños con nosotros</span></div>
-            <div class="g2"><img src="<?php echo URL_ROOT; ?>/img/trampolin.webp" alt="Trampolines"><span>Salto libre en la malla principal</span></div>
-            <div class="g3"><img src="<?php echo URL_ROOT; ?>/img/trampolin2.webp" alt="Trampolines"><span>Diversión sin límites</span></div>
-            <div class="g4"><img src="<?php echo URL_ROOT; ?>/img/HJ1.webp" alt="Happy Jumping"><span>Grupos, colegios y fiestas</span></div>
-            <div class="g5"><img src="<?php echo URL_ROOT; ?>/img/pared_escalar.webp" alt="Pared de escalar"><span>Retos y adrenalina</span></div>
-        </div>
-    </div>
-</section>
-
-<!-- ============================================================
      CONÓCENOS (antes /inicio/conocenos)
      ============================================================ -->
 <section id="conocenos" class="section" style="padding-top:0;">
