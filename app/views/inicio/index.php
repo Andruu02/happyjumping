@@ -305,8 +305,10 @@ require_once APP_ROOT . '/views/includes/header.php';
      ============================================================ -->
 <section id="conocenos" class="section" style="padding-top:0;">
     <div class="wrap">
-    <h2 class="section-title fuente_bouncy">Conócenos</h2>
-    <p class="section-lead">La esencia detrás de cada salto, cada risa y cada celebración.</p>
+    <div class="section-head">
+        <h2 class="section-title fuente_bouncy">Conócenos</h2>
+        <p class="section-lead">La esencia detrás de cada salto, cada risa y cada celebración.</p>
+    </div>
 
     <div class="row g-4 mt-2">
         <div class="col-md-6">

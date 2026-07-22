@@ -25,12 +25,17 @@ body {
     --morado: #7b2ff7;
 }
 
-/* FUENTE DE TÍTULOS: Chewy (alternativa de Google Fonts a la fuente
-   "Bouncy" de /fonts, con licencia solo para uso personal), cargada
-   desde Google Fonts en el <head>. */
+/* FUENTE DE TÍTULOS: Bouncy, fuente propia con licencia (public/fonts). */
+@font-face {
+    font-family: 'Bouncy';
+    src: url('../fonts/Bouncy-Thin-PERSONAL_USE_ONLY.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
 .fuente_bouncy {
-    font-family: 'Chewy', cursive;
-    font-weight: 400;
+    font-family: 'Bouncy', cursive;
+    font-weight: normal;
 }
 
 
@@ -130,9 +135,9 @@ body {
 }
 
 .section-title {
-    font-family: 'Chewy', cursive;
+    font-family: 'Bouncy', cursive;
     text-align: center;
-    font-weight: 400;
+    font-weight: normal;
     font-size: 2rem;
     margin-top: 0;
     margin-bottom: 40px;

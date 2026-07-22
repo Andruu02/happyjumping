@@ -43,7 +43,7 @@
    (no dentro de una tarjeta blanca), así que van en blanco con sombra
    para leerse bien sobre cualquier tramo del degradado. */
 .section{ padding:90px 0; position:relative; }
-.section-head{ max-width:640px; margin-bottom:44px; }
+.section-head{ max-width:640px; margin:0 auto 44px; text-align:center; }
 .section-title{
     color:#fff !important;
     text-shadow: 0 2px 14px rgba(20,10,45,.35);
@@ -259,7 +259,7 @@
     flex-wrap:wrap;
     position:relative; overflow:hidden;
 }
-.cta-band h2{ font-family:'Chewy',cursive; font-weight:400; font-size:clamp(24px,3vw,36px); max-width:480px; color:var(--morado); margin:0; }
+.cta-band h2{ font-family:'Bouncy',cursive; font-weight:normal; font-size:clamp(24px,3vw,36px); max-width:480px; color:var(--morado); margin:0; }
 .cta-band p{ color:#6b6b7a; margin-top:10px; max-width:420px; }
 .cta-band-actions{ display:flex; gap:16px; flex-wrap:wrap; }
 
