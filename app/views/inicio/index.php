@@ -108,17 +108,8 @@ require_once APP_ROOT . '/views/includes/header.php';
             <h2 class="section-title fuente_bouncy titulo-arcoiris">Entradas y Promociones</h2>
             <p class="section-lead">Precios claros y promociones vigentes, siempre a la mano.</p>
         </div>
-        <div class="row g-4 justify-content-center">
-            <div class="col-md-6">
-                <div class="card-grande">
-                    <img src="<?php echo URL_ROOT; ?>/img/precios.webp" alt="Imagen Precios">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card-grande">
-                    <img src="<?php echo URL_ROOT; ?>/img/promos.webp" alt="Imagen Promos">
-                </div>
-            </div>
+        <div class="flier">
+            <img src="<?php echo URL_ROOT; ?>/img/flier.webp" alt="Precios y promociones">
         </div>
     </div>
 </section>
