@@ -18,7 +18,7 @@ $esInicio = isset($active_page) && $active_page === 'inicio';
     <link rel="manifest" href="<?php echo URL_ROOT; ?>/manifest.json">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Chewy&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/style.css">
     <?php if ($esInicio): ?>
     <link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/inicio.css">

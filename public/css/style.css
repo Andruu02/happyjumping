@@ -25,11 +25,12 @@ body {
     --morado: #7b2ff7;
 }
 
-/* FUENTE DE TÍTULOS: Baloo 2 (redondeada, juguetona pero con más carácter
-   y peso visual que Fredoka), cargada desde Google Fonts en el <head>. */
+/* FUENTE DE TÍTULOS: Chewy (alternativa de Google Fonts a la fuente
+   "Bouncy" de /fonts, con licencia solo para uso personal), cargada
+   desde Google Fonts en el <head>. */
 .fuente_bouncy {
-    font-family: 'Baloo 2', sans-serif;
-    font-weight: 700;
+    font-family: 'Chewy', cursive;
+    font-weight: 400;
 }
 
 
@@ -93,7 +94,7 @@ body {
 }
 .hero h1 {
     font-size: 5rem;
-    font-weight: 700;
+    font-weight: 400;
     text-shadow: 3px 3px 8px rgba(0,0,0,0.4);
 }
 .hero p {
@@ -129,9 +130,9 @@ body {
 }
 
 .section-title {
-    font-family: 'Baloo 2', sans-serif;
+    font-family: 'Chewy', cursive;
     text-align: center;
-    font-weight: 700;
+    font-weight: 400;
     font-size: 2rem;
     margin-top: 0;
     margin-bottom: 40px;
