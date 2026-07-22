@@ -4,11 +4,29 @@
 // Incluye, en una sola página con scroll, el contenido de Entradas,
 // Cumpleaños y Conócenos (antes rutas separadas).
 require_once APP_ROOT . '/views/includes/header.php';
+
+// Pinta cada letra de un texto con un color del arcoíris de la marca,
+// igual que el logo (rotando entre los 6 colores de style.css). Los
+// espacios se dejan tal cual, sin envolver ni contar para la rotación.
+function pintarLetrasArcoiris(string $texto): string {
+    $colores = ['color-1', 'color-2', 'color-3', 'color-4', 'color-5', 'color-6'];
+    $i = 0;
+    $html = '';
+    foreach (mb_str_split($texto) as $letra) {
+        if (trim($letra) === '') {
+            $html .= $letra;
+            continue;
+        }
+        $html .= '<span class="letra-arcoiris ' . $colores[$i % count($colores)] . '">' . htmlspecialchars($letra) . '</span>';
+        $i++;
+    }
+    return $html;
+}
 ?>
 
 <section class="hero">
     <div class="hero-content">
-        <h1 class="fuente_bouncy">¡Salta hacia la diversión!</h1>
+        <h1 class="fuente_bouncy titulo-arcoiris"><?php echo pintarLetrasArcoiris('¡Salta hacia la diversión!'); ?></h1>
         <p>Descubre la emoción sin límites en Happy&amp;Jumping, el lugar donde la alegría nunca se detiene.</p>
         <a href="<?php echo URL_ROOT; ?>/reservas/paso1" class="hero-cta">🎉 ¡Reserva tu diversión!</a>
     </div>
