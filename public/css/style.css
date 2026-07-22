@@ -104,8 +104,7 @@ body {
 }
 
 /* Título estilo "arcoíris", letra por letra, igual que el logo.
-   Solo se usa en el título del hero: es la única parte viva de
-   colores de toda la página; el resto del diseño es minimalista. */
+   Se usa en los títulos de sección; el hero se queda en blanco liso. */
 .titulo-arcoiris .letra-arcoiris {
     -webkit-text-stroke: 8px #fff;
     paint-order: stroke fill;
