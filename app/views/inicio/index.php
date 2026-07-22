@@ -44,8 +44,7 @@ require_once APP_ROOT . '/views/includes/header.php';
 <section class="section">
     <div class="wrap">
         <div class="section-head">
-            <span class="eyebrow"><span class="dot"></span> Nuestras amenidades</span>
-            <h2 class="section-title">¿Qué encontrarás en Happy&amp;Jumping?</h2>
+            <h2 class="section-title fuente_bouncy">¿Qué encontrarás en Happy&amp;Jumping?</h2>
             <p class="section-lead">Todo lo que necesitas para pasarla en grande, en un solo lugar. Toca cualquier tarjeta para ver fotos.</p>
         </div>
         <div class="row g-4 justify-content-center">
@@ -68,7 +67,7 @@ require_once APP_ROOT . '/views/includes/header.php';
                 ];
             ?>
             <div class="col-6 col-md-4">
-                <div class="amenidad-card card-gsap" tabindex="0" role="button"
+                <div class="amenidad-card" tabindex="0" role="button"
                      data-titulo="<?php echo htmlspecialchars($a['texto']); ?>"
                      data-desc="<?php echo htmlspecialchars($a['desc']); ?>"
                      data-imgs="<?php echo htmlspecialchars(json_encode($imagenes), ENT_QUOTES); ?>">
@@ -104,18 +103,17 @@ require_once APP_ROOT . '/views/includes/header.php';
 <section id="entradas" class="section" style="padding-top:0;">
     <div class="wrap">
         <div class="section-head">
-            <span class="eyebrow"><span class="dot"></span> Precios</span>
-            <h2 class="section-title">Entradas y Promociones</h2>
+            <h2 class="section-title fuente_bouncy">Entradas y Promociones</h2>
             <p class="section-lead">Precios claros y promociones vigentes, siempre a la mano.</p>
         </div>
         <div class="row g-4 justify-content-center">
             <div class="col-md-6">
-                <div class="card-grande card-gsap">
+                <div class="card-grande">
                     <img src="<?php echo URL_ROOT; ?>/img/precios.webp" alt="Imagen Precios">
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="card-grande card-gsap">
+                <div class="card-grande">
                     <img src="<?php echo URL_ROOT; ?>/img/promos.webp" alt="Imagen Promos">
                 </div>
             </div>
@@ -129,27 +127,26 @@ require_once APP_ROOT . '/views/includes/header.php';
 <section class="section" style="padding-top:0;">
     <div class="wrap">
         <div class="section-head">
-            <span class="eyebrow"><span class="dot"></span> Antes de saltar</span>
-            <h2 class="section-title">Cómo funciona tu reserva</h2>
+            <h2 class="section-title fuente_bouncy">Cómo funciona tu reserva</h2>
             <p class="section-lead">Cuatro pasos entre que eliges tu paquete y celebras tu fiesta.</p>
         </div>
         <div class="steps">
-            <div class="step card-gsap">
+            <div class="step">
                 <span class="num">01</span>
                 <h3>Elige tu paquete</h3>
                 <p>Compara los paquetes de cumpleaños y escoge el que más se ajuste a tu celebración.</p>
             </div>
-            <div class="step card-gsap">
+            <div class="step">
                 <span class="num">02</span>
                 <h3>Elige fecha y hora</h3>
                 <p>Selecciona el día y el horario disponible en nuestro calendario en línea.</p>
             </div>
-            <div class="step card-gsap">
+            <div class="step">
                 <span class="num">03</span>
                 <h3>Confirma tu pago</h3>
                 <p>Paga tu reserva de forma sencilla y recibe la confirmación al instante.</p>
             </div>
-            <div class="step card-gsap">
+            <div class="step">
                 <span class="num">04</span>
                 <h3>¡A saltar!</h3>
                 <p>Llega el día de tu evento y disfruta de tu fiesta con nosotros.</p>
@@ -164,8 +161,7 @@ require_once APP_ROOT . '/views/includes/header.php';
 <section id="cumpleanos" class="section" style="padding-top:0;">
     <div class="wrap">
     <div class="section-head">
-        <span class="eyebrow"><span class="dot"></span> Cumpleaños</span>
-        <h2 class="section-title">Paquetes de Cumpleaños</h2>
+        <h2 class="section-title fuente_bouncy">Paquetes de Cumpleaños</h2>
         <p class="section-lead">Elige el paquete perfecto y deja que nosotros nos encarguemos del resto.</p>
     </div>
 
@@ -214,7 +210,7 @@ require_once APP_ROOT . '/views/includes/header.php';
         $row_class = $alternar ? 'flex-md-row-reverse' : '';
     ?>
 
-    <div class="package-card card-gsap color-<?php echo (($paquete->id_paquete - 1) % 4) + 1; ?>">
+    <div class="package-card color-<?php echo (($paquete->id_paquete - 1) % 4) + 1; ?>">
         <div class="row g-0 align-items-center <?php echo $row_class; ?>">
 
             <div class="col-md-5 package-img" style="background-image: url('<?php echo URL_ROOT; ?>/img/<?php echo $imagen; ?>');"></div>
@@ -249,7 +245,7 @@ require_once APP_ROOT . '/views/includes/header.php';
     endforeach;
     ?>
 
-    <div class="extra-card card-gsap text-center p-4 my-5 mx-auto">
+    <div class="extra-card text-center p-4 my-5 mx-auto">
         <h4 class="fw-bold mb-2">Cuartos de Experiencia</h4>
         <p class="mb-0">
             Si deseas que tu paquete de cumpleaños incluya nuestros
@@ -273,7 +269,7 @@ require_once APP_ROOT . '/views/includes/header.php';
      ============================================================ -->
 <section class="section" style="padding-top:0;">
     <div class="wrap">
-        <div class="cta-band card-gsap">
+        <div class="cta-band">
             <div>
                 <h2>¿Listos para saltar más alto de lo normal?</h2>
                 <p>Cumpleaños, salidas escolares o una tarde cualquiera: siempre hay una razón para venir a rebotar.</p>
@@ -292,8 +288,7 @@ require_once APP_ROOT . '/views/includes/header.php';
 <section class="section" style="padding-top:0;">
     <div class="wrap">
         <div class="section-head">
-            <span class="eyebrow"><span class="dot"></span> Momentos Happy&amp;Jumping</span>
-            <h2 class="section-title">Así se ve un buen salto</h2>
+            <h2 class="section-title fuente_bouncy">Así se ve un buen salto</h2>
         </div>
         <div class="gallery">
             <div class="g1"><img src="<?php echo URL_ROOT; ?>/img/CUMPLEHJ.webp" alt="Cumpleaños Happy Jumping"><span>Celebra tu cumpleaños con nosotros</span></div>
@@ -310,12 +305,12 @@ require_once APP_ROOT . '/views/includes/header.php';
      ============================================================ -->
 <section id="conocenos" class="section" style="padding-top:0;">
     <div class="wrap">
-    <h2 class="section-title">Conócenos</h2>
+    <h2 class="section-title fuente_bouncy">Conócenos</h2>
     <p class="section-lead">La esencia detrás de cada salto, cada risa y cada celebración.</p>
 
     <div class="row g-4 mt-2">
         <div class="col-md-6">
-            <div class="mision-card card-gsap">
+            <div class="mision-card">
                 <div class="icono">🎯</div>
                 <h2 class="fuente_bouncy">Misión</h2>
                 <p>Brindar una experiencia recreativa única, segura y divertida que promueva el bienestar físico y
@@ -326,7 +321,7 @@ require_once APP_ROOT . '/views/includes/header.php';
             </div>
         </div>
         <div class="col-md-6">
-            <div class="mision-card card-gsap">
+            <div class="mision-card">
                 <div class="icono">🚀</div>
                 <h2 class="fuente_bouncy">Visión</h2>
                 <p>Un centro recreativo de trampolines, con una atmósfera energizante y un diseño innovador,
@@ -354,6 +349,4 @@ require_once APP_ROOT . '/views/includes/footer.php';
 ?>
 
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/ScrollTrigger.min.js"></script>
-<script src="<?php echo URL_ROOT; ?>/js/inicio-animaciones.js"></script>
 <script src="<?php echo URL_ROOT; ?>/js/amenidad-expandir.js"></script>
