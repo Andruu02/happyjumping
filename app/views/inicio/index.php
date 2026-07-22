@@ -1,30 +1,63 @@
 <?php
 
-// VISTA DE INICIO (PÁGINA PRINCIPAL)
+// VISTA DE INICIO (PÁGINA PRINCIPAL) — tema oscuro/neón.
 // Incluye, en una sola página con scroll, el contenido de Entradas,
 // Cumpleaños y Conócenos (antes rutas separadas).
 require_once APP_ROOT . '/views/includes/header.php';
 ?>
-<link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/inicio.css">
-
-<!-- Envoltura de toda la página de inicio: contiene UNA sola capa de color
-     de fondo (detrás de todas las secciones, que ahora van transparentes),
-     para que el color sea continuo de arriba a abajo sin cortes. -->
-<div class="inicio-fondo-wrapper">
-    <div class="capa-color-fondo" aria-hidden="true"></div>
 
 <section class="hero">
-    <div class="hero-content">
-        <h1 class="fuente_bouncy">¡Salta hacia la diversión!</h1>
-        <p>Descubre la emoción sin límites en Happy&Jumping, el lugar donde la alegría nunca se detiene.</p>
-        <a href="<?php echo URL_ROOT; ?>/reservas/paso1" class="hero-cta">🎉 ¡Reserva tu diversión!</a>
+    <div class="hero-photo"></div>
+    <div class="mesh-bg"></div>
+    <div class="glow glow-pink"></div>
+    <div class="glow glow-teal"></div>
+    <div class="wrap hero-grid">
+        <span class="eyebrow"><span class="dot"></span> Parque de trampolines</span>
+        <h1>
+            <span class="l1">¡Salta hacia</span>
+            <span class="l2">la diversión!</span>
+        </h1>
+        <p class="lead">Descubre la emoción sin límites en Happy&amp;Jumping, el lugar donde la alegría nunca se detiene.</p>
+        <div class="hero-ctas">
+            <a href="<?php echo URL_ROOT; ?>/reservas/paso1" class="btn-neon btn-neon-primary">🎉 Reserva tu fiesta</a>
+            <a href="#cumpleanos" class="btn-neon btn-neon-ghost">Ver paquetes →</a>
+        </div>
+        <div class="hero-stats">
+            <div class="stat"><b>4</b><span>paquetes de fiesta</span></div>
+            <div class="stat"><b>6</b><span>experiencias distintas</span></div>
+            <div class="stat"><b>100%</b><span>diversión asegurada</span></div>
+        </div>
     </div>
 </section>
 
-<section class="amenidades-section position-relative py-5">
-    <div class="container position-relative">
-        <h2 class="section-title">¿Qué encontrarás en Happy&amp;Jumping?</h2>
-        <p class="section-lead">Todo lo que necesitas para pasarla en grande, en un solo lugar.</p>
+<!-- MARQUEE -->
+<div class="marquee">
+    <div class="marquee-track">
+        <span>Trampolines</span>
+        <span>Anfitrionas</span>
+        <span>Helados y granizados</span>
+        <span>Brazos giratorios</span>
+        <span>Glitter y maquillaje neón</span>
+        <span>Zona de fiestas</span>
+        <span>Trampolines</span>
+        <span>Anfitrionas</span>
+        <span>Helados y granizados</span>
+        <span>Brazos giratorios</span>
+        <span>Glitter y maquillaje neón</span>
+        <span>Zona de fiestas</span>
+    </div>
+</div>
+
+<!-- ============================================================
+     AMENIDADES ("zonas" de la experiencia)
+     ============================================================ -->
+<section class="section">
+    <div class="wrap">
+        <div class="section-head">
+            <span class="eyebrow"><span class="dot"></span> Nuestras amenidades</span>
+            <h2 class="section-title">¿Qué encontrarás en Happy&amp;Jumping?</h2>
+            <p class="section-lead">Todo lo que necesitas para pasarla en grande, en un solo lugar. Toca cualquier tarjeta para ver fotos.</p>
+        </div>
         <div class="row g-4 justify-content-center">
             <?php
             // Cada amenidad tiene 3 fotos (amenidades/<clave>-1.webp, -2.webp, -3.webp)
@@ -78,10 +111,13 @@ require_once APP_ROOT . '/views/includes/header.php';
 <!-- ============================================================
      ENTRADAS Y PROMOCIONES (antes /paquetes/entradas)
      ============================================================ -->
-<section id="entradas" class="entradas-section position-relative py-5">
-    <div class="container position-relative">
-        <h2 class="section-title">Entradas y Promociones</h2>
-        <p class="section-lead">Precios claros y promociones vigentes, siempre a la mano.</p>
+<section id="entradas" class="section" style="padding-top:0;">
+    <div class="wrap">
+        <div class="section-head">
+            <span class="eyebrow"><span class="dot"></span> Precios</span>
+            <h2 class="section-title">Entradas y Promociones</h2>
+            <p class="section-lead">Precios claros y promociones vigentes, siempre a la mano.</p>
+        </div>
         <div class="row g-4 justify-content-center">
             <div class="col-md-6">
                 <div class="card-grande card-gsap">
@@ -98,12 +134,50 @@ require_once APP_ROOT . '/views/includes/header.php';
 </section>
 
 <!-- ============================================================
+     CÓMO FUNCIONA (nuestro flujo real de reserva)
+     ============================================================ -->
+<section class="section" style="padding-top:0;">
+    <div class="wrap">
+        <div class="section-head">
+            <span class="eyebrow"><span class="dot"></span> Antes de saltar</span>
+            <h2 class="section-title">Cómo funciona tu reserva</h2>
+            <p class="section-lead">Cuatro pasos entre que eliges tu paquete y celebras tu fiesta.</p>
+        </div>
+        <div class="steps">
+            <div class="step card-gsap">
+                <span class="num">01</span>
+                <h3>Elige tu paquete</h3>
+                <p>Compara los paquetes de cumpleaños y escoge el que más se ajuste a tu celebración.</p>
+            </div>
+            <div class="step card-gsap">
+                <span class="num">02</span>
+                <h3>Elige fecha y hora</h3>
+                <p>Selecciona el día y el horario disponible en nuestro calendario en línea.</p>
+            </div>
+            <div class="step card-gsap">
+                <span class="num">03</span>
+                <h3>Confirma tu pago</h3>
+                <p>Paga tu reserva de forma sencilla y recibe la confirmación al instante.</p>
+            </div>
+            <div class="step card-gsap">
+                <span class="num">04</span>
+                <h3>¡A saltar!</h3>
+                <p>Llega el día de tu evento y disfruta de tu fiesta con nosotros.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
      PAQUETES DE CUMPLEAÑOS (antes /paquetes/cumpleanos)
      ============================================================ -->
-<section id="cumpleanos" class="cumpleanos-section position-relative py-5">
-    <div class="container position-relative">
-    <h2 class="section-title">Paquetes de Cumpleaños</h2>
-    <p class="section-lead">Elige el paquete perfecto y deja que nosotros nos encarguemos del resto.</p>
+<section id="cumpleanos" class="section" style="padding-top:0;">
+    <div class="wrap">
+    <div class="section-head">
+        <span class="eyebrow"><span class="dot"></span> Cumpleaños</span>
+        <h2 class="section-title">Paquetes de Cumpleaños</h2>
+        <p class="section-lead">Elige el paquete perfecto y deja que nosotros nos encarguemos del resto.</p>
+    </div>
 
     <?php
     $imagenesPaquetes = [
@@ -113,8 +187,7 @@ require_once APP_ROOT . '/views/includes/header.php';
         4 => 'HJ1.webp',
     ];
 
-    // Contenido de cada paquete: icono + lista de beneficios (más "chulo"
-    // que la lista de viñetas plana que tenía antes).
+    // Contenido de cada paquete: icono + lista de beneficios.
     $contenidoPaquetes = [
         1 => [
             'bi-clock-fill'          => '2 horas de uso del local.',
@@ -172,7 +245,7 @@ require_once APP_ROOT . '/views/includes/header.php';
                     <span class="separador">•</span>
                     <span>S/<?php echo number_format($paquete->precio_fin_semana, 2); ?> Sábado y Domingo</span>
                 </div>
-                <div class="text-muted small mb-2">Precio por persona</div>
+                <div class="text-muted small mb-2" style="color:var(--ink-muted) !important;">Precio por persona</div>
 
                 <a href="<?php echo URL_ROOT; ?>/reservas/paso1?paquete=<?php echo $paquete->id_paquete; ?>">
                     <button class="btn-contratar mt-2">Reservar Paquete</button>
@@ -186,7 +259,7 @@ require_once APP_ROOT . '/views/includes/header.php';
     endforeach;
     ?>
 
-    <div class="extra-card card-gsap text-center text-white p-4 my-5 mx-auto">
+    <div class="extra-card card-gsap text-center p-4 my-5 mx-auto">
         <h4 class="fw-bold mb-2">Cuartos de Experiencia</h4>
         <p class="mb-0">
             Si deseas que tu paquete de cumpleaños incluya nuestros
@@ -196,7 +269,7 @@ require_once APP_ROOT . '/views/includes/header.php';
     </div>
 
     <div class="mt-4 mb-5">
-        <p class="text-muted disclaimers">
+        <p class="disclaimers">
             * Al adquirir cualquiera de nuestros paquetes queda totalmente PROHIBIDO traer bebidas embotelladas.<br>
             * Los horarios para cumpleaños privados se confirman según disponibilidad del local.<br>
             * Cualquiera de los paquetes puede ser modificado según lo que desee el cliente.
@@ -206,14 +279,51 @@ require_once APP_ROOT . '/views/includes/header.php';
 </section>
 
 <!-- ============================================================
+     BANDA CTA
+     ============================================================ -->
+<section class="section" style="padding-top:0;">
+    <div class="wrap">
+        <div class="cta-band card-gsap">
+            <div>
+                <h2>¿Listos para saltar más alto de lo normal?</h2>
+                <p>Cumpleaños, salidas escolares o una tarde cualquiera: siempre hay una razón para venir a rebotar.</p>
+            </div>
+            <div class="cta-band-actions">
+                <a href="<?php echo URL_ROOT; ?>/reservas/paso1" class="btn-neon btn-neon-primary">Reserva tu fiesta</a>
+                <a href="#cumpleanos" class="btn-neon btn-neon-ghost">Ver paquetes</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     GALERÍA
+     ============================================================ -->
+<section class="section" style="padding-top:0;">
+    <div class="wrap">
+        <div class="section-head">
+            <span class="eyebrow"><span class="dot"></span> Momentos Happy&amp;Jumping</span>
+            <h2 class="section-title">Así se ve un buen salto</h2>
+        </div>
+        <div class="gallery">
+            <div class="g1"><img src="<?php echo URL_ROOT; ?>/img/CUMPLEHJ.webp" alt="Cumpleaños Happy Jumping"><span>Celebra tu cumpleaños con nosotros</span></div>
+            <div class="g2"><img src="<?php echo URL_ROOT; ?>/img/trampolin.webp" alt="Trampolines"><span>Salto libre en la malla principal</span></div>
+            <div class="g3"><img src="<?php echo URL_ROOT; ?>/img/trampolin2.webp" alt="Trampolines"><span>Diversión sin límites</span></div>
+            <div class="g4"><img src="<?php echo URL_ROOT; ?>/img/HJ1.webp" alt="Happy Jumping"><span>Grupos, colegios y fiestas</span></div>
+            <div class="g5"><img src="<?php echo URL_ROOT; ?>/img/pared_escalar.webp" alt="Pared de escalar"><span>Retos y adrenalina</span></div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
      CONÓCENOS (antes /inicio/conocenos)
      ============================================================ -->
-<section id="conocenos" class="conocenos-section position-relative py-5">
-    <div class="container position-relative">
+<section id="conocenos" class="section" style="padding-top:0;">
+    <div class="wrap">
     <h2 class="section-title">Conócenos</h2>
     <p class="section-lead">La esencia detrás de cada salto, cada risa y cada celebración.</p>
 
-    <div class="row g-4">
+    <div class="row g-4 mt-2">
         <div class="col-md-6">
             <div class="mision-card card-gsap">
                 <div class="icono">🎯</div>
@@ -245,8 +355,6 @@ require_once APP_ROOT . '/views/includes/header.php';
     </div>
     </div>
 </section>
-
-</div><!-- /.inicio-fondo-wrapper -->
 
 <?php
 // Carga el footer

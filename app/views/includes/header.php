@@ -4,8 +4,8 @@
  * HEADER GLOBAL (¡SIMPLIFICADO Y BASADO EN ID!)
  * =========================================
  */
-$viewName = basename($_SERVER['PHP_SELF'], '.php');
 require_once APP_ROOT . '/config/vapid.php';
+$esInicio = isset($active_page) && $active_page === 'inicio';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -18,10 +18,13 @@ require_once APP_ROOT . '/config/vapid.php';
     <link rel="manifest" href="<?php echo URL_ROOT; ?>/manifest.json">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Fredoka:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/style.css">
+    <?php if ($esInicio): ?>
+    <link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/inicio.css">
+    <?php endif; ?>
 </head>
-<body <?php echo ($viewName == 'index/index') ? 'class="body-index"' : ''; ?>>
+<body <?php echo $esInicio ? 'class="body-index"' : ''; ?>>
 
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
     <div class="container">
