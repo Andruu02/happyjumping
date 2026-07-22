@@ -16,24 +16,27 @@ require_once APP_ROOT . '/views/includes/header.php';
 </section>
 
 <section class="container position-relative py-5">
-    <div class="package-card card-gsap">
-        <div class="row g-0 align-items-center flex-md-row-reverse">
-            <div class="col-md-5 package-img" style="background-image:url('<?php echo URL_ROOT; ?>/img/CUMPLEHJ.webp');"></div>
-            <div class="col-md-7 package-body">
-                <h3 class="fuente_bouncy">¡Celebra tu día con estilo!</h3>
-                <p>Vive un cumpleaños inolvidable con nuestro <strong>Paquete Jumping Party</strong>. Incluye decoración temática, zona exclusiva, animación, bebidas y pastel personalizado. Un ambiente lleno de color, risas y saltos que harán brillar tu día especial.</p>
+    <h2 class="section-title">¿Qué encontrarás en Happy&amp;Jumping?</h2>
+    <div class="row g-4 justify-content-center">
+        <?php
+        $amenidades = [
+            ['icono' => '🤸‍♀️', 'texto' => 'Anfitrionas'],
+            ['icono' => '🤾', 'texto' => 'Trampolines'],
+            ['icono' => '🍧', 'texto' => 'Helados y granizados'],
+            ['icono' => '🌀', 'texto' => 'Brazos giratorios'],
+            ['icono' => '🧗', 'texto' => 'Pared de escalar'],
+            ['icono' => '🪂', 'texto' => 'Tirolesa'],
+            ['icono' => '✨', 'texto' => 'Glitter y maquillaje neón'],
+            ['icono' => '🎉', 'texto' => 'Zona de fiestas'],
+        ];
+        foreach ($amenidades as $a): ?>
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="amenidad-card card-gsap">
+                <div class="icono"><?php echo $a['icono']; ?></div>
+                <p><?php echo $a['texto']; ?></p>
             </div>
         </div>
-    </div>
-
-    <div class="package-card card-gsap">
-        <div class="row g-0 align-items-center">
-            <div class="col-md-5 package-img" style="background-image:url('<?php echo URL_ROOT; ?>/img/HAPPY INICIO 1.webp');"></div>
-            <div class="col-md-7 package-body">
-                <h3 class="fuente_bouncy">¡Ven a vivir la experiencia Happy&Jumping!</h3>
-                <p>Disfruta de un día lleno de energía, saltos y diversión. Observa los detalles de tu entrada y siente la emoción de saltar en un ambiente seguro, lleno de color y buena vibra. ¡Perfecto para grandes y pequeños!</p>
-            </div>
-        </div>
+        <?php endforeach; ?>
     </div>
 </section>
 
