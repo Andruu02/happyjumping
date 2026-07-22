@@ -15,7 +15,7 @@
    AMENIDADES (debajo del hero: qué tiene el parque)
    ========================================= */
 .amenidades-section {
-    background: linear-gradient(180deg, #f6ecff 0%, #ffffff 65%);
+    background: linear-gradient(180deg, rgba(246,236,255,0.65) 0%, rgba(255,255,255,0.35) 65%);
 }
 .section-lead {
     text-align: center;
@@ -25,58 +25,29 @@
     font-size: 1.05rem;
 }
 
-/* Manchas de color difuminadas, de fondo, para que la sección no se vea
-   plana/vacía */
-.paint-blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(50px);
-    opacity: 0.35;
-    z-index: 0;
+/* Capa de destellos: FIJA respecto a la pantalla (no a cada sección), para
+   que se vea continua y nunca se corte al pasar de una sección a otra.
+   Las secciones usan fondos semitransparentes para que esta capa se note
+   detrás de ellas. */
+.fondo-destellos {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
     pointer-events: none;
 }
-.paint-blob.blob-1 {
-    top: -60px;
-    left: -80px;
-    width: 260px;
-    height: 260px;
-    background: var(--celeste);
+.destello {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.32;
 }
-.paint-blob.blob-2 {
-    bottom: -80px;
-    right: -60px;
-    width: 300px;
-    height: 300px;
-    background: var(--rosa);
-}
-.paint-blob.blob-3 {
-    top: 40px;
-    right: -70px;
-    width: 240px;
-    height: 240px;
-    background: var(--naranja);
-}
-.paint-blob.blob-4 {
-    bottom: -60px;
-    left: -70px;
-    width: 220px;
-    height: 220px;
-    background: var(--morado);
-}
-.paint-blob.blob-5 {
-    top: -50px;
-    right: -60px;
-    width: 250px;
-    height: 250px;
-    background: var(--verde);
-}
-.paint-blob.blob-6 {
-    bottom: 20px;
-    left: -80px;
-    width: 260px;
-    height: 260px;
-    background: var(--celeste);
-}
+.destello.d-1 { top: 4%;  left: 4%;   width: 260px; height: 260px; background: var(--celeste); }
+.destello.d-2 { top: 18%; right: 6%;  width: 230px; height: 230px; background: var(--rosa); }
+.destello.d-3 { top: 46%; left: 8%;   width: 250px; height: 250px; background: var(--naranja); }
+.destello.d-4 { top: 58%; right: 8%;  width: 270px; height: 270px; background: var(--morado); }
+.destello.d-5 { top: 82%; left: 10%;  width: 240px; height: 240px; background: var(--verde); }
+.destello.d-6 { top: 88%; right: 14%; width: 230px; height: 230px; background: var(--celeste); }
 
 .amenidad-card {
     position: relative;
@@ -205,7 +176,7 @@
 }
 
 .entradas-section {
-    background: linear-gradient(180deg, #ffffff 0%, #fff3e6 50%, #ffffff 100%);
+    background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,243,230,0.65) 50%, rgba(255,255,255,0.3) 100%);
 }
 
 /* =========================================
@@ -232,7 +203,7 @@
 }
 
 .cumpleanos-section {
-    background: linear-gradient(180deg, #ffffff 0%, #f6f1ff 55%, #ffffff 100%);
+    background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(246,241,255,0.65) 55%, rgba(255,255,255,0.3) 100%);
 }
 
 /* =========================================
@@ -338,7 +309,7 @@
 }
 
 .conocenos-section {
-    background: linear-gradient(180deg, #ffffff 0%, #eafaff 50%, #ffffff 100%);
+    background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(234,250,255,0.65) 50%, rgba(255,255,255,0.3) 100%);
 }
 
 /* =========================================
@@ -410,7 +381,7 @@
     .map-container h2 { font-size: 1.6rem; }
     .mision-card { padding: 26px 22px; }
 
-    .paint-blob { display: none; }
+    .fondo-destellos { display: none; }
     .section-lead { margin-top: -20px; padding: 0 10px; }
     .amenidad-card { padding: 26px 12px 20px; }
     .amenidad-card .icono { width: 60px; height: 60px; font-size: 1.6rem; }

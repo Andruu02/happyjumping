@@ -7,6 +7,17 @@ require_once APP_ROOT . '/views/includes/header.php';
 ?>
 <link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/inicio.css">
 
+<!-- Capa de destellos de color: fija detrás de TODO el contenido, para que
+     no se corte al pasar de una sección a otra (ver inicio.css). -->
+<div class="fondo-destellos" aria-hidden="true">
+    <span class="destello d-1"></span>
+    <span class="destello d-2"></span>
+    <span class="destello d-3"></span>
+    <span class="destello d-4"></span>
+    <span class="destello d-5"></span>
+    <span class="destello d-6"></span>
+</div>
+
 <section class="hero">
     <div class="hero-content">
         <h1 class="fuente_bouncy">¡Salta hacia la diversión!</h1>
@@ -16,8 +27,6 @@ require_once APP_ROOT . '/views/includes/header.php';
 </section>
 
 <section class="amenidades-section position-relative py-5">
-    <div class="paint-blob blob-1"></div>
-    <div class="paint-blob blob-2"></div>
     <div class="container position-relative">
         <h2 class="section-title">¿Qué encontrarás en Happy&amp;Jumping?</h2>
         <p class="section-lead">Todo lo que necesitas para pasarla en grande, en un solo lugar.</p>
@@ -67,8 +76,6 @@ require_once APP_ROOT . '/views/includes/header.php';
      ENTRADAS Y PROMOCIONES (antes /paquetes/entradas)
      ============================================================ -->
 <section id="entradas" class="entradas-section position-relative py-5">
-    <div class="paint-blob blob-3"></div>
-    <div class="paint-blob blob-4"></div>
     <div class="container position-relative">
         <h2 class="section-title">Entradas y Promociones</h2>
         <p class="section-lead">Precios claros y promociones vigentes, siempre a la mano.</p>
@@ -199,8 +206,6 @@ require_once APP_ROOT . '/views/includes/header.php';
      CONÓCENOS (antes /inicio/conocenos)
      ============================================================ -->
 <section id="conocenos" class="conocenos-section position-relative py-5">
-    <div class="paint-blob blob-5"></div>
-    <div class="paint-blob blob-6"></div>
     <div class="container position-relative">
     <h2 class="section-title">Conócenos</h2>
     <p class="section-lead">La esencia detrás de cada salto, cada risa y cada celebración.</p>

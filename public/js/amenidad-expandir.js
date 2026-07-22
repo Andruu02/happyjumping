@@ -48,8 +48,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const margen = 16;
         const espacioDisponible = window.innerHeight - alturaNav - margen * 2;
 
-        const anchoObjetivo = Math.min(window.innerWidth * 0.92, 480);
-        const altoObjetivo  = Math.min(espacioDisponible, 620);
+        const anchoObjetivo = Math.min(window.innerWidth * 0.85, 380);
+        const altoObjetivo  = Math.min(espacioDisponible * 0.9, 460);
 
         gsap.to(expandida, {
             top: alturaNav + margen + Math.max(0, (espacioDisponible - altoObjetivo) / 2),
