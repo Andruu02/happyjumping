@@ -97,6 +97,8 @@ require_once APP_ROOT . '/views/includes/header.php';
     </div>
 </div>
 
+<div class="divisor-ondas c1" aria-hidden="true"></div>
+
 <!-- ============================================================
      ENTRADAS Y PROMOCIONES (antes /paquetes/entradas)
      ============================================================ -->
@@ -120,6 +122,8 @@ require_once APP_ROOT . '/views/includes/header.php';
         </div>
     </div>
 </section>
+
+<div class="divisor-ondas c2" aria-hidden="true"></div>
 
 <!-- ============================================================
      CÓMO FUNCIONA (nuestro flujo real de reserva)
@@ -154,6 +158,8 @@ require_once APP_ROOT . '/views/includes/header.php';
         </div>
     </div>
 </section>
+
+<div class="divisor-ondas c3" aria-hidden="true"></div>
 
 <!-- ============================================================
      PAQUETES DE CUMPLEAÑOS (antes /paquetes/cumpleanos)
@@ -264,6 +270,8 @@ require_once APP_ROOT . '/views/includes/header.php';
     </div>
 </section>
 
+<div class="divisor-ondas c4" aria-hidden="true"></div>
+
 <!-- ============================================================
      BANDA CTA
      ============================================================ -->
@@ -281,6 +289,8 @@ require_once APP_ROOT . '/views/includes/header.php';
         </div>
     </div>
 </section>
+
+<div class="divisor-ondas c5" aria-hidden="true"></div>
 
 <!-- ============================================================
      CONÓCENOS (antes /inicio/conocenos)
