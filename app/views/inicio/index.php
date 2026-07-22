@@ -26,6 +26,8 @@ require_once APP_ROOT . '/views/includes/header.php';
     </div>
 </section>
 
+<div class="transicion transicion-hero" aria-hidden="true"><span class="transicion-brillo"></span></div>
+
 <section class="amenidades-section position-relative py-5">
     <div class="container position-relative">
         <h2 class="section-title">¿Qué encontrarás en Happy&amp;Jumping?</h2>
@@ -80,6 +82,8 @@ require_once APP_ROOT . '/views/includes/header.php';
     </div>
 </div>
 
+<div class="transicion transicion-1" aria-hidden="true"><span class="transicion-brillo"></span></div>
+
 <!-- ============================================================
      ENTRADAS Y PROMOCIONES (antes /paquetes/entradas)
      ============================================================ -->
@@ -101,6 +105,8 @@ require_once APP_ROOT . '/views/includes/header.php';
         </div>
     </div>
 </section>
+
+<div class="transicion transicion-2" aria-hidden="true"><span class="transicion-brillo"></span></div>
 
 <!-- ============================================================
      PAQUETES DE CUMPLEAÑOS (antes /paquetes/cumpleanos)
@@ -209,6 +215,8 @@ require_once APP_ROOT . '/views/includes/header.php';
     </div>
     </div>
 </section>
+
+<div class="transicion transicion-3" aria-hidden="true"><span class="transicion-brillo"></span></div>
 
 <!-- ============================================================
      CONÓCENOS (antes /inicio/conocenos)

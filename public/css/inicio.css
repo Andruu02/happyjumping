@@ -12,6 +12,42 @@
 }
 
 /* =========================================
+   TRANSICIONES ENTRE SECCIONES
+   =========================================
+   Franja difuminada (degradado del color de una sección al de la
+   siguiente) que se monta sobre ambas con márgenes negativos, más un
+   brillo animado flotando encima, para que el cambio de color se note
+   como algo vivo y no como una simple línea de corte. */
+.transicion {
+    position: relative;
+    height: 130px;
+    margin: -65px 0;
+    z-index: 2;
+    overflow: hidden;
+    pointer-events: none;
+}
+.transicion-hero { background: linear-gradient(180deg, rgba(20,10,35,0.35) 0%, #f3e9ff 100%); }
+.transicion-1    { background: linear-gradient(180deg, #f3e9ff 0%, #fff0e0 100%); }
+.transicion-2    { background: linear-gradient(180deg, #fff0e0 0%, #ffebf4 100%); }
+.transicion-3    { background: linear-gradient(180deg, #ffebf4 0%, #e3f7ff 100%); }
+
+.transicion-brillo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 360px;
+    height: 220px;
+    background: radial-gradient(circle, rgba(255,255,255,0.9), transparent 70%);
+    filter: blur(35px);
+    transform: translate(-50%, -50%);
+    animation: flotarTransicion 7s ease-in-out infinite;
+}
+@keyframes flotarTransicion {
+    0%, 100% { transform: translate(-58%, -50%) scale(1);    opacity: 0.55; }
+    50%      { transform: translate(-42%, -50%) scale(1.25); opacity: 0.9;  }
+}
+
+/* =========================================
    AMENIDADES (debajo del hero: qué tiene el parque)
    ========================================= */
 .amenidades-section {
@@ -398,4 +434,7 @@
     .amenidad-card .icono { width: 60px; height: 60px; font-size: 1.6rem; }
     .amenidad-card .amenidad-titulo { font-size: 0.95rem; }
     .amenidad-card .amenidad-desc { font-size: 0.82rem; }
+
+    .transicion { height: 80px; margin: -40px 0; }
+    .transicion-brillo { width: 220px; height: 140px; filter: blur(22px); }
 }
