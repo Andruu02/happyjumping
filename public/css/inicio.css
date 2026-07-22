@@ -48,7 +48,7 @@
     color:#fff !important;
     text-shadow: 0 2px 14px rgba(20,10,45,.35);
 }
-.section-lead{ color:rgba(255,255,255,.92); font-size:17px; max-width:560px; text-shadow: 0 1px 8px rgba(20,10,45,.25); }
+.section-lead{ color:rgba(255,255,255,.92); font-size:19px; max-width:560px; text-shadow: 0 1px 8px rgba(20,10,45,.25); }
 
 /* Botones (banda CTA) */
 .btn-neon{

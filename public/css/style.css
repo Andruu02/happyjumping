@@ -147,7 +147,7 @@ body {
     font-family: 'Bouncy', cursive;
     text-align: center;
     font-weight: normal;
-    font-size: 2rem;
+    font-size: 2.5rem;
     margin-top: 0;
     margin-bottom: 40px;
     color: var(--morado);
@@ -280,7 +280,7 @@ footer a:hover i {
     .paint { display: none; }
 
     /* SECCION TITLE */
-    .section-title { font-size: 1.3rem; margin-top: 40px; }
+    .section-title { font-size: 1.7rem; margin-top: 40px; }
 }
 
 /* TABLET (769px - 1024px) */
