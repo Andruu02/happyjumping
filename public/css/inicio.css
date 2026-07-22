@@ -12,47 +12,32 @@
 }
 
 /* =========================================
-   TRANSICIONES ENTRE SECCIONES
+   UNA SOLA CAPA DE COLOR DE FONDO
    =========================================
-   Franja difuminada (degradado del color de una sección al de la
-   siguiente) que se monta sobre ambas con márgenes negativos, más un
-   brillo animado flotando encima, para que el cambio de color se note
-   como algo vivo y no como una simple línea de corte. */
-.transicion {
+   En vez de colorear cada sección por separado (lo que se notaba como
+   bloques cortados), hay UNA capa detrás de TODA la página con un único
+   degradado continuo. Las secciones van transparentes, así el color de
+   fondo se ve siempre continuo, sin costuras. */
+.inicio-fondo-wrapper {
     position: relative;
-    height: 130px;
-    margin: -65px 0;
-    z-index: 2;
-    overflow: hidden;
-    pointer-events: none;
 }
-.transicion-hero { background: linear-gradient(180deg, rgba(20,10,35,0.35) 0%, #f3e9ff 100%); }
-.transicion-1    { background: linear-gradient(180deg, #f3e9ff 0%, #fff0e0 100%); }
-.transicion-2    { background: linear-gradient(180deg, #fff0e0 0%, #ffebf4 100%); }
-.transicion-3    { background: linear-gradient(180deg, #ffebf4 0%, #e3f7ff 100%); }
-
-.transicion-brillo {
+.capa-color-fondo {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 360px;
-    height: 220px;
-    background: radial-gradient(circle, rgba(255,255,255,0.9), transparent 70%);
-    filter: blur(35px);
-    transform: translate(-50%, -50%);
-    animation: flotarTransicion 7s ease-in-out infinite;
-}
-@keyframes flotarTransicion {
-    0%, 100% { transform: translate(-58%, -50%) scale(1);    opacity: 0.55; }
-    50%      { transform: translate(-42%, -50%) scale(1.25); opacity: 0.9;  }
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+        180deg,
+        #d9bdfc 0%,
+        #ffd9a8 25%,
+        #ffb8d6 50%,
+        #9fe6ff 75%,
+        #b9c8ff 100%
+    );
 }
 
 /* =========================================
    AMENIDADES (debajo del hero: qué tiene el parque)
    ========================================= */
-.amenidades-section {
-    background: rgba(243, 233, 255, 0.92);
-}
 .section-lead {
     text-align: center;
     max-width: 560px;
@@ -60,30 +45,6 @@
     color: #6b6b7a;
     font-size: 1.05rem;
 }
-
-/* Capa de destellos: FIJA respecto a la pantalla (no a cada sección), para
-   que se vea continua y nunca se corte al pasar de una sección a otra.
-   Las secciones usan fondos semitransparentes para que esta capa se note
-   detrás de ellas. */
-.fondo-destellos {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    overflow: hidden;
-    pointer-events: none;
-}
-.destello {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(60px);
-    opacity: 0.32;
-}
-.destello.d-1 { top: 4%;  left: 4%;   width: 260px; height: 260px; background: var(--celeste); }
-.destello.d-2 { top: 18%; right: 6%;  width: 230px; height: 230px; background: var(--rosa); }
-.destello.d-3 { top: 46%; left: 8%;   width: 250px; height: 250px; background: var(--naranja); }
-.destello.d-4 { top: 58%; right: 8%;  width: 270px; height: 270px; background: var(--morado); }
-.destello.d-5 { top: 82%; left: 10%;  width: 240px; height: 240px; background: var(--verde); }
-.destello.d-6 { top: 88%; right: 14%; width: 230px; height: 230px; background: var(--celeste); }
 
 .amenidad-card {
     position: relative;
@@ -222,9 +183,6 @@
     display: flex;
 }
 
-.entradas-section {
-    background: rgba(255, 240, 224, 0.92);
-}
 
 /* =========================================
    ENTRADAS (tarjetas grandes de precios/promos)
@@ -249,9 +207,6 @@
     aspect-ratio: 3 / 4;
 }
 
-.cumpleanos-section {
-    background: rgba(255, 235, 244, 0.92);
-}
 
 /* =========================================
    CUMPLEAÑOS (tarjetas de paquetes)
@@ -355,9 +310,6 @@
     font-size: 0.95rem;
 }
 
-.conocenos-section {
-    background: rgba(227, 247, 255, 0.92);
-}
 
 /* =========================================
    CONÓCENOS (misión / visión + mapa)
@@ -428,13 +380,9 @@
     .map-container h2 { font-size: 1.6rem; }
     .mision-card { padding: 26px 22px; }
 
-    .fondo-destellos { display: none; }
     .section-lead { margin-top: -20px; padding: 0 10px; }
     .amenidad-card { padding: 26px 12px 20px; }
     .amenidad-card .icono { width: 60px; height: 60px; font-size: 1.6rem; }
     .amenidad-card .amenidad-titulo { font-size: 0.95rem; }
     .amenidad-card .amenidad-desc { font-size: 0.82rem; }
-
-    .transicion { height: 80px; margin: -40px 0; }
-    .transicion-brillo { width: 220px; height: 140px; filter: blur(22px); }
 }

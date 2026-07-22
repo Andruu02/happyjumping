@@ -7,16 +7,11 @@ require_once APP_ROOT . '/views/includes/header.php';
 ?>
 <link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/inicio.css">
 
-<!-- Capa de destellos de color: fija detrás de TODO el contenido, para que
-     no se corte al pasar de una sección a otra (ver inicio.css). -->
-<div class="fondo-destellos" aria-hidden="true">
-    <span class="destello d-1"></span>
-    <span class="destello d-2"></span>
-    <span class="destello d-3"></span>
-    <span class="destello d-4"></span>
-    <span class="destello d-5"></span>
-    <span class="destello d-6"></span>
-</div>
+<!-- Envoltura de toda la página de inicio: contiene UNA sola capa de color
+     de fondo (detrás de todas las secciones, que ahora van transparentes),
+     para que el color sea continuo de arriba a abajo sin cortes. -->
+<div class="inicio-fondo-wrapper">
+    <div class="capa-color-fondo" aria-hidden="true"></div>
 
 <section class="hero">
     <div class="hero-content">
@@ -25,8 +20,6 @@ require_once APP_ROOT . '/views/includes/header.php';
         <a href="<?php echo URL_ROOT; ?>/reservas/paso1" class="hero-cta">🎉 ¡Reserva tu diversión!</a>
     </div>
 </section>
-
-<div class="transicion transicion-hero" aria-hidden="true"><span class="transicion-brillo"></span></div>
 
 <section class="amenidades-section position-relative py-5">
     <div class="container position-relative">
@@ -82,8 +75,6 @@ require_once APP_ROOT . '/views/includes/header.php';
     </div>
 </div>
 
-<div class="transicion transicion-1" aria-hidden="true"><span class="transicion-brillo"></span></div>
-
 <!-- ============================================================
      ENTRADAS Y PROMOCIONES (antes /paquetes/entradas)
      ============================================================ -->
@@ -105,8 +96,6 @@ require_once APP_ROOT . '/views/includes/header.php';
         </div>
     </div>
 </section>
-
-<div class="transicion transicion-2" aria-hidden="true"><span class="transicion-brillo"></span></div>
 
 <!-- ============================================================
      PAQUETES DE CUMPLEAÑOS (antes /paquetes/cumpleanos)
@@ -216,8 +205,6 @@ require_once APP_ROOT . '/views/includes/header.php';
     </div>
 </section>
 
-<div class="transicion transicion-3" aria-hidden="true"><span class="transicion-brillo"></span></div>
-
 <!-- ============================================================
      CONÓCENOS (antes /inicio/conocenos)
      ============================================================ -->
@@ -258,6 +245,8 @@ require_once APP_ROOT . '/views/includes/header.php';
     </div>
     </div>
 </section>
+
+</div><!-- /.inicio-fondo-wrapper -->
 
 <?php
 // Carga el footer
