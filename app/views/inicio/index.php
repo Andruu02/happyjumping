@@ -1,34 +1,24 @@
 <?php
 
-// VISTA DE INICIO (PÁGINA PRINCIPAL) — tema oscuro/neón.
+// VISTA DE INICIO (PÁGINA PRINCIPAL)
 // Incluye, en una sola página con scroll, el contenido de Entradas,
 // Cumpleaños y Conócenos (antes rutas separadas).
 require_once APP_ROOT . '/views/includes/header.php';
 ?>
 
 <section class="hero">
-    <div class="hero-photo"></div>
-    <div class="mesh-bg"></div>
-    <div class="glow glow-pink"></div>
-    <div class="glow glow-teal"></div>
-    <div class="wrap hero-grid">
-        <span class="eyebrow"><span class="dot"></span> Parque de trampolines</span>
-        <h1>
-            <span class="l1">¡Salta hacia</span>
-            <span class="l2">la diversión!</span>
-        </h1>
-        <p class="lead">Descubre la emoción sin límites en Happy&amp;Jumping, el lugar donde la alegría nunca se detiene.</p>
-        <div class="hero-ctas">
-            <a href="<?php echo URL_ROOT; ?>/reservas/paso1" class="btn-neon btn-neon-primary">🎉 Reserva tu fiesta</a>
-            <a href="#cumpleanos" class="btn-neon btn-neon-ghost">Ver paquetes →</a>
-        </div>
-        <div class="hero-stats">
-            <div class="stat"><b>4</b><span>paquetes de fiesta</span></div>
-            <div class="stat"><b>6</b><span>experiencias distintas</span></div>
-            <div class="stat"><b>100%</b><span>diversión asegurada</span></div>
-        </div>
+    <div class="hero-content">
+        <h1 class="fuente_bouncy">¡Salta hacia la diversión!</h1>
+        <p>Descubre la emoción sin límites en Happy&amp;Jumping, el lugar donde la alegría nunca se detiene.</p>
+        <a href="<?php echo URL_ROOT; ?>/reservas/paso1" class="hero-cta">🎉 ¡Reserva tu diversión!</a>
     </div>
 </section>
+
+<!-- Envoltura de toda la página de inicio: UNA sola capa de color de fondo
+     continua (detrás de todas las secciones, que van transparentes), para
+     que se vea variada pero sin cortes ni monotonía. -->
+<div class="inicio-fondo-wrapper">
+    <div class="capa-color-fondo" aria-hidden="true"></div>
 
 <!-- MARQUEE -->
 <div class="marquee">
@@ -245,7 +235,7 @@ require_once APP_ROOT . '/views/includes/header.php';
                     <span class="separador">•</span>
                     <span>S/<?php echo number_format($paquete->precio_fin_semana, 2); ?> Sábado y Domingo</span>
                 </div>
-                <div class="text-muted small mb-2" style="color:var(--ink-muted) !important;">Precio por persona</div>
+                <div class="text-muted small mb-2">Precio por persona</div>
 
                 <a href="<?php echo URL_ROOT; ?>/reservas/paso1?paquete=<?php echo $paquete->id_paquete; ?>">
                     <button class="btn-contratar mt-2">Reservar Paquete</button>
@@ -355,6 +345,8 @@ require_once APP_ROOT . '/views/includes/header.php';
     </div>
     </div>
 </section>
+
+</div><!-- /.inicio-fondo-wrapper -->
 
 <?php
 // Carga el footer
