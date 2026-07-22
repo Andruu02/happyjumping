@@ -109,6 +109,7 @@ body {
     -webkit-text-stroke: 8px #fff;
     paint-order: stroke fill;
     margin: 0 3px;
+    text-shadow: none;
 }
 .titulo-arcoiris .letra-arcoiris.color-1 { color: var(--rosa); }
 .titulo-arcoiris .letra-arcoiris.color-2 { color: var(--celeste); }
