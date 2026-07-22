@@ -15,28 +15,32 @@ require_once APP_ROOT . '/views/includes/header.php';
     </div>
 </section>
 
-<section class="container position-relative py-5">
-    <h2 class="section-title">¿Qué encontrarás en Happy&amp;Jumping?</h2>
-    <div class="row g-4 justify-content-center">
-        <?php
-        $amenidades = [
-            ['icono' => '🤸‍♀️', 'texto' => 'Anfitrionas'],
-            ['icono' => '🤾', 'texto' => 'Trampolines'],
-            ['icono' => '🍧', 'texto' => 'Helados y granizados'],
-            ['icono' => '🌀', 'texto' => 'Brazos giratorios'],
-            ['icono' => '🧗', 'texto' => 'Pared de escalar'],
-            ['icono' => '🪂', 'texto' => 'Tirolesa'],
-            ['icono' => '✨', 'texto' => 'Glitter y maquillaje neón'],
-            ['icono' => '🎉', 'texto' => 'Zona de fiestas'],
-        ];
-        foreach ($amenidades as $a): ?>
-        <div class="col-6 col-md-4 col-lg-3">
-            <div class="amenidad-card card-gsap">
-                <div class="icono"><?php echo $a['icono']; ?></div>
-                <p><?php echo $a['texto']; ?></p>
+<section class="amenidades-section position-relative py-5">
+    <div class="paint-blob blob-1"></div>
+    <div class="paint-blob blob-2"></div>
+    <div class="container position-relative">
+        <h2 class="section-title">¿Qué encontrarás en Happy&amp;Jumping?</h2>
+        <p class="section-lead">Todo lo que necesitas para pasarla en grande, en un solo lugar.</p>
+        <div class="row g-4 justify-content-center">
+            <?php
+            $amenidades = [
+                ['icono' => '🤸‍♀️', 'texto' => 'Anfitrionas',              'desc' => 'Dinámicas y juegos para toda la fiesta.'],
+                ['icono' => '🤾', 'texto' => 'Trampolines',                'desc' => 'Diversión y salto sin límites.'],
+                ['icono' => '🍧', 'texto' => 'Helados y granizados',       'desc' => 'Para refrescarte entre salto y salto.'],
+                ['icono' => '🌀', 'texto' => 'Brazos giratorios',          'desc' => 'Adrenalina en cada vuelta.'],
+                ['icono' => '✨', 'texto' => 'Glitter y maquillaje neón',   'desc' => 'Brilla en cada celebración.'],
+                ['icono' => '🎉', 'texto' => 'Zona de fiestas',            'desc' => 'Espacios decorados para tu evento.'],
+            ];
+            foreach ($amenidades as $i => $a): ?>
+            <div class="col-6 col-md-4">
+                <div class="amenidad-card card-gsap">
+                    <div class="icono color-<?php echo ($i % 6) + 1; ?>"><span><?php echo $a['icono']; ?></span></div>
+                    <p class="amenidad-titulo"><?php echo $a['texto']; ?></p>
+                    <p class="amenidad-desc"><?php echo $a['desc']; ?></p>
+                </div>
             </div>
+            <?php endforeach; ?>
         </div>
-        <?php endforeach; ?>
     </div>
 </section>
 
