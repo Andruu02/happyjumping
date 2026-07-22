@@ -107,7 +107,7 @@ body {
    Se usa en los títulos de sección debajo del header. */
 .titulo-arcoiris .letra-arcoiris {
     paint-order: stroke fill;
-    color: #fff;
+    color: #000;
     text-shadow: 2px 2px 4px rgba(0,0,0,.35);
 }
 .hero p {

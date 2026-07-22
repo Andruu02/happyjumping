@@ -353,7 +353,7 @@ function pintarLetrasArcoiris(string $texto): string {
     </div>
 
     <div class="map-container">
-        <h2 class="fuente_bouncy">¡Ubícanos!</h2>
+        <h2 class="section-title fuente_bouncy titulo-arcoiris"><?php echo pintarLetrasArcoiris('¡Ubícanos!'); ?></h2>
         <iframe
           src="https://www.google.com/maps?q=-6.5058575638378375, -76.35724119120785&z=15&output=embed">
         </iframe>
