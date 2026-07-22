@@ -15,7 +15,7 @@
    AMENIDADES (debajo del hero: qué tiene el parque)
    ========================================= */
 .amenidades-section {
-    background: linear-gradient(180deg, rgba(246,236,255,0.65) 0%, rgba(255,255,255,0.35) 65%);
+    background: rgba(243, 233, 255, 0.92);
 }
 .section-lead {
     text-align: center;
@@ -128,9 +128,20 @@
     flex: 1 1 55%;
     min-height: 0;
     background: #f3e9ff;
+    overflow: hidden;
+    position: relative;
 }
-.amenidad-expandida-img img {
-    width: 100%;
+/* Slider infinito (GSAP) dentro de la tarjeta expandida: una fila de
+   imágenes duplicada que se desliza sin parar (ver amenidad-expandir.js). */
+.amenidad-slider-track {
+    display: flex;
+    height: 100%;
+    width: max-content;
+}
+.amenidad-slider-track img {
+    /* El ancho exacto lo fija amenidad-expandir.js (igual al ancho de la
+       tarjeta expandida), para que el loop del slider calce siempre. */
+    flex: 0 0 auto;
     height: 100%;
     object-fit: cover;
     display: block;
@@ -176,7 +187,7 @@
 }
 
 .entradas-section {
-    background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,243,230,0.65) 50%, rgba(255,255,255,0.3) 100%);
+    background: rgba(255, 240, 224, 0.92);
 }
 
 /* =========================================
@@ -203,7 +214,7 @@
 }
 
 .cumpleanos-section {
-    background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(246,241,255,0.65) 55%, rgba(255,255,255,0.3) 100%);
+    background: rgba(255, 235, 244, 0.92);
 }
 
 /* =========================================
@@ -309,7 +320,7 @@
 }
 
 .conocenos-section {
-    background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(234,250,255,0.65) 50%, rgba(255,255,255,0.3) 100%);
+    background: rgba(227, 247, 255, 0.92);
 }
 
 /* =========================================

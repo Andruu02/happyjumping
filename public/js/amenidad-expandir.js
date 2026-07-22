@@ -7,25 +7,50 @@
 document.addEventListener('DOMContentLoaded', function () {
     if (typeof gsap === 'undefined') return;
 
-    const backdrop   = document.getElementById('amenidad-backdrop');
-    const expandida  = document.getElementById('amenidad-expandida');
-    const btnCerrar  = document.getElementById('amenidad-cerrar');
-    const imgEl      = document.getElementById('amenidad-expandida-img-el');
-    const tituloEl   = document.getElementById('amenidad-expandida-titulo');
-    const descEl     = document.getElementById('amenidad-expandida-desc');
-    const tarjetas   = document.querySelectorAll('.amenidad-card');
+    const backdrop     = document.getElementById('amenidad-backdrop');
+    const expandida    = document.getElementById('amenidad-expandida');
+    const btnCerrar    = document.getElementById('amenidad-cerrar');
+    const sliderTrack  = document.getElementById('amenidad-slider-track');
+    const tituloEl     = document.getElementById('amenidad-expandida-titulo');
+    const descEl       = document.getElementById('amenidad-expandida-desc');
+    const tarjetas     = document.querySelectorAll('.amenidad-card');
 
     if (!backdrop || !expandida || tarjetas.length === 0) return;
 
-    let origen = null; // rect de la tarjeta que abrió el modal
+    let origen = null;      // rect de la tarjeta que abrió el modal
+    let sliderTween = null; // tween del slider infinito en curso
+
+    // Slider infinito (GSAP): arma la pista con las imágenes duplicadas una
+    // vez y la desliza -50% en loop; como la segunda mitad es idéntica a la
+    // primera, el ciclo se ve continuo, sin salto. Cada imagen se ancha al
+    // mismo ancho que va a tener la tarjeta expandida.
+    function armarSlider(urls, anchoImg) {
+        if (sliderTween) { sliderTween.kill(); sliderTween = null; }
+        gsap.set(sliderTrack, { xPercent: 0 });
+        sliderTrack.innerHTML = '';
+
+        const todas = urls.concat(urls);
+        todas.forEach(function (url) {
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = tituloEl.textContent;
+            img.style.width = anchoImg + 'px';
+            sliderTrack.appendChild(img);
+        });
+
+        sliderTween = gsap.to(sliderTrack, {
+            xPercent: -50,
+            duration: urls.length * 3.5,
+            ease: 'none',
+            repeat: -1,
+        });
+    }
 
     function abrir(tarjeta) {
         origen = tarjeta.getBoundingClientRect();
 
         tituloEl.textContent = tarjeta.dataset.titulo || '';
         descEl.textContent   = tarjeta.dataset.desc || '';
-        imgEl.src = tarjeta.dataset.img || '';
-        imgEl.alt = tarjeta.dataset.titulo || '';
 
         // Punto de partida: exactamente el tamaño/posición de la tarjeta.
         gsap.set(expandida, {
@@ -51,6 +76,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const anchoObjetivo = Math.min(window.innerWidth * 0.85, 380);
         const altoObjetivo  = Math.min(espacioDisponible * 0.9, 460);
 
+        let urls = [];
+        try { urls = JSON.parse(tarjeta.dataset.imgs || '[]'); } catch (e) { urls = []; }
+        if (urls.length) armarSlider(urls, anchoObjetivo);
+
         gsap.to(expandida, {
             top: alturaNav + margen + Math.max(0, (espacioDisponible - altoObjetivo) / 2),
             left: (window.innerWidth - anchoObjetivo) / 2,
@@ -68,6 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function cerrar() {
         if (!origen) return;
         expandida.classList.remove('expandida');
+        if (sliderTween) sliderTween.pause();
 
         gsap.to(expandida, {
             top: origen.top,
