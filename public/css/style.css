@@ -104,7 +104,11 @@ body {
 }
 
 /* Título estilo "arcoíris", letra por letra, igual que el logo.
-   Solo se usa en el título justo debajo del header (hero). */
+   Se usa en los títulos de sección debajo del header. */
+.titulo-arcoiris .letra-arcoiris {
+    -webkit-text-stroke: 1.5px #fff;
+    paint-order: stroke fill;
+}
 .titulo-arcoiris .letra-arcoiris.color-1 { color: var(--rosa); }
 .titulo-arcoiris .letra-arcoiris.color-2 { color: var(--celeste); }
 .titulo-arcoiris .letra-arcoiris.color-3 { color: var(--amarillo); }
