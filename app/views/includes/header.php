@@ -34,7 +34,7 @@ require_once APP_ROOT . '/config/vapid.php';
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo URL_ROOT; ?>/">Inicio</a>
+                    <a class="nav-link" id="nav-inicio" href="<?php echo URL_ROOT; ?>/">Inicio</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="<?php echo URL_ROOT; ?>/#entradas">Entradas</a>
