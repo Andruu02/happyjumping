@@ -15,7 +15,6 @@
    AMENIDADES (debajo del hero: qué tiene el parque)
    ========================================= */
 .amenidades-section {
-    overflow: hidden;
     background: linear-gradient(180deg, #f6ecff 0%, #ffffff 65%);
 }
 .section-lead {
@@ -138,7 +137,7 @@
     inset: 0;
     background: rgba(20, 10, 40, 0.55);
     opacity: 0;
-    z-index: 1000;
+    z-index: 1040; /* por encima del navbar fixed-top de Bootstrap (1030) */
     backdrop-filter: blur(2px);
 }
 .amenidad-backdrop.activo {
@@ -149,7 +148,7 @@
     background: #fff;
     overflow: hidden;
     box-shadow: 0 30px 70px rgba(0,0,0,0.35);
-    z-index: 1001;
+    z-index: 1041;
     display: flex;
     flex-direction: column;
 }
@@ -206,7 +205,6 @@
 }
 
 .entradas-section {
-    overflow: hidden;
     background: linear-gradient(180deg, #ffffff 0%, #fff3e6 50%, #ffffff 100%);
 }
 
@@ -340,7 +338,6 @@
 }
 
 .conocenos-section {
-    overflow: hidden;
     background: linear-gradient(180deg, #ffffff 0%, #eafaff 50%, #ffffff 100%);
 }
 

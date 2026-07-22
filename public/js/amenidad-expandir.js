@@ -41,11 +41,18 @@ document.addEventListener('DOMContentLoaded', function () {
         backdrop.classList.add('activo');
         gsap.to(backdrop, { opacity: 1, duration: 0.25, ease: 'power1.out' });
 
-        const anchoObjetivo  = Math.min(window.innerWidth * 0.92, 480);
-        const altoObjetivo   = Math.min(window.innerHeight * 0.85, 620);
+        // El navbar es fixed-top: el modal debe centrarse en el espacio
+        // visible que queda DEBAJO de él, no en el viewport completo.
+        const barraNav = document.querySelector('.navbar');
+        const alturaNav = barraNav ? barraNav.getBoundingClientRect().height : 0;
+        const margen = 16;
+        const espacioDisponible = window.innerHeight - alturaNav - margen * 2;
+
+        const anchoObjetivo = Math.min(window.innerWidth * 0.92, 480);
+        const altoObjetivo  = Math.min(espacioDisponible, 620);
 
         gsap.to(expandida, {
-            top: (window.innerHeight - altoObjetivo) / 2,
+            top: alturaNav + margen + Math.max(0, (espacioDisponible - altoObjetivo) / 2),
             left: (window.innerWidth - anchoObjetivo) / 2,
             width: anchoObjetivo,
             height: altoObjetivo,
