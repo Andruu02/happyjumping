@@ -174,7 +174,7 @@
 
 /* ---------- Entradas (flier de precios/promos) ---------- */
 .flier{
-    max-width:480px;
+    max-width:680px;
     margin:0 auto;
     border-radius:22px;
     overflow:hidden;
@@ -304,7 +304,7 @@
 @media (max-width: 768px){
     .section{ padding:60px 0; }
     .flier{ max-width:320px; }
-    .package-img{ height:200px; }
+    .package-img{ height:500px; }
     .package-body{ padding:18px; }
     .package-body h3{ font-size:1.3rem; }
     .map-container iframe{ height:240px; }
