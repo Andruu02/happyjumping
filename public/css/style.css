@@ -8,7 +8,7 @@
  */
 
 body {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Nunito', sans-serif;
     background-color: #fff;
     color: #333;
     overflow-x: hidden;
@@ -25,11 +25,11 @@ body {
     --morado: #7b2ff7;
 }
 
-/* FUENTE DE TÍTULOS: Fredoka (redondeada y juguetona, acorde a un parque
-   de trampolines), cargada desde Google Fonts en el <head>. */
+/* FUENTE DE TÍTULOS: Baloo 2 (redondeada, juguetona pero con más carácter
+   y peso visual que Fredoka), cargada desde Google Fonts en el <head>. */
 .fuente_bouncy {
-    font-family: 'Fredoka', sans-serif;
-    font-weight: 600;
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 700;
 }
 
 
@@ -129,7 +129,7 @@ body {
 }
 
 .section-title {
-    font-family: 'Fredoka', sans-serif;
+    font-family: 'Baloo 2', sans-serif;
     text-align: center;
     font-weight: 600;
     margin-top: 20px;
