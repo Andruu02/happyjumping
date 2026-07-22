@@ -4,24 +4,6 @@
 // Incluye, en una sola página con scroll, el contenido de Entradas,
 // Cumpleaños y Conócenos (antes rutas separadas).
 require_once APP_ROOT . '/views/includes/header.php';
-
-// Pinta cada letra de un texto con un color del arcoíris de la marca,
-// igual que el logo (rotando entre los 6 colores de style.css). Los
-// espacios se dejan tal cual, sin envolver ni contar para la rotación.
-function pintarLetrasArcoiris(string $texto): string {
-    $colores = ['color-1', 'color-2', 'color-3', 'color-4', 'color-5', 'color-6'];
-    $i = 0;
-    $html = '';
-    foreach (mb_str_split($texto) as $letra) {
-        if (trim($letra) === '') {
-            $html .= $letra;
-            continue;
-        }
-        $html .= '<span class="letra-arcoiris ' . $colores[$i % count($colores)] . '">' . htmlspecialchars($letra) . '</span>';
-        $i++;
-    }
-    return $html;
-}
 ?>
 
 <section class="hero">
@@ -62,7 +44,7 @@ function pintarLetrasArcoiris(string $texto): string {
 <section class="section">
     <div class="wrap">
         <div class="section-head">
-            <h2 class="section-title fuente_bouncy titulo-arcoiris"><?php echo pintarLetrasArcoiris('¿Qué encontrarás en Happy&Jumping?'); ?></h2>
+            <h2 class="section-title fuente_bouncy titulo-arcoiris">¿Qué encontrarás en Happy&amp;Jumping?</h2>
             <p class="section-lead">Todo lo que necesitas para pasarla en grande, en un solo lugar. Toca cualquier tarjeta para ver fotos.</p>
         </div>
         <div class="row g-4 justify-content-center">
@@ -121,7 +103,7 @@ function pintarLetrasArcoiris(string $texto): string {
 <section id="entradas" class="section" style="padding-top:0;">
     <div class="wrap">
         <div class="section-head">
-            <h2 class="section-title fuente_bouncy titulo-arcoiris"><?php echo pintarLetrasArcoiris('Entradas y Promociones'); ?></h2>
+            <h2 class="section-title fuente_bouncy titulo-arcoiris">Entradas y Promociones</h2>
             <p class="section-lead">Precios claros y promociones vigentes, siempre a la mano.</p>
         </div>
         <div class="row g-4 justify-content-center">
@@ -145,7 +127,7 @@ function pintarLetrasArcoiris(string $texto): string {
 <section class="section" style="padding-top:0;">
     <div class="wrap">
         <div class="section-head">
-            <h2 class="section-title fuente_bouncy titulo-arcoiris"><?php echo pintarLetrasArcoiris('Cómo funciona tu reserva'); ?></h2>
+            <h2 class="section-title fuente_bouncy titulo-arcoiris">Cómo funciona tu reserva</h2>
             <p class="section-lead">Cuatro pasos entre que eliges tu paquete y celebras tu fiesta.</p>
         </div>
         <div class="steps">
@@ -179,7 +161,7 @@ function pintarLetrasArcoiris(string $texto): string {
 <section id="cumpleanos" class="section" style="padding-top:0;">
     <div class="wrap">
     <div class="section-head">
-        <h2 class="section-title fuente_bouncy titulo-arcoiris"><?php echo pintarLetrasArcoiris('Paquetes de Cumpleaños'); ?></h2>
+        <h2 class="section-title fuente_bouncy titulo-arcoiris">Paquetes de Cumpleaños</h2>
         <p class="section-lead">Elige el paquete perfecto y deja que nosotros nos encarguemos del resto.</p>
     </div>
 
@@ -306,7 +288,7 @@ function pintarLetrasArcoiris(string $texto): string {
 <section id="conocenos" class="section" style="padding-top:0;">
     <div class="wrap">
     <div class="section-head">
-        <h2 class="section-title fuente_bouncy titulo-arcoiris"><?php echo pintarLetrasArcoiris('Conócenos'); ?></h2>
+        <h2 class="section-title fuente_bouncy titulo-arcoiris">Conócenos</h2>
         <p class="section-lead">La esencia detrás de cada salto, cada risa y cada celebración.</p>
     </div>
 
@@ -335,7 +317,7 @@ function pintarLetrasArcoiris(string $texto): string {
     </div>
 
     <div class="map-container">
-        <h2 class="section-title fuente_bouncy titulo-arcoiris"><?php echo pintarLetrasArcoiris('¡Ubícanos!'); ?></h2>
+        <h2 class="section-title fuente_bouncy titulo-arcoiris">¡Ubícanos!</h2>
         <iframe
           src="https://www.google.com/maps?q=-6.5058575638378375, -76.35724119120785&z=15&output=embed">
         </iframe>
