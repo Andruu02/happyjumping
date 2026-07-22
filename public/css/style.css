@@ -25,17 +25,11 @@ body {
     --morado: #7b2ff7;
 }
 
-/* FUENTE DE TÍTULOS: Bouncy, fuente propia con licencia (public/fonts). */
-@font-face {
-    font-family: 'Bouncy';
-    src: url('../fonts/Bouncy-Thin-PERSONAL_USE_ONLY.otf') format('opentype');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
+/* FUENTE DE TÍTULOS: Fredoka (Google Fonts), moderna y geométrica,
+   contrasta con Nunito (texto normal) sin verse infantil. */
 .fuente_bouncy {
-    font-family: 'Bouncy', cursive;
-    font-weight: normal;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
 }
 
 
@@ -103,20 +97,15 @@ body {
     text-shadow: 3px 3px 8px rgba(0,0,0,0.4);
 }
 
-/* Título estilo "arcoíris", letra por letra, igual que el logo.
-   Se usa en los títulos de sección; el hero se queda en blanco liso. */
+/* Títulos de sección: letra "hueca", relleno blanco con borde negro
+   (más sobrio que el arcoíris; el hero se queda en blanco liso). */
 .titulo-arcoiris .letra-arcoiris {
-    -webkit-text-stroke: 8px #fff;
+    color: #fff;
+    -webkit-text-stroke: 2px #000;
     paint-order: stroke fill;
     margin: 0 3px;
     text-shadow: 2px 2px 4px rgba(0,0,0,.35);
 }
-.titulo-arcoiris .letra-arcoiris.color-1 { color: var(--rosa); }
-.titulo-arcoiris .letra-arcoiris.color-2 { color: var(--celeste); }
-.titulo-arcoiris .letra-arcoiris.color-3 { color: var(--amarillo); }
-.titulo-arcoiris .letra-arcoiris.color-4 { color: var(--naranja); }
-.titulo-arcoiris .letra-arcoiris.color-5 { color: var(--verde); }
-.titulo-arcoiris .letra-arcoiris.color-6 { color: var(--morado); }
 .hero p {
     font-size: 1.3rem;
     margin-top: 15px;
@@ -150,9 +139,9 @@ body {
 }
 
 .section-title {
-    font-family: 'Bouncy', cursive;
+    font-family: 'Fredoka', sans-serif;
     text-align: center;
-    font-weight: normal;
+    font-weight: 600;
     font-size: 3rem;
     margin-top: 0;
     margin-bottom: 40px;

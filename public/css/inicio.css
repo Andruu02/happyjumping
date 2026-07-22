@@ -244,7 +244,7 @@
     flex-wrap:wrap;
     position:relative; overflow:hidden;
 }
-.cta-band h2{ font-family:'Bouncy',cursive; font-weight:normal; font-size:clamp(24px,3vw,36px); max-width:480px; color:var(--morado); margin:0; }
+.cta-band h2{ font-family:'Fredoka',sans-serif; font-weight:600; font-size:clamp(24px,3vw,36px); max-width:480px; color:var(--morado); margin:0; }
 .cta-band p{ color:#6b6b7a; margin-top:10px; max-width:420px; }
 .cta-band-actions{ display:flex; gap:16px; flex-wrap:wrap; }
 
