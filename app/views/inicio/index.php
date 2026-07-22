@@ -24,16 +24,19 @@ require_once APP_ROOT . '/views/includes/header.php';
         <div class="row g-4 justify-content-center">
             <?php
             $amenidades = [
-                ['icono' => '🤸‍♀️', 'texto' => 'Anfitrionas',              'desc' => 'Dinámicas y juegos para toda la fiesta.'],
-                ['icono' => '🤾', 'texto' => 'Trampolines',                'desc' => 'Diversión y salto sin límites.'],
-                ['icono' => '🍧', 'texto' => 'Helados y granizados',       'desc' => 'Para refrescarte entre salto y salto.'],
-                ['icono' => '🌀', 'texto' => 'Brazos giratorios',          'desc' => 'Adrenalina en cada vuelta.'],
-                ['icono' => '✨', 'texto' => 'Glitter y maquillaje neón',   'desc' => 'Brilla en cada celebración.'],
-                ['icono' => '🎉', 'texto' => 'Zona de fiestas',            'desc' => 'Espacios decorados para tu evento.'],
+                ['icono' => '🤸‍♀️', 'texto' => 'Anfitrionas',              'desc' => 'Dinámicas y juegos para toda la fiesta.',        'imagen' => 'amenidades/anfitrionas.webp'],
+                ['icono' => '🤾', 'texto' => 'Trampolines',                'desc' => 'Diversión y salto sin límites.',                  'imagen' => 'amenidades/trampolines.webp'],
+                ['icono' => '🍧', 'texto' => 'Helados y granizados',       'desc' => 'Para refrescarte entre salto y salto.',           'imagen' => 'amenidades/helados.webp'],
+                ['icono' => '🌀', 'texto' => 'Brazos giratorios',          'desc' => 'Adrenalina en cada vuelta.',                      'imagen' => 'amenidades/brazos-giratorios.webp'],
+                ['icono' => '✨', 'texto' => 'Glitter y maquillaje neón',   'desc' => 'Brilla en cada celebración.',                     'imagen' => 'amenidades/glitter-neon.webp'],
+                ['icono' => '🎉', 'texto' => 'Zona de fiestas',            'desc' => 'Espacios decorados para tu evento.',              'imagen' => 'amenidades/zona-fiestas.webp'],
             ];
             foreach ($amenidades as $i => $a): ?>
             <div class="col-6 col-md-4">
-                <div class="amenidad-card card-gsap">
+                <div class="amenidad-card card-gsap" tabindex="0" role="button"
+                     data-titulo="<?php echo htmlspecialchars($a['texto']); ?>"
+                     data-desc="<?php echo htmlspecialchars($a['desc']); ?>"
+                     data-img="<?php echo URL_ROOT; ?>/img/<?php echo $a['imagen']; ?>">
                     <div class="icono color-<?php echo ($i % 6) + 1; ?>"><span><?php echo $a['icono']; ?></span></div>
                     <p class="amenidad-titulo"><?php echo $a['texto']; ?></p>
                     <p class="amenidad-desc"><?php echo $a['desc']; ?></p>
@@ -44,20 +47,41 @@ require_once APP_ROOT . '/views/includes/header.php';
     </div>
 </section>
 
+<!-- Overlay reutilizable para la tarjeta "expandida" (ver amenidad-expandir.js) -->
+<div class="amenidad-backdrop" id="amenidad-backdrop">
+    <div class="amenidad-expandida" id="amenidad-expandida">
+        <button type="button" class="amenidad-cerrar" id="amenidad-cerrar" aria-label="Cerrar">
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <div class="amenidad-expandida-img">
+            <img id="amenidad-expandida-img-el" src="" alt="">
+        </div>
+        <div class="amenidad-expandida-body">
+            <p class="amenidad-titulo" id="amenidad-expandida-titulo"></p>
+            <p class="amenidad-desc" id="amenidad-expandida-desc"></p>
+        </div>
+    </div>
+</div>
+
 <!-- ============================================================
      ENTRADAS Y PROMOCIONES (antes /paquetes/entradas)
      ============================================================ -->
-<section id="entradas" class="container position-relative py-5">
-    <h2 class="section-title">Entradas y Promociones</h2>
-    <div class="row g-4 justify-content-center">
-        <div class="col-md-6">
-            <div class="card-grande card-gsap">
-                <img src="<?php echo URL_ROOT; ?>/img/precios.webp" alt="Imagen Precios">
+<section id="entradas" class="entradas-section position-relative py-5">
+    <div class="paint-blob blob-3"></div>
+    <div class="paint-blob blob-4"></div>
+    <div class="container position-relative">
+        <h2 class="section-title">Entradas y Promociones</h2>
+        <p class="section-lead">Precios claros y promociones vigentes, siempre a la mano.</p>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-6">
+                <div class="card-grande card-gsap">
+                    <img src="<?php echo URL_ROOT; ?>/img/precios.webp" alt="Imagen Precios">
+                </div>
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card-grande card-gsap">
-                <img src="<?php echo URL_ROOT; ?>/img/promos.webp" alt="Imagen Promos">
+            <div class="col-md-6">
+                <div class="card-grande card-gsap">
+                    <img src="<?php echo URL_ROOT; ?>/img/promos.webp" alt="Imagen Promos">
+                </div>
             </div>
         </div>
     </div>
@@ -66,8 +90,10 @@ require_once APP_ROOT . '/views/includes/header.php';
 <!-- ============================================================
      PAQUETES DE CUMPLEAÑOS (antes /paquetes/cumpleanos)
      ============================================================ -->
-<section id="cumpleanos" class="container position-relative py-5">
+<section id="cumpleanos" class="cumpleanos-section position-relative py-5">
+    <div class="container position-relative">
     <h2 class="section-title">Paquetes de Cumpleaños</h2>
+    <p class="section-lead">Elige el paquete perfecto y deja que nosotros nos encarguemos del resto.</p>
 
     <?php
     $imagenesPaquetes = [
@@ -115,7 +141,7 @@ require_once APP_ROOT . '/views/includes/header.php';
         $row_class = $alternar ? 'flex-md-row-reverse' : '';
     ?>
 
-    <div class="package-card card-gsap">
+    <div class="package-card card-gsap color-<?php echo (($paquete->id_paquete - 1) % 4) + 1; ?>">
         <div class="row g-0 align-items-center <?php echo $row_class; ?>">
 
             <div class="col-md-5 package-img" style="background-image: url('<?php echo URL_ROOT; ?>/img/<?php echo $imagen; ?>');"></div>
@@ -166,13 +192,18 @@ require_once APP_ROOT . '/views/includes/header.php';
             * Cualquiera de los paquetes puede ser modificado según lo que desee el cliente.
         </p>
     </div>
+    </div>
 </section>
 
 <!-- ============================================================
      CONÓCENOS (antes /inicio/conocenos)
      ============================================================ -->
-<section id="conocenos" class="container position-relative py-5">
+<section id="conocenos" class="conocenos-section position-relative py-5">
+    <div class="paint-blob blob-5"></div>
+    <div class="paint-blob blob-6"></div>
+    <div class="container position-relative">
     <h2 class="section-title">Conócenos</h2>
+    <p class="section-lead">La esencia detrás de cada salto, cada risa y cada celebración.</p>
 
     <div class="row g-4">
         <div class="col-md-6">
@@ -204,6 +235,7 @@ require_once APP_ROOT . '/views/includes/header.php';
           src="https://www.google.com/maps?q=-6.5058575638378375, -76.35724119120785&z=15&output=embed">
         </iframe>
     </div>
+    </div>
 </section>
 
 <?php
@@ -214,3 +246,4 @@ require_once APP_ROOT . '/views/includes/footer.php';
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/ScrollTrigger.min.js"></script>
 <script src="<?php echo URL_ROOT; ?>/js/inicio-animaciones.js"></script>
+<script src="<?php echo URL_ROOT; ?>/js/amenidad-expandir.js"></script>

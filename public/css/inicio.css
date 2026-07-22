@@ -50,6 +50,34 @@
     height: 300px;
     background: var(--rosa);
 }
+.paint-blob.blob-3 {
+    top: 40px;
+    right: -70px;
+    width: 240px;
+    height: 240px;
+    background: var(--naranja);
+}
+.paint-blob.blob-4 {
+    bottom: -60px;
+    left: -70px;
+    width: 220px;
+    height: 220px;
+    background: var(--morado);
+}
+.paint-blob.blob-5 {
+    top: -50px;
+    right: -60px;
+    width: 250px;
+    height: 250px;
+    background: var(--verde);
+}
+.paint-blob.blob-6 {
+    bottom: 20px;
+    left: -80px;
+    width: 260px;
+    height: 260px;
+    background: var(--celeste);
+}
 
 .amenidad-card {
     position: relative;
@@ -95,6 +123,92 @@
     color: #777;
     line-height: 1.4;
 }
+.amenidad-card {
+    cursor: pointer;
+}
+.amenidad-card:focus-visible {
+    outline: 3px solid var(--celeste);
+    outline-offset: 3px;
+}
+
+/* Tarjeta "expandida" al hacer click (ver amenidad-expandir.js) */
+.amenidad-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 10, 40, 0.55);
+    opacity: 0;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+.amenidad-backdrop.activo {
+    display: block;
+}
+
+.amenidad-expandida {
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.35);
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+}
+.amenidad-expandida-img {
+    display: none;
+    flex: 1 1 55%;
+    min-height: 0;
+    background: #f3e9ff;
+}
+.amenidad-expandida-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.amenidad-expandida-body {
+    padding: 20px 26px 26px;
+    overflow-y: auto;
+}
+.amenidad-expandida .amenidad-titulo {
+    font-size: 1.3rem;
+    opacity: 0;
+}
+.amenidad-expandida .amenidad-desc {
+    font-size: 1rem;
+    opacity: 0;
+}
+.amenidad-cerrar {
+    display: none;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.45);
+    color: #fff;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.amenidad-expandida.expandida .amenidad-expandida-img {
+    display: block;
+}
+.amenidad-expandida.expandida .amenidad-titulo,
+.amenidad-expandida.expandida .amenidad-desc {
+    opacity: 1;
+    transition: opacity 0.35s ease 0.15s;
+}
+.amenidad-expandida.expandida .amenidad-cerrar {
+    display: flex;
+}
+
+.entradas-section {
+    overflow: hidden;
+    background: linear-gradient(180deg, #ffffff 0%, #fff3e6 50%, #ffffff 100%);
+}
 
 /* =========================================
    ENTRADAS (tarjetas grandes de precios/promos)
@@ -119,12 +233,17 @@
     aspect-ratio: 3 / 4;
 }
 
+.cumpleanos-section {
+    background: linear-gradient(180deg, #ffffff 0%, #f6f1ff 55%, #ffffff 100%);
+}
+
 /* =========================================
    CUMPLEAÑOS (tarjetas de paquetes)
    ========================================= */
 .package-card {
     background: #fff;
     border-radius: 18px;
+    border-top: 6px solid var(--rosa);
     box-shadow: 0 6px 18px rgba(0,0,0,0.15);
     overflow: hidden;
     margin-bottom: 50px;
@@ -132,6 +251,10 @@
     position: relative;
     z-index: 2;
 }
+.package-card.color-1 { border-top-color: var(--rosa); }
+.package-card.color-2 { border-top-color: var(--celeste); }
+.package-card.color-3 { border-top-color: var(--naranja); }
+.package-card.color-4 { border-top-color: var(--morado); }
 .package-card:hover {
     transform: translateY(-6px);
     box-shadow: 0 10px 30px rgba(0,0,0,0.25);
@@ -214,6 +337,11 @@
 
 .disclaimers {
     font-size: 0.95rem;
+}
+
+.conocenos-section {
+    overflow: hidden;
+    background: linear-gradient(180deg, #ffffff 0%, #eafaff 50%, #ffffff 100%);
 }
 
 /* =========================================
