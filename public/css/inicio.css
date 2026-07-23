@@ -83,7 +83,7 @@
 .marquee-track span::before{ content:'✷'; color:#fff; opacity:.75; }
 @keyframes marquee-scroll{
     from{ transform:translateX(0); }
-    to{ transform:translateX(-50%); }
+    to{ transform:translateX(-25%); }
 }
 
 /* ---------- Amenidades ---------- */
@@ -229,14 +229,6 @@
     max-width:900px;
     color:#fff;
 }
-.disclaimers{
-    font-size:.9rem;
-    color:#5a5a68;
-    background: rgba(255,255,255,.85);
-    padding:16px 20px;
-    border-radius:14px;
-}
-
 /* ---------- Conócenos (misión / visión + mapa) ---------- */
 .mision-card{
     background:#fff;

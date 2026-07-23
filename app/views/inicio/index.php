@@ -23,18 +23,20 @@ require_once APP_ROOT . '/views/includes/header.php';
 <!-- MARQUEE -->
 <div class="marquee">
     <div class="marquee-track">
-        <span>Trampolines</span>
-        <span>Anfitrionas</span>
-        <span>Helados y granizados</span>
-        <span>Brazos giratorios</span>
-        <span>Glitter y maquillaje neón</span>
-        <span>Zona de fiestas</span>
-        <span>Trampolines</span>
-        <span>Anfitrionas</span>
-        <span>Helados y granizados</span>
-        <span>Brazos giratorios</span>
-        <span>Glitter y maquillaje neón</span>
-        <span>Zona de fiestas</span>
+        <?php
+        // Se repite 4 veces (no 2) para que en pantallas anchas siempre haya
+        // contenido de sobra cubriendo el recorrido del scroll; con solo 2
+        // copias, en monitores grandes se alcanzaba a ver el final del
+        // recorrido en blanco antes de reiniciar el loop.
+        $itemsMarquee = ['Trampolines', 'Anfitrionas', 'Helados y granizados', 'Brazos giratorios', 'Glitter y maquillaje neón', 'Zona de fiestas'];
+        for ($vuelta = 0; $vuelta < 4; $vuelta++):
+            foreach ($itemsMarquee as $item):
+        ?>
+        <span><?php echo $item; ?></span>
+        <?php
+            endforeach;
+        endfor;
+        ?>
     </div>
 </div>
 
@@ -212,14 +214,6 @@ require_once APP_ROOT . '/views/includes/header.php';
             Si deseas que tu paquete de cumpleaños incluya nuestros
             <strong>cuartos de experiencia (cuarto de pintura o cuarto de destrucción)</strong>,
             solo agregarías <strong>S/. 15 soles MÁS</strong> por cada cuarto al precio del paquete que escojas.
-        </p>
-    </div>
-
-    <div class="mt-4 mb-5">
-        <p class="disclaimers">
-            * Al adquirir cualquiera de nuestros paquetes queda totalmente PROHIBIDO traer bebidas embotelladas.<br>
-            * Los horarios para cumpleaños privados se confirman según disponibilidad del local.<br>
-            * Cualquiera de los paquetes puede ser modificado según lo que desee el cliente.
         </p>
     </div>
     </div>
