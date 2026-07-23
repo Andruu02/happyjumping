@@ -102,53 +102,45 @@ require_once APP_ROOT . '/views/includes/header.php';
 <div class="divisor-ondas c1" aria-hidden="true"></div>
 
 <!-- ============================================================
-     ENTRADAS Y PROMOCIONES (antes /paquetes/entradas)
+     ENTRADAS Y PROMOCIONES + DISPONIBILIDAD (calendario informativo:
+     para quien quiera venir a saltar de forma normal y ver si un día/hora
+     está ocupado por un cumpleaños. Las entradas normales se venden de
+     forma presencial, esto es solo informativo, no vende ni reserva nada)
      ============================================================ -->
 <section id="entradas" class="section" style="padding-top:0;">
     <div class="wrap">
         <div class="section-head">
-            <h2 class="section-title fuente_bouncy titulo-arcoiris">Entradas y Promociones</h2>
-            <p class="section-lead">Precios claros y promociones vigentes, siempre a la mano.</p>
+            <h2 class="section-title fuente_bouncy titulo-arcoiris">Entradas y Disponibilidad</h2>
+            <p class="section-lead">Precios y promociones vigentes, y si un día hay un cumpleaños para elegir el mejor momento para venir.</p>
         </div>
-        <div class="flier">
-            <img src="<?php echo URL_ROOT; ?>/img/flier.webp" alt="Precios y promociones">
+        <div class="row g-4 align-items-start justify-content-center">
+            <div class="col-lg-5">
+                <div class="flier">
+                    <img src="<?php echo URL_ROOT; ?>/img/flier.webp" alt="Precios y promociones">
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="calendario-disponibilidad">
+                    <div class="calendar-header">
+                        <button type="button" id="cal-prev" class="calendar-nav" aria-label="Mes anterior"><i class="bi bi-chevron-left"></i></button>
+                        <div class="month-year" id="cal-month-year"></div>
+                        <button type="button" id="cal-next" class="calendar-nav" aria-label="Mes siguiente"><i class="bi bi-chevron-right"></i></button>
+                    </div>
+                    <div class="calendar-grid" id="cal-grid"></div>
+                    <div class="calendario-leyenda">
+                        <span><span class="punto punto-disponible"></span> Sin cumpleaños</span>
+                        <span><span class="punto punto-ocupado"></span> Con cumpleaños</span>
+                    </div>
+                    <div class="calendario-cta" id="cal-cta">
+                        <p id="cal-info-fecha"></p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
 <div class="divisor-ondas c2" aria-hidden="true"></div>
-
-<!-- ============================================================
-     DISPONIBILIDAD (calendario informativo: para quien quiera venir
-     a saltar de forma normal y ver si un día/hora está ocupado por
-     un cumpleaños. Las entradas normales se venden de forma presencial,
-     esto es solo informativo, no vende ni reserva nada)
-     ============================================================ -->
-<section id="calendario" class="section" style="padding-top:0;">
-    <div class="wrap">
-        <div class="section-head">
-            <h2 class="section-title fuente_bouncy titulo-arcoiris">Disponibilidad del Local</h2>
-            <p class="section-lead">¿Quieres venir a saltar un día cualquiera? Revisa aquí si ese día hay un cumpleaños y a qué horas, para elegir el mejor momento para venir.</p>
-        </div>
-        <div class="calendario-disponibilidad">
-            <div class="calendar-header">
-                <button type="button" id="cal-prev" class="calendar-nav" aria-label="Mes anterior"><i class="bi bi-chevron-left"></i></button>
-                <div class="month-year" id="cal-month-year"></div>
-                <button type="button" id="cal-next" class="calendar-nav" aria-label="Mes siguiente"><i class="bi bi-chevron-right"></i></button>
-            </div>
-            <div class="calendar-grid" id="cal-grid"></div>
-            <div class="calendario-leyenda">
-                <span><span class="punto punto-disponible"></span> Sin cumpleaños</span>
-                <span><span class="punto punto-ocupado"></span> Con cumpleaños</span>
-            </div>
-            <div class="calendario-cta" id="cal-cta">
-                <p id="cal-info-fecha"></p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<div class="divisor-ondas c3" aria-hidden="true"></div>
 
 <!-- ============================================================
      PAQUETES DE CUMPLEAÑOS (antes /paquetes/cumpleanos)
@@ -251,7 +243,7 @@ require_once APP_ROOT . '/views/includes/header.php';
     </div>
 </section>
 
-<div class="divisor-ondas c4" aria-hidden="true"></div>
+<div class="divisor-ondas c3" aria-hidden="true"></div>
 
 <!-- ============================================================
      CÓMO FUNCIONA (nuestro flujo real de reserva)
@@ -287,7 +279,7 @@ require_once APP_ROOT . '/views/includes/header.php';
     </div>
 </section>
 
-<div class="divisor-ondas c5" aria-hidden="true"></div>
+<div class="divisor-ondas c4" aria-hidden="true"></div>
 
 <!-- ============================================================
      CONÓCENOS (antes /inicio/conocenos)

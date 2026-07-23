@@ -18,7 +18,7 @@
 }
 
 /* Offset para que el navbar fijo no tape el título al saltar con el ancla */
-#entradas, #cumpleanos, #calendario, #conocenos{
+#entradas, #cumpleanos, #conocenos{
     scroll-margin-top: 90px;
 }
 
@@ -55,7 +55,6 @@
 .divisor-ondas.c2{ background: var(--celeste); }
 .divisor-ondas.c3{ background: var(--naranja); }
 .divisor-ondas.c4{ background: var(--morado); }
-.divisor-ondas.c5{ background: var(--verde); }
 
 /* ---------- Secciones / cabeceras ---------- */
 .section{ padding:90px 0; position:relative; }
