@@ -119,6 +119,38 @@ require_once APP_ROOT . '/views/includes/header.php';
 <div class="divisor-ondas c2" aria-hidden="true"></div>
 
 <!-- ============================================================
+     DISPONIBILIDAD (calendario informativo: para quien quiera venir
+     a saltar de forma normal y ver si un día/hora está ocupado por
+     un cumpleaños. Las entradas normales se venden de forma presencial,
+     esto es solo informativo, no vende ni reserva nada)
+     ============================================================ -->
+<section id="calendario" class="section" style="padding-top:0;">
+    <div class="wrap">
+        <div class="section-head">
+            <h2 class="section-title fuente_bouncy titulo-arcoiris">Disponibilidad del Local</h2>
+            <p class="section-lead">¿Quieres venir a saltar un día cualquiera? Revisa aquí si ese día hay un cumpleaños y a qué horas, para elegir el mejor momento para venir.</p>
+        </div>
+        <div class="calendario-disponibilidad">
+            <div class="calendar-header">
+                <button type="button" id="cal-prev" class="calendar-nav" aria-label="Mes anterior"><i class="bi bi-chevron-left"></i></button>
+                <div class="month-year" id="cal-month-year"></div>
+                <button type="button" id="cal-next" class="calendar-nav" aria-label="Mes siguiente"><i class="bi bi-chevron-right"></i></button>
+            </div>
+            <div class="calendar-grid" id="cal-grid"></div>
+            <div class="calendario-leyenda">
+                <span><span class="punto punto-disponible"></span> Sin cumpleaños</span>
+                <span><span class="punto punto-ocupado"></span> Con cumpleaños</span>
+            </div>
+            <div class="calendario-cta" id="cal-cta">
+                <p id="cal-info-fecha"></p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divisor-ondas c3" aria-hidden="true"></div>
+
+<!-- ============================================================
      PAQUETES DE CUMPLEAÑOS (antes /paquetes/cumpleanos)
      ============================================================ -->
 <section id="cumpleanos" class="section" style="padding-top:0;">
@@ -216,37 +248,6 @@ require_once APP_ROOT . '/views/includes/header.php';
             solo agregarías <strong>S/. 15 soles MÁS</strong> por cada cuarto al precio del paquete que escojas.
         </p>
     </div>
-    </div>
-</section>
-
-<div class="divisor-ondas c3" aria-hidden="true"></div>
-
-<!-- ============================================================
-     FECHAS DISPONIBLES (calendario de disponibilidad, info de
-     Paquetes de Cumpleaños: para ver qué días ya están ocupados)
-     ============================================================ -->
-<section id="calendario" class="section" style="padding-top:0;">
-    <div class="wrap">
-        <div class="section-head">
-            <h2 class="section-title fuente_bouncy titulo-arcoiris">Fechas Disponibles</h2>
-            <p class="section-lead">Consulta el calendario y elige el día perfecto para tu fiesta de cumpleaños.</p>
-        </div>
-        <div class="calendario-disponibilidad">
-            <div class="calendar-header">
-                <button type="button" id="cal-prev" class="calendar-nav" aria-label="Mes anterior"><i class="bi bi-chevron-left"></i></button>
-                <div class="month-year" id="cal-month-year"></div>
-                <button type="button" id="cal-next" class="calendar-nav" aria-label="Mes siguiente"><i class="bi bi-chevron-right"></i></button>
-            </div>
-            <div class="calendar-grid" id="cal-grid"></div>
-            <div class="calendario-leyenda">
-                <span><span class="punto punto-disponible"></span> Disponible</span>
-                <span><span class="punto punto-ocupado"></span> Ocupado</span>
-            </div>
-            <div class="calendario-cta" id="cal-cta">
-                <p>Fecha elegida: <strong id="cal-fecha-elegida"></strong></p>
-                <a href="<?php echo URL_ROOT; ?>/reservas/paso1" class="btn-contratar">Reservar esta fecha</a>
-            </div>
-        </div>
     </div>
 </section>
 

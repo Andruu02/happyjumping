@@ -203,8 +203,9 @@
 }
 .calendario-disponibilidad .calendar-grid .day.empty{ cursor:default; opacity:.3; }
 .calendario-disponibilidad .calendar-grid .day.occupied{
-    background:#ffebee; color:#d32f2f; cursor:not-allowed; text-decoration:line-through;
+    background:#ffebee; color:#d32f2f; font-weight:700;
 }
+.calendario-disponibilidad .calendar-grid .day.occupied:hover{ background:#ffd6dc; }
 .calendario-disponibilidad .calendar-grid .day.selected{ background:var(--morado); color:#fff; }
 .calendario-leyenda{
     display:flex; gap:20px; justify-content:center; margin-top:18px;

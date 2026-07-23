@@ -34,5 +34,19 @@ class HorarioModel extends Model {
         }
         return $fechas;
     }
+
+    /**
+     * Obtiene los rangos de hora ocupados por cumpleaños en una fecha
+     * específica (para que un visitante que quiera entrar de forma normal
+     * vea a qué horas el local va a estar ocupado por una fiesta).
+     */
+    public function getHorariosPorFecha($fecha) {
+        $this->query("SELECT hora_inicio, hora_fin FROM horarios_disponibles
+                      WHERE fecha = :fecha ORDER BY hora_inicio ASC");
+
+        $this->bind(':fecha', $fecha);
+
+        return $this->resultSet();
+    }
 }
 ?>

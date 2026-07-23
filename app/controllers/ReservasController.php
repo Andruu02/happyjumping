@@ -82,6 +82,27 @@ class ReservasController extends Controller {
     }
 
     /**
+     * FUNCIÓN DE AJAX: a qué horas está ocupado un día por un cumpleaños
+     * (para que un visitante que quiera entrar de forma normal vea si el
+     * local va a estar ocupado por una fiesta a cierta hora antes de ir;
+     * las entradas normales se venden de forma presencial, esto es solo
+     * informativo).
+     */
+    public function getHorariosOcupados($fecha = '') {
+        header('Content-Type: application/json');
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha)) {
+            echo json_encode(['error' => 'Fecha inválida']);
+            return;
+        }
+        $horarios = $this->horarioModel->getHorariosPorFecha($fecha);
+        $resultado = [];
+        foreach ($horarios as $h) {
+            $resultado[] = ['hora_inicio' => $h->hora_inicio, 'hora_fin' => $h->hora_fin];
+        }
+        echo json_encode($resultado);
+    }
+
+    /**
      * ACCIÓN FINAL: Recibe el POST del Paso 3 y guarda la reserva
      */
     public function finalizar() {
