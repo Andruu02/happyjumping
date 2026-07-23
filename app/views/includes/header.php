@@ -77,28 +77,12 @@ $esInicio = isset($active_page) && $active_page === 'inicio';
     </div>
 </nav>
 
-<!-- Overlay para la animación de transición (MorphSVG) al ir al login -->
-<div class="transicion-login" id="transicion-login" aria-hidden="true">
-    <svg width="100%" height="100%">
-        <circle id="forma-transicion" cx="0" cy="0" r="0" fill="url(#grad-transicion)"></circle>
-        <defs>
-            <linearGradient id="grad-transicion" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#ff3c8d"></stop>
-                <stop offset="50%" stop-color="#7b2ff7"></stop>
-                <stop offset="100%" stop-color="#00c6ff"></stop>
-            </linearGradient>
-        </defs>
-    </svg>
-</div>
-
 <script>
     window.HJ_URL_ROOT = "<?php echo URL_ROOT; ?>";
     window.HJ_VAPID_PUBLIC_KEY = "<?php echo VAPID_PUBLIC_KEY; ?>";
 </script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/MorphSVGPlugin.min.js"></script>
 <script src="<?php echo URL_ROOT; ?>/js/push.js"></script>
 <script src="<?php echo URL_ROOT; ?>/js/scroll-suave.js"></script>
-<script src="<?php echo URL_ROOT; ?>/js/transicion-login.js"></script>
+<script src="<?php echo URL_ROOT; ?>/js/transicion-vista.js"></script>
 
 <main class="main-container">

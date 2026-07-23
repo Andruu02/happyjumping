@@ -16,17 +16,25 @@ body {
     padding-top: 80px;
 }
 
-/* Overlay de transición (MorphSVG) al ir al login: oculto por defecto,
-   se activa por JS justo antes de navegar (ver transicion-login.js). */
-.transicion-login {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 2000;
-    pointer-events: none;
+/* Transición nativa entre páginas (View Transitions API): la página
+   nueva "revela" con un círculo que crece desde el punto donde se hizo
+   click (ver transicion-vista.js), en vez del corte/flash normal del
+   navegador al navegar. Solo funciona en navegadores basados en
+   Chromium; en el resto simplemente no hay transición (navegación
+   normal, sin errores). */
+@view-transition {
+    navigation: auto;
 }
-.transicion-login.activo { display: block; }
-.transicion-login svg { display: block; width: 100%; height: 100%; }
+::view-transition-old(root) {
+    animation: none;
+}
+::view-transition-new(root) {
+    animation: hj-revelar-circulo .6s ease-in-out forwards;
+}
+@keyframes hj-revelar-circulo {
+    from { clip-path: circle(0% at var(--vt-x, 90%) var(--vt-y, 6%)); }
+    to   { clip-path: circle(150% at var(--vt-x, 90%) var(--vt-y, 6%)); }
+}
 
 :root {
     --rosa: #ff3c8d;
