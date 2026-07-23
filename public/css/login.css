@@ -12,25 +12,6 @@
     --morado: #7b2ff7;
 }
 
-/* Transición nativa entre páginas (View Transitions API): debe declararse
-   también aquí, porque esta plantilla (login/registro/recuperar/verificar)
-   no incluye header.php ni style.css, así que no hereda la regla de ahí.
-   La API exige que AMBOS lados de la navegación (origen y destino)
-   la declaren para activar la transición. */
-@view-transition {
-    navigation: auto;
-}
-::view-transition-old(root) {
-    animation: none;
-}
-::view-transition-new(root) {
-    animation: hj-revelar-circulo .6s ease-in-out forwards;
-}
-@keyframes hj-revelar-circulo {
-    from { clip-path: circle(0% at 92% 6%); }
-    to   { clip-path: circle(150% at 92% 6%); }
-}
-
 body {
     font-family: 'Poppins', sans-serif;
     background: linear-gradient(135deg, var(--celeste), var(--rosa), var(--amarillo));

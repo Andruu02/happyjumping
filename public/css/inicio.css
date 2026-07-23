@@ -18,7 +18,7 @@
 }
 
 /* Offset para que el navbar fijo no tape el título al saltar con el ancla */
-#entradas, #cumpleanos, #conocenos{
+#entradas, #cumpleanos, #calendario, #conocenos{
     scroll-margin-top: 90px;
 }
 
@@ -55,6 +55,7 @@
 .divisor-ondas.c2{ background: var(--celeste); }
 .divisor-ondas.c3{ background: var(--naranja); }
 .divisor-ondas.c4{ background: var(--morado); }
+.divisor-ondas.c5{ background: var(--verde); }
 
 /* ---------- Secciones / cabeceras ---------- */
 .section{ padding:90px 0; position:relative; }
@@ -163,6 +164,63 @@
     line-height:0;
 }
 .flier img{ width:100%; height:auto; display:block; }
+
+/* ---------- Fechas disponibles (calendario de solo lectura) ---------- */
+.calendario-disponibilidad{
+    background:#fff;
+    max-width:520px;
+    margin:0 auto;
+    border-radius:20px;
+    padding:28px 26px;
+    box-shadow: 0 14px 30px rgba(30,10,60,.22);
+}
+.calendario-disponibilidad .calendar-header{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:18px;
+}
+.calendario-disponibilidad .month-year{
+    font-family:'Fredoka', sans-serif; font-weight:600;
+    font-size:1.2rem; color:var(--morado); text-transform:capitalize;
+}
+.calendario-disponibilidad .calendar-nav{
+    background:none; border:none; color:var(--morado);
+    font-size:1.3rem; cursor:pointer; padding:4px 10px;
+    transition: color .2s ease;
+}
+.calendario-disponibilidad .calendar-nav:hover{ color:var(--rosa); }
+.calendario-disponibilidad .calendar-grid{
+    display:grid; grid-template-columns:repeat(7,1fr); gap:8px;
+}
+.calendario-disponibilidad .calendar-grid .weekday,
+.calendario-disponibilidad .calendar-grid .day{
+    text-align:center; font-weight:600; padding:8px 0; border-radius:10px;
+    font-size:.9rem;
+}
+.calendario-disponibilidad .calendar-grid .weekday{ color:var(--celeste); font-size:.8rem; }
+.calendario-disponibilidad .calendar-grid .day{ cursor:pointer; transition: background .2s ease, color .2s ease; }
+.calendario-disponibilidad .calendar-grid .day:hover:not(.empty):not(.occupied){
+    background: rgba(123,47,247,.12); color:var(--morado);
+}
+.calendario-disponibilidad .calendar-grid .day.empty{ cursor:default; opacity:.3; }
+.calendario-disponibilidad .calendar-grid .day.occupied{
+    background:#ffebee; color:#d32f2f; cursor:not-allowed; text-decoration:line-through;
+}
+.calendario-disponibilidad .calendar-grid .day.selected{ background:var(--morado); color:#fff; }
+.calendario-leyenda{
+    display:flex; gap:20px; justify-content:center; margin-top:18px;
+    font-size:.85rem; color:#6b6b7a;
+}
+.calendario-leyenda .punto{
+    display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px;
+}
+.punto-disponible{ background: var(--verde); }
+.punto-ocupado{ background:#d32f2f; }
+.calendario-cta{
+    display:none; text-align:center; margin-top:22px; padding-top:18px;
+    border-top:1px solid rgba(0,0,0,.08);
+}
+.calendario-cta.activo{ display:block; }
+.calendario-cta p{ margin-bottom:10px; color:#555; }
 
 /* ---------- Cómo funciona ---------- */
 .steps{ display:grid; grid-template-columns: repeat(4, 1fr); gap:22px; }

@@ -222,6 +222,37 @@ require_once APP_ROOT . '/views/includes/header.php';
 <div class="divisor-ondas c3" aria-hidden="true"></div>
 
 <!-- ============================================================
+     FECHAS DISPONIBLES (calendario de disponibilidad, info de
+     Paquetes de Cumpleaños: para ver qué días ya están ocupados)
+     ============================================================ -->
+<section id="calendario" class="section" style="padding-top:0;">
+    <div class="wrap">
+        <div class="section-head">
+            <h2 class="section-title fuente_bouncy titulo-arcoiris">Fechas Disponibles</h2>
+            <p class="section-lead">Consulta el calendario y elige el día perfecto para tu fiesta de cumpleaños.</p>
+        </div>
+        <div class="calendario-disponibilidad">
+            <div class="calendar-header">
+                <button type="button" id="cal-prev" class="calendar-nav" aria-label="Mes anterior"><i class="bi bi-chevron-left"></i></button>
+                <div class="month-year" id="cal-month-year"></div>
+                <button type="button" id="cal-next" class="calendar-nav" aria-label="Mes siguiente"><i class="bi bi-chevron-right"></i></button>
+            </div>
+            <div class="calendar-grid" id="cal-grid"></div>
+            <div class="calendario-leyenda">
+                <span><span class="punto punto-disponible"></span> Disponible</span>
+                <span><span class="punto punto-ocupado"></span> Ocupado</span>
+            </div>
+            <div class="calendario-cta" id="cal-cta">
+                <p>Fecha elegida: <strong id="cal-fecha-elegida"></strong></p>
+                <a href="<?php echo URL_ROOT; ?>/reservas/paso1" class="btn-contratar">Reservar esta fecha</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divisor-ondas c4" aria-hidden="true"></div>
+
+<!-- ============================================================
      CÓMO FUNCIONA (nuestro flujo real de reserva)
      ============================================================ -->
 <section class="section" style="padding-top:0;">
@@ -255,7 +286,7 @@ require_once APP_ROOT . '/views/includes/header.php';
     </div>
 </section>
 
-<div class="divisor-ondas c4" aria-hidden="true"></div>
+<div class="divisor-ondas c5" aria-hidden="true"></div>
 
 <!-- ============================================================
      CONÓCENOS (antes /inicio/conocenos)
@@ -309,3 +340,4 @@ require_once APP_ROOT . '/views/includes/footer.php';
 
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
 <script src="<?php echo URL_ROOT; ?>/js/amenidad-expandir.js"></script>
+<script src="<?php echo URL_ROOT; ?>/js/calendario-disponibilidad.js"></script>
