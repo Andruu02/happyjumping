@@ -173,8 +173,6 @@
 /* ---------- Fechas disponibles (calendario de solo lectura) ---------- */
 .calendario-disponibilidad{
     background:#fff;
-    max-width:520px;
-    margin:0 auto;
     border-radius:20px;
     padding:28px 26px;
     box-shadow: 0 14px 30px rgba(30,10,60,.22);

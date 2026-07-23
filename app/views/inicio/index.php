@@ -115,12 +115,12 @@ require_once APP_ROOT . '/views/includes/header.php';
             <p class="horario-atencion"><i class="bi bi-clock-fill"></i> Lunes a domingo, de 3:00pm a 11:00pm</p>
         </div>
         <div class="row g-4 align-items-start justify-content-center">
-            <div class="col-lg-5">
+            <div class="col-lg-6">
                 <div class="flier">
                     <img src="<?php echo URL_ROOT; ?>/img/flier.webp" alt="Precios y promociones">
                 </div>
             </div>
-            <div class="col-lg-7">
+            <div class="col-lg-6">
                 <div class="calendario-disponibilidad">
                     <div class="calendar-header">
                         <button type="button" id="cal-prev" class="calendar-nav" aria-label="Mes anterior"><i class="bi bi-chevron-left"></i></button>
