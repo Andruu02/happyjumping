@@ -7,7 +7,7 @@
 require APP_ROOT . '/views/includes/header.php';
 ?>
 
-<link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/perfil.css">
+<link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/perfil.css?v=<?php echo filemtime(PUBLIC_ROOT . '/css/perfil.css'); ?>">
 
 <div class="container mt-5 mb-5">
 
