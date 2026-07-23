@@ -307,5 +307,4 @@ require_once APP_ROOT . '/views/includes/header.php';
 require_once APP_ROOT . '/views/includes/footer.php';
 ?>
 
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
 <script src="<?php echo URL_ROOT; ?>/js/amenidad-expandir.js"></script>

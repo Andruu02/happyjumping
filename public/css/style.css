@@ -16,6 +16,18 @@ body {
     padding-top: 80px;
 }
 
+/* Overlay de transición (MorphSVG) al ir al login: oculto por defecto,
+   se activa por JS justo antes de navegar (ver transicion-login.js). */
+.transicion-login {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    pointer-events: none;
+}
+.transicion-login.activo { display: block; }
+.transicion-login svg { display: block; width: 100%; height: 100%; }
+
 :root {
     --rosa: #ff3c8d;
     --celeste: #00c6ff;
