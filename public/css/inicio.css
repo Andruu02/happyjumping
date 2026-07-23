@@ -200,7 +200,7 @@
     font-size:.9rem;
 }
 .calendario-disponibilidad .calendar-grid .weekday{ color:var(--celeste); font-size:.8rem; }
-.calendario-disponibilidad .calendar-grid .day{ cursor:pointer; transition: background .2s ease, color .2s ease; }
+.calendario-disponibilidad .calendar-grid .day{ position:relative; cursor:pointer; transition: background .2s ease, color .2s ease; }
 .calendario-disponibilidad .calendar-grid .day:hover:not(.empty):not(.occupied){
     background: rgba(123,47,247,.12); color:var(--morado);
 }
@@ -210,6 +210,42 @@
 }
 .calendario-disponibilidad .calendar-grid .day.occupied:hover{ background:#ffd6dc; }
 .calendario-disponibilidad .calendar-grid .day.selected{ background:var(--morado); color:#fff; }
+
+/* Globo de texto (tooltip) al pasar el mouse sobre un día */
+.calendario-disponibilidad .calendar-grid .day[data-tooltip]:hover::after{
+    content: attr(data-tooltip);
+    position:absolute;
+    bottom:calc(100% + 10px);
+    left:50%;
+    transform:translateX(-50%);
+    background:var(--morado);
+    color:#fff;
+    padding:8px 12px;
+    border-radius:10px;
+    font-size:.75rem;
+    font-weight:600;
+    line-height:1.3;
+    white-space:normal;
+    width:max-content;
+    max-width:170px;
+    text-align:center;
+    z-index:5;
+    box-shadow:0 8px 20px rgba(30,10,60,.3);
+    pointer-events:none;
+}
+.calendario-disponibilidad .calendar-grid .day.occupied[data-tooltip]:hover::after{ background:#d32f2f; }
+.calendario-disponibilidad .calendar-grid .day[data-tooltip]:hover::before{
+    content:'';
+    position:absolute;
+    bottom:calc(100% + 4px);
+    left:50%;
+    transform:translateX(-50%);
+    border:6px solid transparent;
+    border-top-color:var(--morado);
+    z-index:5;
+    pointer-events:none;
+}
+.calendario-disponibilidad .calendar-grid .day.occupied[data-tooltip]:hover::before{ border-top-color:#d32f2f; }
 .calendario-leyenda{
     display:flex; gap:20px; justify-content:center; margin-top:18px;
     font-size:.85rem; color:#6b6b7a;
