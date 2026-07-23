@@ -7,10 +7,26 @@ class UsuariosController extends Controller {
         $this->usuarioModel = $this->model('UsuarioModel');
     }
 
+    /**
+     * Valida que un destino de "volver aquí después de iniciar sesión" sea
+     * una ruta relativa del propio sitio (nunca una URL externa), para
+     * evitar un open redirect.
+     */
+    private function redirectSeguro($redirect) {
+        $redirect = trim((string) $redirect);
+        if ($redirect === '' || $redirect[0] !== '/' || (isset($redirect[1]) && $redirect[1] === '/')) {
+            return '';
+        }
+        return $redirect;
+    }
+
     // ── LOGIN ─────────────────────────────────────────────────────────────────
     public function login() {
+        $redirect = $this->redirectSeguro($_GET['redirect'] ?? ($_POST['redirect'] ?? ''));
+
         if (isset($_SESSION['id_usuario'])) {
-            header('Location: ' . URL_ROOT . (($_SESSION['usuario_rol'] ?? '') === 'admin' ? '/admin' : '/perfil'));
+            $destino = $redirect ?: (($_SESSION['usuario_rol'] ?? '') === 'admin' ? '/admin' : '/perfil');
+            header('Location: ' . URL_ROOT . $destino);
             exit();
         }
 
@@ -20,7 +36,8 @@ class UsuariosController extends Controller {
                 'correo'         => trim($_POST['correo']),
                 'password'       => trim($_POST['password']),
                 'correo_error'   => '',
-                'password_error' => ''
+                'password_error' => '',
+                'redirect'       => $redirect,
             ];
 
             if (empty($datos['correo']))
@@ -35,11 +52,13 @@ class UsuariosController extends Controller {
                     // Si no está verificado → mandar a verificar
                     if (!$user->is_verificado) {
                         $_SESSION['correo_verificacion'] = $user->correo;
+                        if ($redirect) $_SESSION['redirect_post_verificacion'] = $redirect;
                         header('Location: ' . URL_ROOT . '/usuarios/verificar');
                         exit();
                     }
                     $this->createUsuarioSession($user);
-                    header('Location: ' . URL_ROOT . ($user->rol === 'admin' ? '/admin' : '/perfil'));
+                    $destino = $redirect ?: ($user->rol === 'admin' ? '/admin' : '/perfil');
+                    header('Location: ' . URL_ROOT . $destino);
                     exit();
                 } else {
                     $datos['password_error'] = 'Correo o contraseña incorrectos. Intenta de nuevo.';
@@ -52,7 +71,8 @@ class UsuariosController extends Controller {
             $this->view('usuarios/login', [
                 'titulo'         => 'Iniciar Sesion - Happy&Jumping',
                 'correo'         => '', 'password'       => '',
-                'correo_error'   => '', 'password_error' => ''
+                'correo_error'   => '', 'password_error' => '',
+                'redirect'       => $redirect,
             ]);
         }
     }
@@ -169,7 +189,10 @@ class UsuariosController extends Controller {
 
             if ($this->usuarioModel->verificarCodigo($correo, $codigo)) {
                 unset($_SESSION['correo_verificacion']);
-                header('Location: ' . URL_ROOT . '/usuarios/login?verificado=1');
+                $redirect = $this->redirectSeguro($_SESSION['redirect_post_verificacion'] ?? '');
+                unset($_SESSION['redirect_post_verificacion']);
+                $extra = $redirect ? '&redirect=' . urlencode($redirect) : '';
+                header('Location: ' . URL_ROOT . '/usuarios/login?verificado=1' . $extra);
                 exit();
             } else {
                 $datos = ['titulo' => 'Verificar Cuenta', 'error' => 'Código incorrecto. Inténtalo de nuevo.', 'exito' => ''];

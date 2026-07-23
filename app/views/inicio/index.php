@@ -346,7 +346,7 @@ require_once APP_ROOT . '/views/includes/header.php';
             </form>
             <?php else: ?>
             <p class="comentarios-login-prompt">
-                <a href="<?php echo URL_ROOT; ?>/usuarios/login">Inicia sesión</a> para dejar tu comentario.
+                <a href="<?php echo URL_ROOT; ?>/usuarios/login?redirect=<?php echo urlencode('/#comentarios'); ?>">Inicia sesión</a> para dejar tu comentario.
             </p>
             <?php endif; ?>
         </div>

@@ -43,7 +43,8 @@
             <p class="title">Iniciar sesión</p>
 
             <form action="<?php echo URL_ROOT; ?>/usuarios/login" method="POST">
-                
+                <input type="hidden" name="redirect" value="<?php echo htmlspecialchars($datos['redirect'] ?? ''); ?>">
+
                 <div class="mb-3">
                     <label for="correo">Correo electrónico</label>
                     <input type="email" id="correo" 
