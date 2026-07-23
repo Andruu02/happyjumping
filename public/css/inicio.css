@@ -60,6 +60,12 @@
 .section{ padding:90px 0; position:relative; }
 .section-head{ margin:0 auto 44px; text-align:center; }
 .section-lead{ color:#555; font-size:19px; max-width:560px; margin-left:auto; margin-right:auto; }
+.horario-atencion{
+    display:inline-flex; align-items:center; gap:8px;
+    margin:14px auto 0; padding:8px 18px;
+    background: rgba(123,47,247,.08); color:var(--morado);
+    font-weight:700; font-size:.95rem; border-radius:999px;
+}
 
 /* ---------- Marquee ---------- */
 .marquee{

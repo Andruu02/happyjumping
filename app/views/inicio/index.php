@@ -111,7 +111,8 @@ require_once APP_ROOT . '/views/includes/header.php';
     <div class="wrap">
         <div class="section-head">
             <h2 class="section-title fuente_bouncy titulo-arcoiris">Entradas y Disponibilidad</h2>
-            <p class="section-lead">Precios y promociones vigentes, y si un día hay un cumpleaños para elegir el mejor momento para venir.</p>
+            <p class="section-lead">Precios y promociones vigentes, además elige el mejor momento para venir a divertirte.</p>
+            <p class="horario-atencion"><i class="bi bi-clock-fill"></i> Lunes a domingo, de 3:00pm a 11:00pm</p>
         </div>
         <div class="row g-4 align-items-start justify-content-center">
             <div class="col-lg-5">
