@@ -22,15 +22,27 @@ document.addEventListener('DOMContentLoaded', function () {
             const alto = window.innerHeight;
 
             overlay.classList.add('activo');
-            gsap.set(circulo, { attr: { cx: cx, cy: cy, r: 0 } });
+            // Radio inicial pequeño pero distinto de 0: un círculo de radio 0
+            // es una forma "degenerada" (sin área) y MorphSVGPlugin no logra
+            // interpolarla correctamente, dejando la animación invisible.
+            gsap.set(circulo, { attr: { cx: cx, cy: cy, r: 1 } });
+
+            // Si por lo que sea la animación no llega a completar, igual
+            // navegamos: nunca debe quedar al usuario "atascado" sin poder
+            // entrar a iniciar sesión.
+            let yaNavego = false;
+            function irAlLogin() {
+                if (yaNavego) return;
+                yaNavego = true;
+                window.location.href = destino;
+            }
+            setTimeout(irAlLogin, 1200);
 
             gsap.to(circulo, {
                 duration: 0.7,
                 ease: 'power2.inOut',
                 morphSVG: 'M0,0 H' + ancho + ' V' + alto + ' H0 Z',
-                onComplete: function () {
-                    window.location.href = destino;
-                },
+                onComplete: irAlLogin,
             });
         });
     });
