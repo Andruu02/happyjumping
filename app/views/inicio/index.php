@@ -117,42 +117,6 @@ require_once APP_ROOT . '/views/includes/header.php';
 <div class="divisor-ondas c2" aria-hidden="true"></div>
 
 <!-- ============================================================
-     CÓMO FUNCIONA (nuestro flujo real de reserva)
-     ============================================================ -->
-<section class="section" style="padding-top:0;">
-    <div class="wrap">
-        <div class="section-head">
-            <h2 class="section-title fuente_bouncy titulo-arcoiris">Cómo funciona tu reserva</h2>
-            <p class="section-lead">Cuatro pasos entre que eliges tu paquete y celebras tu fiesta.</p>
-        </div>
-        <div class="steps">
-            <div class="step">
-                <span class="num">01</span>
-                <h3>Elige tu paquete</h3>
-                <p>Compara los paquetes de cumpleaños y escoge el que más se ajuste a tu celebración.</p>
-            </div>
-            <div class="step">
-                <span class="num">02</span>
-                <h3>Elige fecha y hora</h3>
-                <p>Selecciona el día y el horario disponible en nuestro calendario en línea.</p>
-            </div>
-            <div class="step">
-                <span class="num">03</span>
-                <h3>Confirma tu pago</h3>
-                <p>Paga tu reserva de forma sencilla y recibe la confirmación al instante.</p>
-            </div>
-            <div class="step">
-                <span class="num">04</span>
-                <h3>¡A saltar!</h3>
-                <p>Llega el día de tu evento y disfruta de tu fiesta con nosotros.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<div class="divisor-ondas c3" aria-hidden="true"></div>
-
-<!-- ============================================================
      PAQUETES DE CUMPLEAÑOS (antes /paquetes/cumpleanos)
      ============================================================ -->
 <section id="cumpleanos" class="section" style="padding-top:0;">
@@ -261,27 +225,43 @@ require_once APP_ROOT . '/views/includes/header.php';
     </div>
 </section>
 
-<div class="divisor-ondas c4" aria-hidden="true"></div>
+<div class="divisor-ondas c3" aria-hidden="true"></div>
 
 <!-- ============================================================
-     BANDA CTA
+     CÓMO FUNCIONA (nuestro flujo real de reserva)
      ============================================================ -->
 <section class="section" style="padding-top:0;">
     <div class="wrap">
-        <div class="cta-band">
-            <div>
-                <h2>¿Listos para saltar más alto de lo normal?</h2>
-                <p>Cumpleaños, salidas escolares o una tarde cualquiera: siempre hay una razón para venir a rebotar.</p>
+        <div class="section-head">
+            <h2 class="section-title fuente_bouncy titulo-arcoiris">Cómo funciona tu reserva</h2>
+            <p class="section-lead">Cuatro pasos entre que eliges tu paquete y celebras tu fiesta.</p>
+        </div>
+        <div class="steps">
+            <div class="step">
+                <span class="num">01</span>
+                <h3>Elige tu paquete</h3>
+                <p>Compara los paquetes de cumpleaños y escoge el que más se ajuste a tu celebración.</p>
             </div>
-            <div class="cta-band-actions">
-                <a href="<?php echo URL_ROOT; ?>/reservas/paso1" class="btn-neon btn-neon-primary">Reserva tu fiesta</a>
-                <a href="#cumpleanos" class="btn-neon btn-neon-ghost">Ver paquetes</a>
+            <div class="step">
+                <span class="num">02</span>
+                <h3>Elige fecha y hora</h3>
+                <p>Selecciona el día y el horario disponible en nuestro calendario en línea.</p>
+            </div>
+            <div class="step">
+                <span class="num">03</span>
+                <h3>Confirma tu pago</h3>
+                <p>Paga tu reserva de forma sencilla y recibe la confirmación al instante.</p>
+            </div>
+            <div class="step">
+                <span class="num">04</span>
+                <h3>¡A saltar!</h3>
+                <p>Llega el día de tu evento y disfruta de tu fiesta con nosotros.</p>
             </div>
         </div>
     </div>
 </section>
 
-<div class="divisor-ondas c5" aria-hidden="true"></div>
+<div class="divisor-ondas c4" aria-hidden="true"></div>
 
 <!-- ============================================================
      CONÓCENOS (antes /inicio/conocenos)

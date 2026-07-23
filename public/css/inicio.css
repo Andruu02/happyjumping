@@ -55,31 +55,11 @@
 .divisor-ondas.c2{ background: var(--celeste); }
 .divisor-ondas.c3{ background: var(--naranja); }
 .divisor-ondas.c4{ background: var(--morado); }
-.divisor-ondas.c5{ background: var(--verde); }
 
 /* ---------- Secciones / cabeceras ---------- */
 .section{ padding:90px 0; position:relative; }
 .section-head{ margin:0 auto 44px; text-align:center; }
 .section-lead{ color:#555; font-size:19px; max-width:560px; margin-left:auto; margin-right:auto; }
-
-/* Botones (banda CTA) */
-.btn-neon{
-    display:inline-flex; align-items:center; justify-content:center; gap:8px;
-    font-family:'Baloo 2', sans-serif;
-    font-weight:600; font-size:15px;
-    padding:14px 28px;
-    border-radius:999px;
-    border:none; cursor:pointer;
-    transition: transform .3s ease, box-shadow .3s ease;
-}
-.btn-neon-primary{
-    background: linear-gradient(90deg, var(--rosa), var(--naranja));
-    color:#fff;
-    box-shadow: 0 10px 26px -8px rgba(255,60,141,.5);
-}
-.btn-neon-primary:hover{ transform:translateY(-3px); color:#fff; box-shadow: 0 14px 30px -8px rgba(255,140,0,.55); }
-.btn-neon-ghost{ background:#fff; color:var(--morado); border:1.5px solid rgba(123,47,247,.3); }
-.btn-neon-ghost:hover{ border-color:var(--morado); transform:translateY(-2px); }
 
 /* ---------- Marquee ---------- */
 .marquee{
@@ -91,13 +71,14 @@
     z-index:1;
 }
 .marquee-track{
-    display:flex; width:max-content; gap:48px;
+    display:flex; width:max-content;
     animation: marquee-scroll 22s linear infinite;
 }
 .marquee-track span{
     font-family:'Baloo 2', sans-serif;
     font-size:16px; font-weight:600; color:#fff;
     white-space:nowrap; display:flex; align-items:center; gap:12px;
+    margin-right:48px;
 }
 .marquee-track span::before{ content:'✷'; color:#fff; opacity:.75; }
 @keyframes marquee-scroll{
@@ -256,21 +237,6 @@
     border-radius:14px;
 }
 
-/* ---------- Banda CTA ---------- */
-.cta-band{
-    border-radius:32px;
-    padding:56px 46px;
-    background:#fff;
-    border-top:6px solid var(--naranja);
-    box-shadow: 0 14px 30px rgba(30,10,60,.22);
-    display:flex; align-items:center; justify-content:space-between; gap:28px;
-    flex-wrap:wrap;
-    position:relative; overflow:hidden;
-}
-.cta-band h2{ font-family:'Fredoka',sans-serif; font-weight:600; font-size:clamp(24px,3vw,36px); max-width:480px; color:var(--morado); margin:0; }
-.cta-band p{ color:#6b6b7a; margin-top:10px; max-width:420px; }
-.cta-band-actions{ display:flex; gap:16px; flex-wrap:wrap; }
-
 /* ---------- Conócenos (misión / visión + mapa) ---------- */
 .mision-card{
     background:#fff;
@@ -314,5 +280,4 @@
     .amenidad-titulo{ font-size:.95rem; }
     .amenidad-desc{ font-size:.82rem; }
     .steps{ grid-template-columns:1fr; }
-    .cta-band{ padding:40px 26px; }
 }
