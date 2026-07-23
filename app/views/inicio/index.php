@@ -325,6 +325,53 @@ require_once APP_ROOT . '/views/includes/header.php';
     </div>
 </section>
 
+<div class="divisor-ondas c5" aria-hidden="true"></div>
+
+<!-- ============================================================
+     COMENTARIOS (sección tipo blog: cualquiera puede ver los
+     comentarios; solo un usuario con sesión iniciada puede comentar)
+     ============================================================ -->
+<section id="comentarios" class="section" style="padding-top:0;">
+    <div class="wrap">
+        <div class="section-head">
+            <h2 class="section-title fuente_bouncy titulo-arcoiris">Comentarios</h2>
+            <p class="section-lead">Lo que dicen quienes ya vinieron a saltar con nosotros.</p>
+        </div>
+
+        <div class="comentarios-formulario">
+            <?php if (isset($_SESSION['id_usuario'])): ?>
+            <form action="<?php echo URL_ROOT; ?>/comentarios/agregar" method="POST">
+                <textarea name="comentario" maxlength="500" rows="3" placeholder="Cuéntanos tu experiencia en Happy&amp;Jumping..." required></textarea>
+                <button type="submit" class="btn-contratar mt-2">Publicar comentario</button>
+            </form>
+            <?php else: ?>
+            <p class="comentarios-login-prompt">
+                <a href="<?php echo URL_ROOT; ?>/usuarios/login">Inicia sesión</a> para dejar tu comentario.
+            </p>
+            <?php endif; ?>
+        </div>
+
+        <div class="comentarios-lista">
+            <?php if (empty($comentarios)): ?>
+            <p class="comentarios-vacio">Todavía no hay comentarios. ¡Sé el primero en contar tu experiencia!</p>
+            <?php else: ?>
+                <?php foreach ($comentarios as $i => $c): ?>
+                <div class="comentario-card">
+                    <div class="comentario-avatar icono color-<?php echo ($i % 6) + 1; ?>"><?php echo htmlspecialchars(mb_strtoupper(mb_substr($c->nombre, 0, 1))); ?></div>
+                    <div class="comentario-cuerpo">
+                        <div class="comentario-cabecera">
+                            <span class="comentario-nombre"><?php echo htmlspecialchars($c->nombre); ?></span>
+                            <span class="comentario-fecha"><?php echo date('d/m/Y', strtotime($c->fecha_creacion)); ?></span>
+                        </div>
+                        <p class="comentario-texto"><?php echo nl2br(htmlspecialchars($c->comentario)); ?></p>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+    </div>
+</section>
+
 </div><!-- /.inicio-fondo-wrapper -->
 
 <?php

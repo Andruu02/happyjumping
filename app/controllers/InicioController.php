@@ -8,9 +8,11 @@
 class InicioController extends Controller {
 
     private $paqueteModel;
+    private $comentarioModel;
 
     public function __construct() {
         $this->paqueteModel = $this->model('PaqueteModel');
+        $this->comentarioModel = $this->model('ComentarioModel');
     }
 
     /**
@@ -23,6 +25,7 @@ class InicioController extends Controller {
             'titulo'      => 'Happy&Jumping - Diversión sin límites',
             'active_page' => 'inicio',
             'paquetes'    => $this->paqueteModel->obtenerPaquetesActivos(),
+            'comentarios' => $this->comentarioModel->obtenerComentarios(),
         ];
 
         $this->view('inicio/index', $datos);

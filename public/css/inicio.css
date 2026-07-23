@@ -351,6 +351,40 @@
     box-shadow: 0 4px 20px rgba(0,0,0,.15);
 }
 
+/* ---------- Comentarios (tipo blog) ---------- */
+.comentarios-formulario{
+    max-width:640px; margin:0 auto 36px;
+    background:#fff; border-radius:18px; padding:22px 24px;
+    box-shadow: 0 14px 30px rgba(30,10,60,.22);
+}
+.comentarios-formulario textarea{
+    width:100%; border:1.5px solid rgba(123,47,247,.2); border-radius:12px;
+    padding:12px 14px; font-family:'Nunito', sans-serif; font-size:1rem;
+    resize:vertical; color:#333;
+}
+.comentarios-formulario textarea:focus{ outline:none; border-color:var(--morado); }
+.comentarios-login-prompt{ text-align:center; color:#555; margin:0; }
+.comentarios-login-prompt a{ color:var(--morado); font-weight:700; text-decoration:none; }
+.comentarios-login-prompt a:hover{ text-decoration:underline; }
+
+.comentarios-lista{ max-width:720px; margin:0 auto; display:flex; flex-direction:column; gap:18px; }
+.comentarios-vacio{ text-align:center; color:#777; }
+.comentario-card{
+    display:flex; gap:16px; align-items:flex-start;
+    background:#fff; border-radius:16px; padding:20px 22px;
+    box-shadow: 0 12px 26px rgba(30,10,60,.16);
+}
+.comentario-avatar{
+    width:46px; height:46px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-weight:700; font-size:1.1rem;
+}
+.comentario-cuerpo{ flex:1; min-width:0; }
+.comentario-cabecera{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:4px; }
+.comentario-nombre{ font-weight:700; color:var(--morado); }
+.comentario-fecha{ font-size:.8rem; color:#999; }
+.comentario-texto{ margin:0; color:#444; line-height:1.5; }
+
 /* =========================================
    RESPONSIVE MOBILE
    ========================================= */
