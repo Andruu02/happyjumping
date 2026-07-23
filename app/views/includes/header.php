@@ -83,6 +83,5 @@ $esInicio = isset($active_page) && $active_page === 'inicio';
 </script>
 <script src="<?php echo URL_ROOT; ?>/js/push.js"></script>
 <script src="<?php echo URL_ROOT; ?>/js/scroll-suave.js"></script>
-<script src="<?php echo URL_ROOT; ?>/js/transicion-vista.js"></script>
 
 <main class="main-container">

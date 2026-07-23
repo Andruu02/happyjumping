@@ -17,9 +17,11 @@ body {
 }
 
 /* Transición nativa entre páginas (View Transitions API): la página
-   nueva "revela" con un círculo que crece desde el punto donde se hizo
-   click (ver transicion-vista.js), en vez del corte/flash normal del
-   navegador al navegar. Solo funciona en navegadores basados en
+   nueva "revela" con un círculo que crece desde la esquina donde está
+   el botón de login, en vez del corte/flash normal del navegador al
+   navegar. El origen queda fijo (no basado en el click) porque la
+   página nueva es un documento aparte que no hereda variables CSS de
+   la página de origen. Solo funciona en navegadores basados en
    Chromium; en el resto simplemente no hay transición (navegación
    normal, sin errores). */
 @view-transition {
@@ -32,8 +34,8 @@ body {
     animation: hj-revelar-circulo .6s ease-in-out forwards;
 }
 @keyframes hj-revelar-circulo {
-    from { clip-path: circle(0% at var(--vt-x, 90%) var(--vt-y, 6%)); }
-    to   { clip-path: circle(150% at var(--vt-x, 90%) var(--vt-y, 6%)); }
+    from { clip-path: circle(0% at 92% 6%); }
+    to   { clip-path: circle(150% at 92% 6%); }
 }
 
 :root {
