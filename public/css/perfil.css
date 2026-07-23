@@ -3,14 +3,16 @@
  * ESTILOS DE LA PÁGINA DE PERFIL
  * =========================================
  */
-/* ---------- Cabecera de perfil, estilo "portada de LinkedIn" ---------- */
-.perfil-portada {
+/* ---------- Tarjeta única: cabecera (estilo "portada de LinkedIn") +
+   filtros + lista, todo dentro del mismo bloque ---------- */
+.perfil-unificado {
     background: #fff;
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 14px 30px rgba(30,10,60,.12);
     margin-bottom: 30px;
 }
+.perfil-unificado-contenido { padding: 0 28px 28px; }
 .perfil-banner {
     height: 110px;
     background: linear-gradient(90deg, var(--rosa), var(--morado), var(--celeste));
@@ -49,22 +51,42 @@
     font-size: 1.5rem;
 }
 .perfil-portada-info p { margin: 0; color: #666; }
-.perfil-btn-reservar { margin-top: 44px; white-space: nowrap; }
+
+.perfil-btn-reservar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 44px;
+    padding: 12px 24px;
+    background: linear-gradient(90deg, var(--rosa), var(--naranja));
+    color: #fff;
+    font-weight: 700;
+    border-radius: 999px;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: 0 10px 24px -8px rgba(255,60,141,.5);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.perfil-btn-reservar:hover {
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px -8px rgba(255,140,0,.55);
+}
+
+.perfil-unificado h3 { margin-top: 8px; }
 
 /* ---------- Filtros ---------- */
 .perfil-filtros {
-    background: #fff;
+    background: #f8f9fb;
     border-radius: 14px;
     padding: 20px;
-    box-shadow: 0 4px 16px rgba(0,0,0,.06);
     margin-bottom: 24px;
 }
 .pagina-info { font-size: .9rem; color: #666; }
 
 .reservas-lista {
-    background: #fff;
+    border: 1px solid #eee;
     border-radius: 16px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
     overflow: hidden;
 }
 
