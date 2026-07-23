@@ -105,21 +105,105 @@ h2 {
     color: var(--morado);
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
+.reserva-topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 12px 25px;
+}
 .btn-back-reserva {
-    position: absolute;
-    top: 25px;
-    left: 25px;
     z-index: 10;
     color: white;
-    font-size: 2.5rem;
+    font-size: 2.2rem;
     font-weight: bold;
     text-decoration: none;
+    line-height: 1;
     transition: all 0.3s ease;
     text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    flex-shrink: 0;
 }
 .btn-back-reserva:hover {
     color: var(--amarillo);
     transform: scale(1.1);
+}
+
+/* --- Indicador de progreso (Paso 1 - 2 - 3) --- */
+.reserva-stepper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffffee;
+    backdrop-filter: blur(6px);
+    padding: 10px 22px;
+    border-radius: 50px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    margin: 0 auto;
+}
+.stepper-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #999;
+    font-weight: 700;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+.stepper-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #ddd;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+.stepper-item.active { color: var(--morado); }
+.stepper-item.active .stepper-num {
+    background: linear-gradient(135deg, var(--morado), var(--rosa));
+}
+.stepper-item.completado { color: #28a745; }
+.stepper-item.completado .stepper-num { background: #28a745; }
+.stepper-line {
+    width: 26px;
+    height: 3px;
+    background: #ddd;
+    border-radius: 2px;
+}
+
+/* --- Tarjetas de pasos aún no alcanzados --- */
+#card-paso1 { margin-top: 90px; }
+.step-card { position: relative; }
+.step-bloqueado {
+    opacity: 0.5;
+    filter: grayscale(70%);
+    pointer-events: none;
+    user-select: none;
+}
+.badge-bloqueado {
+    display: none;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    align-items: center;
+    gap: 6px;
+    background: #6c757d;
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+.step-bloqueado .badge-bloqueado {
+    display: inline-flex;
 }
 
 /* --- Estilos de Calendario y Horarios --- */
@@ -346,5 +430,10 @@ h2 {
 
     /* Paso 2 y 3 */
     .form-control { font-size: 0.9rem; }
-    .btn-back-reserva { top: 12px; left: 12px; font-size: 1.8rem; }
+
+    .reserva-topbar { padding: 10px 14px; gap: 12px; }
+    .btn-back-reserva { font-size: 1.8rem; }
+    .reserva-stepper { padding: 8px 14px; gap: 6px; }
+    .stepper-line { width: 16px; }
+    #card-paso1 { margin-top: 70px; }
 }

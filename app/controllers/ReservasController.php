@@ -50,21 +50,20 @@ class ReservasController extends Controller {
     }
 
     /**
-     * PASO 2: Muestra el formulario de "Nombre" y "Edad"
+     * PASO 2 y PASO 3 ya no son ventanas aparte: todo el flujo vive en una
+     * sola página (ver paso1()). Estas rutas se mantienen solo por si algún
+     * enlace viejo (favorito, historial) apunta aquí, y redirigen al flujo.
      */
     public function paso2() {
-        $this->proteger(); 
-        $datos = [ 'titulo' => 'Reserva (Paso 2) - Detalles' ];
-        $this->view('reservas/paso2', $datos);
+        $this->proteger();
+        header('Location: ' . URL_ROOT . '/reservas/paso1');
+        exit();
     }
-    
-    /**
-     * PASO 3: Muestra QR y formulario de subida
-     */
+
     public function paso3() {
-        $this->proteger(); 
-        $datos = [ 'titulo' => 'Reserva (Paso 3) - Pago' ];
-        $this->view('reservas/paso3', $datos);
+        $this->proteger();
+        header('Location: ' . URL_ROOT . '/reservas/paso1');
+        exit();
     }
     
     /**
