@@ -3,16 +3,48 @@
  * ESTILOS DE LA PÁGINA DE PERFIL
  * =========================================
  */
-.profile-header {
-    background: linear-gradient(90deg, var(--morado), var(--rosa));
-    color: white;
-    padding: 30px;
-    border-radius: 15px;
+.perfil-saludo {
+    background: #fff;
+    border-radius: 20px;
+    padding: 36px 30px;
+    text-align: center;
+    box-shadow: 0 14px 30px rgba(30,10,60,.12);
     margin-bottom: 30px;
+    border-top: 6px solid var(--rosa);
 }
-.profile-header h2 {
+.perfil-saludo-iconos {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.perfil-icono {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 6px 14px rgba(0,0,0,.15);
+}
+.perfil-icono.color-1 { background: linear-gradient(135deg, var(--rosa), #ff8fb8); }
+.perfil-icono.color-2 { background: linear-gradient(135deg, var(--celeste), #6fe0ff); }
+.perfil-icono.color-3 { background: linear-gradient(135deg, var(--naranja), #ffc266); }
+.perfil-icono.color-4 { background: linear-gradient(135deg, var(--morado), #b18bff); }
+.perfil-icono.color-5 { background: linear-gradient(135deg, var(--verde), #6cf0c2); }
+.perfil-icono.color-6 { background: linear-gradient(135deg, var(--rosa), var(--morado)); }
+.perfil-saludo h2 {
+    margin: 0 0 8px;
+    font-weight: 600;
+    color: var(--morado);
+    font-size: 1.8rem;
+}
+.perfil-saludo-lead {
     margin: 0;
-    font-weight: 700;
+    color: #666;
+    font-size: 1.05rem;
 }
 
 .reservas-lista {

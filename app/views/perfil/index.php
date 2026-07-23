@@ -10,13 +10,25 @@ require APP_ROOT . '/views/includes/header.php';
 <link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/perfil.css">
 
 <div class="container mt-5 mb-5">
-    
-    <div class="profile-header">
-        <h2>¡Bienvenido, <?php echo $_SESSION['usuario_nombre']; ?>!</h2>
-        <p class="lead">Aquí puedes ver el estado de todas tus reservas.</p>
+
+    <?php
+        // Iconos de animales "saltarines" al azar, para que la cabecera del
+        // perfil no sea siempre igual y combine con el tema del parque.
+        $iconosAnimales = ['🦘', '🐒', '🐰', '🐸', '🦋', '🦩', '🐬', '🦁', '🐯', '🐨'];
+        shuffle($iconosAnimales);
+        $iconosElegidos = array_slice($iconosAnimales, 0, 5);
+    ?>
+    <div class="perfil-saludo">
+        <div class="perfil-saludo-iconos" aria-hidden="true">
+            <?php foreach ($iconosElegidos as $i => $icono): ?>
+            <span class="perfil-icono color-<?php echo ($i % 6) + 1; ?>"><?php echo $icono; ?></span>
+            <?php endforeach; ?>
+        </div>
+        <h2 class="fuente_bouncy">¡Hola, <?php echo htmlspecialchars($_SESSION['usuario_nombre']); ?>! 🎉</h2>
+        <p class="perfil-saludo-lead">Aquí puedes ver el estado de todas tus reservas.</p>
     </div>
 
-    <h3>Tus Reservas</h3>
+    <h3 class="fuente_bouncy text-center">Tus Reservas</h3>
     <hr>
 
     <?php if (empty($reservas)): ?>
