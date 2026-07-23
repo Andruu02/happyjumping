@@ -28,8 +28,9 @@ require APP_ROOT . '/views/includes/header.php';
 
     <?php else: ?>
 
+        <div class="reservas-lista">
         <?php foreach($reservas as $reserva): ?>
-            
+
             <?php
                 $status_class = '';
                 $status_text = '';
@@ -50,28 +51,28 @@ require APP_ROOT . '/views/includes/header.php';
                         $status_class = 'status-pendiente';
                         $status_text = 'Pendiente';
                 }
+                $fechaObj = new DateTime($reserva->fecha . ' ' . $reserva->hora_inicio);
             ?>
 
-            <div class="reserva-card <?php echo $status_class; ?>">
-                <div class="reserva-card-body">
-                    <h5><?php echo $reserva->paquete_nombre; ?></h5>
-                    <p>
-                        <strong>Fecha:</strong> 
-                        <?php 
-                            $fechaObj = new DateTime($reserva->fecha . ' ' . $reserva->hora_inicio);
-                            echo $fechaObj->format('d/m/Y \a \l\a\s h:i A');
-                        ?>
-                    </p>
-                    <p><strong>Cumpleañero:</strong> <?php echo $reserva->nombre_cumpleanero; ?> (Cumple <?php echo $reserva->edad_cumpleanero; ?>)</p>
-                    <p><strong>Invitados:</strong> <?php echo $reserva->cantidad_personas; ?> personas</p>
+            <div class="reserva-fila">
+                <div class="reserva-fila-fecha">
+                    <span class="dia"><?php echo $fechaObj->format('d'); ?></span>
+                    <span class="mes"><?php echo $fechaObj->format('M'); ?></span>
                 </div>
-                <div class="reserva-card-status">
-                    <span class="status-badge <?php echo $status_class; ?>">
-                        <?php echo $status_text; ?>
-                    </span>
+                <div class="reserva-fila-info">
+                    <h5><?php echo htmlspecialchars($reserva->paquete_nombre); ?></h5>
+                    <p class="reserva-fila-detalle">
+                        <span><i class="bi bi-clock-fill"></i> <?php echo $fechaObj->format('h:i A'); ?></span>
+                        <span><i class="bi bi-cake2-fill"></i> <?php echo htmlspecialchars($reserva->nombre_cumpleanero); ?> (cumple <?php echo (int) $reserva->edad_cumpleanero; ?>)</span>
+                        <span><i class="bi bi-people-fill"></i> <?php echo (int) $reserva->cantidad_personas; ?> personas</span>
+                    </p>
+                </div>
+                <div class="reserva-fila-estado">
+                    <span class="status-badge <?php echo $status_class; ?>"><?php echo $status_text; ?></span>
                 </div>
             </div>
         <?php endforeach; ?>
+        </div>
     <?php endif; ?>
 
 

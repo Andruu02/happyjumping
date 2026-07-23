@@ -15,60 +15,76 @@
     font-weight: 700;
 }
 
-.reserva-card {
+.reservas-lista {
     background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    margin-bottom: 25px;
-    border-left: 5px solid var(--morado); /* Borde por defecto */
-    display: flex;
-    flex-wrap: wrap; /* Para responsive */
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
 }
 
-.reserva-card-body {
-    padding: 20px 25px;
-    flex: 3; /* Ocupa 3/4 del espacio */
-    min-width: 300px;
-}
-.reserva-card-body h5 {
-    font-weight: 700;
-    color: var(--morado);
-}
-.reserva-card-body p {
-    margin-bottom: 5px;
-    color: #555;
-    font-weight: 500;
-}
-.reserva-card-body strong {
-    color: #333;
-}
-
-.reserva-card-status {
-    flex: 1; /* Ocupa 1/4 del espacio */
-    min-width: 150px;
+.reserva-fila {
     display: flex;
     align-items: center;
-    justify-content: center;
-    background: #f9f9f9;
-    border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px;
+    gap: 20px;
+    padding: 18px 24px;
+    border-bottom: 1px solid #eee;
+    transition: background .2s ease;
 }
+.reserva-fila:last-child { border-bottom: none; }
+.reserva-fila:hover { background: #faf9fc; }
+
+.reserva-fila-fecha {
+    flex: 0 0 64px;
+    text-align: center;
+    background: rgba(123,47,247,.08);
+    border-radius: 12px;
+    padding: 8px 0;
+}
+.reserva-fila-fecha .dia {
+    display: block;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--morado);
+    line-height: 1;
+}
+.reserva-fila-fecha .mes {
+    display: block;
+    font-size: .72rem;
+    text-transform: uppercase;
+    color: #888;
+    letter-spacing: .05em;
+}
+
+.reserva-fila-info { flex: 1; min-width: 0; }
+.reserva-fila-info h5 {
+    margin: 0 0 4px;
+    font-weight: 700;
+    color: #333;
+    font-size: 1.05rem;
+}
+.reserva-fila-detalle {
+    margin: 0;
+    color: #666;
+    font-size: .88rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+}
+.reserva-fila-detalle i { color: var(--morado); margin-right: 4px; }
+
+.reserva-fila-estado { flex: 0 0 auto; }
 .status-badge {
-    padding: 10px 20px;
+    padding: 7px 18px;
     border-radius: 50px;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: .8rem;
     color: white;
+    white-space: nowrap;
 }
 
-/* Colores de Borde y Badge por Estado */
-.reserva-card.status-pendiente { border-left-color: var(--naranja); }
+/* Colores del badge por estado */
 .status-badge.status-pendiente { background-color: var(--naranja); }
-
-.reserva-card.status-confirmada { border-left-color: #28a745; } /* Verde */
 .status-badge.status-confirmada { background-color: #28a745; }
-
-.reserva-card.status-cancelada { border-left-color: #dc3545; } /* Rojo */
 .status-badge.status-cancelada { background-color: #dc3545; }
 
 .btn-logout {
@@ -92,19 +108,9 @@
    RESPONSIVE MOBILE - PERFIL
    ========================================= */
 @media (max-width: 768px) {
-
-    .perfil-hero { padding: 30px 16px; }
-    .perfil-hero h2 { font-size: 1.5rem; }
-    .perfil-avatar { width: 70px; height: 70px; font-size: 1.8rem; }
-
-    .perfil-card { padding: 18px 14px; border-radius: 14px; }
-
-    .reserva-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
+    .reserva-fila {
+        flex-wrap: wrap;
+        padding: 16px;
     }
-
-    .table-responsive { font-size: 0.82rem; }
-    .btn { font-size: 0.82rem; padding: 6px 12px; }
+    .reserva-fila-estado { margin-left: auto; }
 }
