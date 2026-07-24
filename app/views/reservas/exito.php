@@ -17,7 +17,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/reserva.css?v=<?php echo filemtime(PUBLIC_ROOT . '/css/reserva.css'); ?>">
 </head>
-<body>
+<body class="body-exito">
 
     <div class="reserva-fondo-wrapper">
         <div class="capa-color-fondo" aria-hidden="true"></div>
@@ -41,8 +41,8 @@
                 <?php endif; ?>
 
                 <div class="exito-acciones">
-                    <a href="<?php echo URL_ROOT; ?>" class="btn-next">Volver al Inicio</a>
-                    <a href="<?php echo URL_ROOT; ?>/perfil" class="btn-secundario">Ir a Mi Perfil</a>
+                    <a href="<?php echo URL_ROOT; ?>/perfil" class="btn-exito-principal"><i class="bi bi-person-fill"></i> Ir a Mi Perfil</a>
+                    <a href="<?php echo URL_ROOT; ?>" class="exito-link-secundario"><i class="bi bi-house-fill"></i> Volver al Inicio</a>
                 </div>
             </div>
         </div>

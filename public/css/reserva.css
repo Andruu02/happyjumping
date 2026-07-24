@@ -454,80 +454,101 @@ body {
     transform: translateY(-2px);
 }
 
-/* --- Botón secundario (píldora con borde, para acciones no principales) --- */
-.btn-secundario {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: #fff;
-    color: var(--morado);
-    font-weight: 700;
-    border: 2px solid var(--morado-claro);
-    padding: 14px 30px;
-    border-radius: 999px;
-    font-size: 1.05rem;
-    text-decoration: none;
-    transition: background .2s ease, transform .2s ease;
-}
-.btn-secundario:hover {
-    background: var(--morado-claro);
-    color: var(--morado);
-    transform: translateY(-2px);
-}
+/* --- Página de éxito (reserva pendiente) ---
+   Pensada para caber entera en una pantalla, sin scroll: el wrapper centra
+   verticalmente con min-height:100vh y la tarjeta usa medidas compactas. */
+body.body-exito { padding-bottom: 0; }
 
-/* --- Página de éxito (reserva pendiente) --- */
 .exito-wrap {
-    max-width: 620px;
+    max-width: 560px;
     margin: 0 auto;
-    padding: 90px 24px;
+    min-height: 100vh;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .exito-card {
+    width: 100%;
     background: #fff;
-    border-radius: 24px;
-    padding: 50px 40px;
+    border-radius: 22px;
+    padding: 34px 36px;
     text-align: center;
     box-shadow: 0 20px 45px rgba(30,10,60,.18);
     border-top: 6px solid var(--rosa);
 }
 .exito-icono {
-    width: 100px;
-    height: 100px;
-    margin: 0 auto 24px;
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 14px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--verde), #6cf0c2);
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 3rem;
+    font-size: 2.1rem;
     box-shadow: 0 14px 30px rgba(0,208,132,.35);
 }
 .exito-card h1 {
     color: var(--morado);
-    font-size: 2rem;
-    margin-bottom: 16px;
+    font-size: 1.65rem;
+    margin-bottom: 10px;
 }
-.exito-texto { color: #444; font-size: 1.1rem; line-height: 1.5; margin-bottom: 8px; }
-.exito-subtexto { color: #888; font-size: .95rem; margin-bottom: 26px; }
+.exito-texto { color: #444; font-size: 1rem; line-height: 1.45; margin-bottom: 4px; }
+.exito-subtexto { color: #888; font-size: .88rem; margin-bottom: 18px; }
+
+/* Botón principal: la acción que más le sirve al cliente después de reservar */
+.btn-exito-principal {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(90deg, var(--morado), var(--rosa));
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    padding: 13px 32px;
+    border-radius: 999px;
+    font-size: 1rem;
+    text-decoration: none;
+    box-shadow: 0 10px 22px -6px rgba(123,47,247,.5);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.btn-exito-principal:hover {
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 14px 26px -6px rgba(123,47,247,.55);
+}
+
+/* Enlace secundario, discreto, para no competir con el botón principal */
+.exito-link-secundario {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #999;
+    font-weight: 600;
+    font-size: .9rem;
+    text-decoration: none;
+    transition: color .2s ease;
+}
+.exito-link-secundario:hover { color: var(--morado); }
 
 .exito-acciones {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     gap: 14px;
-    margin-top: 26px;
-    padding-top: 24px;
+    margin-top: 18px;
+    padding-top: 18px;
     border-top: 1px solid #f0f0f0;
 }
 
 @media (max-width: 768px) {
-    .exito-wrap { padding: 50px 18px; }
-    .exito-card { padding: 36px 22px; border-radius: 18px; }
-    .exito-icono { width: 80px; height: 80px; font-size: 2.4rem; }
-    .exito-card h1 { font-size: 1.6rem; }
-    .exito-acciones { flex-direction: column; }
-    .exito-acciones .btn-next,
-    .exito-acciones .btn-secundario { width: 100%; justify-content: center; text-align: center; }
+    .exito-wrap { padding: 16px; }
+    .exito-card { padding: 26px 20px; border-radius: 18px; }
+    .exito-icono { width: 60px; height: 60px; font-size: 1.7rem; }
+    .exito-card h1 { font-size: 1.35rem; }
+    .btn-exito-principal { width: 100%; justify-content: center; }
 }
 
 /* --- Calendario --- */
