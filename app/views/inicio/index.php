@@ -10,7 +10,7 @@ require_once APP_ROOT . '/views/includes/header.php';
     <div class="hero-content">
         <h1 class="fuente_bouncy">¡Salta hacia la diversión!</h1>
         <p>Descubre la emoción sin límites en Happy&amp;Jumping, el lugar donde la alegría nunca se detiene.</p>
-        <a href="<?php echo URL_ROOT; ?>/reservas/paso1" class="hero-cta">🎉 ¡Reserva tu diversión!</a>
+        <a href="<?php echo URL_ROOT; ?>/#cumpleanos" class="hero-cta">🎉 ¡Reserva tu diversión!</a>
     </div>
 </section>
 

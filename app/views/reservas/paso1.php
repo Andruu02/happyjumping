@@ -1,7 +1,12 @@
 <?php
 /*
  * VISTA RESERVA - FLUJO COMPLETO EN UNA SOLA PÁGINA
- * (Paso 1: Paquete/Fecha, Paso 2: Detalles, Paso 3: Pago)
+ * (Paso 1: Extras/Fecha, Paso 2: Detalles, Paso 3: Pago)
+ *
+ * El paquete YA viene elegido desde la sección "Cumpleaños" del inicio
+ * (?paquete=ID, resuelto en ReservasController::paso1()) - aquí solo se
+ * muestra como información ("Paquete elegido"), no se puede cambiar sin
+ * volver a esa sección.
  *
  * Los 3 pasos viven en el mismo documento, uno debajo del otro, y NO están
  * bloqueados entre sí: el usuario puede rellenarlos en el orden que quiera
@@ -9,8 +14,9 @@
  * obligatorios (excepto "observaciones") y se validan recién al presionar
  * "Finalizar Reserva" al final.
  *
- * Los números grandes (1-2-3) que conectan las 3 tarjetas quedan listos
- * para, más adelante, animarse con GSAP MotionPath + ScrollTrigger.
+ * Un indicador numérico (1-2-3) viaja con GSAP MotionPath + ScrollTrigger
+ * a lo largo de una ruta que conecta los 3 pasos, a medida que se hace
+ * scroll por la página.
  */
 ?>
 <!DOCTYPE html>
@@ -29,8 +35,6 @@
 </head>
 <body>
 
-    <?php $paquete_preseleccionado = isset($_GET['paquete']) ? (int)$_GET['paquete'] : 0; ?>
-
     <a href="javascript:void(0)" id="btnBack" class="btn-back-reserva">
         <i class="bi bi-arrow-left"></i>
     </a>
@@ -45,86 +49,64 @@
 
         <div class="wrap reserva-pasos">
 
-            <!-- ============== PASO 1: PAQUETE, EXTRAS, FECHA Y HORA ============== -->
+            <!-- Ruta (SVG) que conecta los 3 pasos + indicador numérico que viaja con GSAP -->
+            <svg id="reserva-path-svg" class="reserva-path-svg" aria-hidden="true">
+                <defs>
+                    <linearGradient id="reserva-path-gradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%"   stop-color="#7b2ff7"/>
+                        <stop offset="50%"  stop-color="#ff3c8d"/>
+                        <stop offset="100%" stop-color="#ff8c00"/>
+                    </linearGradient>
+                </defs>
+                <path id="reserva-path" fill="none" stroke="url(#reserva-path-gradient)" stroke-width="3" stroke-dasharray="2 14" stroke-linecap="round"/>
+            </svg>
+            <div id="paso-indicador" class="paso-indicador">1</div>
+
+            <!-- ============== PASO 1: EXTRAS, CANTIDAD, FECHA Y HORA ============== -->
             <div class="paso-fila">
                 <div class="paso-numero-col">
-                    <span class="paso-numero" data-paso-num="1">1</span>
+                    <span class="paso-punto" data-paso-num="1"></span>
                 </div>
                 <div class="step-card" id="card-paso1" data-paso="1">
-                    <h2>Paquete, Extras y Fecha</h2>
+                    <h2>Personaliza tu Fiesta</h2>
 
-                    <h5 class="fw-semibold">1. Selecciona tu paquete</h5>
-                    <div class="accordion mb-4" id="paquetesAccordion">
-
-                        <?php foreach($paquetes as $paquete): ?>
-
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button<?php echo ($paquete_preseleccionado == $paquete->id_paquete) ? '' : ' collapsed'; ?>" type="button"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#paquete-<?php echo $paquete->id_paquete; ?>">
-
-                                    <input type="radio" name="paquete" class="package-select"
-                                           id="paquete_id_<?php echo $paquete->id_paquete; ?>"
-                                           value="<?php echo $paquete->precio_semana; ?>"
-                                           data-precio-finde="<?php echo $paquete->precio_fin_semana; ?>"
-                                           data-nombre="<?php echo $paquete->nombre; ?>"
-                                           data-duracion="<?php echo $paquete->duracion; ?>">
-
-                                    <span class="ms-2">
-                                        <?php echo $paquete->nombre; ?> —
-                                        S/<?php echo number_format($paquete->precio_semana, 2); ?> (L-V) |
-                                        S/<?php echo number_format($paquete->precio_fin_semana, 2); ?> (S-D)
-                                    </span>
-                                </button>
-                            </h2>
-                            <div id="paquete-<?php echo $paquete->id_paquete; ?>" class="accordion-collapse collapse<?php echo ($paquete_preseleccionado == $paquete->id_paquete) ? ' show' : ''; ?>" data-bs-parent="#paquetesAccordion">
-                                <div class="accordion-body">
-                                    <?php if ($paquete->id_paquete == 1): ?>
-                                        <ul>
-                                            <li>2 horas de uso del local.</li>
-                                            <li>Pulsera de 1 hora en camas saltarinas.</li>
-                                            <li>Dinámicas con premios a cargo de nuestras anfitrionas.</li>
-                                        </ul>
-                                    <?php elseif ($paquete->id_paquete == 2): ?>
-                                        <ul>
-                                            <li>2 horas y media de diversión total.</li>
-                                            <li>Pulsera de 1 hora en trampolines.</li>
-                                            <li>Glitter Bar y tatuajes neón durante 1 hora.</li>
-                                            <li>Combo Happy: Popcorn + agua mineral.</li>
-                                        </ul>
-                                    <?php elseif ($paquete->id_paquete == 3): ?>
-                                        <ul>
-                                            <li>3 horas de uso completo del local.</li>
-                                            <li>1 hora y media de trampolines, pared de escalar y tirolesa.</li>
-                                            <li>Maquillaje neón y Glitter.</li>
-                                            <li>Combo Happy: Popcorn + bebida (frugos, agua o gaseosa).</li>
-                                        </ul>
-                                    <?php elseif ($paquete->id_paquete == 4): ?>
-                                        <ul>
-                                            <li>5 horas de uso exclusivo del local.</li>
-                                            <li>Acceso a trampolines, tirolesa y pared de escalar.</li>
-                                            <li>Dinámicas con premios y muñecos inflables.</li>
-                                            <li>Combo Happy: Popcorn + bebida + pan con hotdog.</li>
-                                        </ul>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
+                    <?php
+                        $contenidoPaquetes = [
+                            1 => ['2 horas de uso del local.', 'Pulsera de 1 hora en camas saltarinas.', 'Dinámicas con premios a cargo de nuestras anfitrionas.'],
+                            2 => ['2 horas y media de diversión total.', 'Pulsera de 1 hora en trampolines.', 'Glitter Bar y tatuajes neón durante 1 hora.', 'Combo Happy: Popcorn + agua mineral.'],
+                            3 => ['3 horas de uso completo del local.', '1 hora y media de trampolines, pared de escalar y tirolesa.', 'Maquillaje neón y Glitter.', 'Combo Happy: Popcorn + bebida (frugos, agua o gaseosa).'],
+                            4 => ['5 horas de uso exclusivo del local.', 'Acceso a trampolines, tirolesa y pared de escalar.', 'Dinámicas con premios y muñecos inflables.', 'Combo Happy: Popcorn + bebida + pan con hotdog.'],
+                        ];
+                    ?>
+                    <div class="paquete-elegido-box">
+                        <span class="paquete-elegido-label">Paquete elegido</span>
+                        <h4><?php echo htmlspecialchars($paquete->nombre); ?></h4>
+                        <div class="paquete-elegido-precios">
+                            <span>S/<?php echo number_format($paquete->precio_semana, 2); ?> (L-V)</span>
+                            <span>S/<?php echo number_format($paquete->precio_fin_semana, 2); ?> (S-D)</span>
                         </div>
-                        <?php endforeach; ?>
-
+                        <?php if (isset($contenidoPaquetes[$paquete->id_paquete])): ?>
+                        <ul class="paquete-elegido-lista">
+                            <?php foreach ($contenidoPaquetes[$paquete->id_paquete] as $item): ?>
+                                <li><i class="bi bi-check-circle-fill"></i> <?php echo $item; ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                        <?php endif; ?>
+                        <a href="<?php echo URL_ROOT; ?>/#cumpleanos" class="paquete-elegido-cambiar"><i class="bi bi-arrow-repeat"></i> ¿Cambiar de paquete?</a>
                     </div>
+
+                    <hr class="my-4">
 
                     <div class="row">
                         <div class="col-md-6">
-                            <h5 class="fw-semibold">2. Extras (S/15 c/u por reserva)</h5>
+                            <h5 class="fw-semibold">1. Extras (S/15 c/u por reserva)</h5>
                             <div class="mb-3">
                                 <label><input type="checkbox" class="experience-select" value="15" id="pintura"> Cuarto de Pintura</label><br>
                                 <label><input type="checkbox" class="experience-select" value="15" id="destruccion"> Cuarto de Destrucción</label>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <h5 class="fw-semibold">3. Cantidad de personas</h5>
+                            <h5 class="fw-semibold">2. Cantidad de personas</h5>
                             <div class="mb-4">
                                 <label for="cantidad" class="form-label visually-hidden">Cantidad de personas:</label>
                                 <input type="number" id="cantidad" class="form-control" min="10" max="30" value="10" style="max-width:150px;">
@@ -133,7 +115,7 @@
                     </div>
 
                     <hr class="my-4">
-                    <h5 class="mb-3 fw-semibold">4. Selecciona Fecha y Hora de Inicio</h5>
+                    <h5 class="mb-3 fw-semibold">3. Selecciona Fecha y Hora de Inicio</h5>
                     <div class="row g-3">
                         <div class="col-lg-7">
                             <div class="calendar-wrapper">
@@ -174,7 +156,7 @@
             <!-- ============== PASO 2: DETALLES DEL CUMPLEAÑERO ============== -->
             <div class="paso-fila">
                 <div class="paso-numero-col">
-                    <span class="paso-numero" data-paso-num="2">2</span>
+                    <span class="paso-punto" data-paso-num="2"></span>
                 </div>
                 <div class="step-card" id="card-paso2" data-paso="2">
                     <h2>Detalles del Cumpleañero</h2>
@@ -204,7 +186,7 @@
                         <div class="col-lg-5">
                             <div class="resumen-box">
                                 <h5>Resumen de tu Reserva</h5>
-                                <p><strong>Paquete:</strong> <span id="resumen_paquete">—</span></p>
+                                <p><strong>Paquete:</strong> <span id="resumen_paquete"><?php echo htmlspecialchars($paquete->nombre); ?></span></p>
                                 <p><strong>Cantidad:</strong> <span id="resumen_cantidad">—</span></p>
                                 <p><strong>Extras:</strong> <span id="resumen_extras">—</span></p>
                                 <p><strong>Fecha:</strong> <span id="resumen_fecha">—</span></p>
@@ -222,7 +204,7 @@
             <!-- ============== PASO 3: PAGO Y SUBIDA DE COMPROBANTE ============== -->
             <div class="paso-fila">
                 <div class="paso-numero-col">
-                    <span class="paso-numero" data-paso-num="3">3</span>
+                    <span class="paso-punto" data-paso-num="3"></span>
                 </div>
                 <div class="step-card" id="card-paso3" data-paso="3">
                     <h2>Realiza tu Pago</h2>
@@ -271,8 +253,21 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/MotionPathPlugin.min.js"></script>
 
     <script>
+        // El paquete ya viene elegido desde el inicio (?paquete=ID); acá solo
+        // se usa como dato fijo para calcular precios y duración.
+        const paqueteElegido = {
+            id: <?php echo (int) $paquete->id_paquete; ?>,
+            nombre: <?php echo json_encode($paquete->nombre); ?>,
+            precioSemana: <?php echo (float) $paquete->precio_semana; ?>,
+            precioFinde: <?php echo (float) $paquete->precio_fin_semana; ?>,
+            duracion: <?php echo (int) $paquete->duracion; ?>
+        };
+
         // --- BOTÓN DE RETROCEDER: vuelve a la pestaña/página anterior ---
         document.getElementById('btnBack').addEventListener('click', function (e) {
             e.preventDefault();
@@ -283,21 +278,8 @@
             }
         });
 
-        // --- Resalta el número del paso que está actualmente en pantalla ---
-        // (Punto de partida para, más adelante, animar estos números con
-        // GSAP MotionPath + ScrollTrigger a medida que se hace scroll.)
-        const pasoCards = document.querySelectorAll('.step-card[data-paso]');
-        const numeroObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                const numero = document.querySelector(`.paso-numero[data-paso-num="${entry.target.dataset.paso}"]`);
-                if (numero) numero.classList.toggle('numero-activo', entry.isIntersecting);
-            });
-        }, { rootMargin: '-35% 0px -35% 0px', threshold: 0 });
-        pasoCards.forEach(card => numeroObserver.observe(card));
+        /* ================= PASO 1: Extras, cantidad, fecha y hora ================= */
 
-        /* ================= PASO 1: Paquete, extras, fecha y hora ================= */
-
-        const paquetes = document.querySelectorAll('input[name="paquete"]');
         const experiencias = document.querySelectorAll('.experience-select');
         const cantidadInput = document.getElementById('cantidad');
         const totalEl1 = document.getElementById('total-paso1');
@@ -350,6 +332,8 @@
 
                 calendarGrid.innerHTML += `<div class="${classes}" data-date="${dateStr}">${day}</div>`;
             }
+
+            if (window.ScrollTrigger) setTimeout(() => ScrollTrigger.refresh(), 50);
         }
         prevMonthBtn.addEventListener('click', () => {
             currentDate.setMonth(currentDate.getMonth() - 1);
@@ -390,23 +374,17 @@
         }
 
         function calcularTotal() {
-            let totalBase = 0;
             let extras = 0;
             const cantidad = parseInt(cantidadInput.value) || 0;
-            const paqueteSeleccionado = document.querySelector('input[name="paquete"]:checked');
 
-            if (paqueteSeleccionado) {
-                let precio = parseFloat(paqueteSeleccionado.value);
-                if (selectedDate && esFinDeSemana(selectedDate)) {
-                    precio = parseFloat(paqueteSeleccionado.dataset.precioFinde);
-                }
-                totalBase = precio * cantidad;
+            let precio = paqueteElegido.precioSemana;
+            if (selectedDate && esFinDeSemana(selectedDate)) {
+                precio = paqueteElegido.precioFinde;
             }
+            const totalBase = precio * cantidad;
 
             experiencias.forEach(e => {
-                if (e.checked) {
-                    extras += parseFloat(e.value);
-                }
+                if (e.checked) extras += parseFloat(e.value);
             });
 
             total = totalBase + extras;
@@ -418,8 +396,6 @@
         function actualizarResumenGlobal() {
             calcularTotal();
 
-            const paqueteSeleccionado = document.querySelector('input[name="paquete"]:checked');
-            document.getElementById('resumen_paquete').textContent = paqueteSeleccionado ? paqueteSeleccionado.dataset.nombre : '—';
             document.getElementById('resumen_cantidad').textContent = cantidadInput.value ? cantidadInput.value + ' personas' : '—';
 
             if (selectedDate) {
@@ -450,11 +426,8 @@
 
         const HORA_CIERRE_MINUTOS = 23 * 60; // 11:00 PM
 
-        function filtrarHorasPorDuracion(duracionMinutosStr) {
-            const duracion = parseInt(duracionMinutosStr);
-            if (isNaN(duracion)) return;
-
-            let duracionHoras = (duracion / 60).toFixed(1);
+        function filtrarHorasPorDuracion(duracionMinutos) {
+            let duracionHoras = (duracionMinutos / 60).toFixed(1);
             if (duracionHoras.endsWith('.0')) {
                 duracionHoras = duracionHoras.substring(0, duracionHoras.length - 2);
             }
@@ -464,7 +437,7 @@
                 const option = horaInicioSelect.options[i];
                 const [horas, minutos] = option.value.split(':').map(Number);
                 const horaInicioMinutos = (horas * 60) + minutos;
-                const horaFinMinutos = horaInicioMinutos + duracion;
+                const horaFinMinutos = horaInicioMinutos + duracionMinutos;
 
                 if (horaFinMinutos > HORA_CIERRE_MINUTOS) {
                     option.style.display = 'none';
@@ -474,25 +447,7 @@
                     option.disabled = false;
                 }
             }
-
-            if (horaInicioSelect.options[horaInicioSelect.selectedIndex]?.disabled) {
-                 horaInicioSelect.value = "";
-                 horaFinCalculadaEl.textContent = "";
-            }
         }
-
-        paquetes.forEach(p => {
-            p.addEventListener('change', (e) => {
-                actualizarResumenGlobal();
-                filtrarHorasPorDuracion(e.target.dataset.duracion);
-            });
-
-            p.closest('.accordion-header').querySelector('button').addEventListener('click', (e) => {
-                p.checked = true;
-                actualizarResumenGlobal();
-                filtrarHorasPorDuracion(p.dataset.duracion);
-            });
-        });
 
         experiencias.forEach(e => e.addEventListener('change', actualizarResumenGlobal));
         cantidadInput.addEventListener('input', () => {
@@ -503,19 +458,17 @@
         horaInicioSelect.addEventListener('change', () => {
             actualizarResumenGlobal();
 
-            const paqueteSeleccionado = document.querySelector('input[name="paquete"]:checked');
-            if (!selectedDate || !horaInicioSelect.value || !paqueteSeleccionado) {
+            if (!selectedDate || !horaInicioSelect.value) {
                 horaFinCalculadaEl.textContent = "";
                 return;
             }
 
-            const duracionMinutos = parseInt(paqueteSeleccionado.dataset.duracion);
             const [horas, minutos] = horaInicioSelect.value.split(':').map(Number);
 
             const fechaInicio = new Date(selectedDate);
             fechaInicio.setHours(horas, minutos);
 
-            const fechaFin = new Date(fechaInicio.getTime() + duracionMinutos * 60000);
+            const fechaFin = new Date(fechaInicio.getTime() + paqueteElegido.duracion * 60000);
 
             const horaFinStr = fechaFin.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: true });
 
@@ -528,17 +481,7 @@
             }
         });
 
-        // Preselección de paquete (cuando se viene con ?paquete=ID desde el inicio)
-        const paquetePreseleccionado = <?php echo $paquete_preseleccionado; ?>;
-
-        paquetes.forEach(p => {
-            const idPaquete = parseInt(p.id.replace('paquete_id_', ''));
-            if (paquetePreseleccionado > 0 && idPaquete === paquetePreseleccionado) {
-                p.checked = true;
-                filtrarHorasPorDuracion(p.dataset.duracion);
-            }
-        });
-
+        filtrarHorasPorDuracion(paqueteElegido.duracion);
         renderCalendar();
         actualizarResumenGlobal();
 
@@ -561,11 +504,7 @@
 
         function validarTodo() {
             const errores = [];
-            const paqueteSeleccionado = document.querySelector('input[name="paquete"]:checked');
 
-            if (!paqueteSeleccionado) {
-                errores.push({ paso: 1, mensaje: 'Selecciona un paquete.', el: document.getElementById('paquetesAccordion') });
-            }
             if (!selectedDate) {
                 errores.push({ paso: 1, mensaje: 'Selecciona la fecha de tu evento.', el: document.querySelector('.calendar-wrapper') });
             }
@@ -595,8 +534,8 @@
                 if (err.el) err.el.classList.add('campo-invalido');
             });
             pasosConError.forEach(p => {
-                const numero = document.querySelector(`.paso-numero[data-paso-num="${p}"]`);
-                if (numero) numero.classList.add('numero-error');
+                const punto = document.querySelector(`.paso-punto[data-paso-num="${p}"]`);
+                if (punto) punto.classList.add('numero-error');
             });
 
             let banner = document.getElementById('reserva-errores-banner');
@@ -627,16 +566,15 @@
                 return;
             }
 
-            const paqueteSeleccionado = document.querySelector('input[name="paquete"]:checked');
             const reservaData = {
-                id_paquete: paqueteSeleccionado.id.replace('paquete_id_', ''),
+                id_paquete: paqueteElegido.id,
                 cantidad: parseInt(cantidadInput.value),
                 extra_pintura: document.getElementById('pintura').checked,
                 extra_destruccion: document.getElementById('destruccion').checked,
                 total_calculado: total,
                 fecha: selectedDate.toISOString().split('T')[0],
                 hora_inicio: horaInicioSelect.value,
-                duracion_minutos: parseInt(paqueteSeleccionado.dataset.duracion),
+                duracion_minutos: paqueteElegido.duracion,
                 nombre_cumpleanero: nombreInput.value.trim(),
                 edad_cumpleanero: parseInt(edadInput.value),
                 observaciones: observacionesInput.value.trim()
@@ -646,6 +584,108 @@
 
             // Envío nativo: no dispara este mismo listener de nuevo (evita bucles).
             HTMLFormElement.prototype.submit.call(form);
+        });
+
+        /* ================= GSAP: indicador viajando por el MotionPath ================= */
+
+        gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
+
+        const contenedorPasos = document.querySelector('.reserva-pasos');
+        const svgRuta = document.getElementById('reserva-path-svg');
+        const pathRuta = document.getElementById('reserva-path');
+        const indicador = document.getElementById('paso-indicador');
+        let progresoPaso2 = 0.5;
+
+        function construirRutaPasos() {
+            const rectContenedor = contenedorPasos.getBoundingClientRect();
+            const puntos = document.querySelectorAll('.paso-punto');
+            if (puntos.length < 3) return false;
+
+            const coords = Array.from(puntos).map(p => {
+                const r = p.getBoundingClientRect();
+                return {
+                    x: r.left + r.width / 2 - rectContenedor.left,
+                    y: r.top + r.height / 2 - rectContenedor.top
+                };
+            });
+            const [p1, p2, p3] = coords;
+
+            const alturaTotal = contenedorPasos.scrollHeight;
+            svgRuta.setAttribute('viewBox', `0 0 ${rectContenedor.width} ${alturaTotal}`);
+            svgRuta.setAttribute('width', rectContenedor.width);
+            svgRuta.setAttribute('height', alturaTotal);
+
+            // Curvas suaves (tipo "S") entre cada par de puntos, en vez de una
+            // línea recta, para que se vea como un camino ondulado.
+            const c1x = p1.x + 26;
+            const c2x = p2.x - 26;
+            const d = `M ${p1.x} ${p1.y} Q ${c1x} ${(p1.y + p2.y) / 2} ${p2.x} ${p2.y} Q ${c2x} ${(p2.y + p3.y) / 2} ${p3.x} ${p3.y}`;
+            pathRuta.setAttribute('d', d);
+
+            const dist = (a, b) => Math.hypot(b.x - a.x, b.y - a.y);
+            const d1 = dist(p1, p2);
+            const d2 = dist(p2, p3);
+            progresoPaso2 = (d1 + d2) > 0 ? d1 / (d1 + d2) : 0.5;
+
+            return true;
+        }
+
+        let scrollTriggerActivo = null;
+
+        function inicializarGSAP() {
+            if (!construirRutaPasos()) return;
+
+            ScrollTrigger.getAll().forEach(st => st.kill());
+
+            gsap.set(indicador, {
+                motionPath: {
+                    path: '#reserva-path',
+                    align: '#reserva-path',
+                    alignOrigin: [0.5, 0.5],
+                    start: 0
+                }
+            });
+            indicador.textContent = '1';
+
+            scrollTriggerActivo = gsap.to(indicador, {
+                motionPath: {
+                    path: '#reserva-path',
+                    align: '#reserva-path',
+                    alignOrigin: [0.5, 0.5],
+                    start: 0,
+                    end: 1
+                },
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: '.reserva-pasos',
+                    start: 'top center',
+                    end: 'bottom center',
+                    scrub: 0.6,
+                    onUpdate: (self) => {
+                        let numero = '1';
+                        if (self.progress >= 0.999) numero = '3';
+                        else if (self.progress >= progresoPaso2) numero = '2';
+
+                        if (indicador.textContent !== numero) {
+                            indicador.textContent = numero;
+                            gsap.fromTo(indicador, { scale: 0.65 }, { scale: 1, duration: 0.35, ease: 'back.out(3)' });
+                        }
+                    }
+                }
+            });
+        }
+
+        window.addEventListener('load', () => {
+            inicializarGSAP();
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(() => ScrollTrigger.refresh());
+            }
+        });
+
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(inicializarGSAP, 250);
         });
     </script>
 </body>

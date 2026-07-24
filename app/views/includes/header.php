@@ -60,7 +60,7 @@ $esInicio = isset($active_page) && $active_page === 'inicio';
                                 <li><a class="dropdown-item" href="<?php echo URL_ROOT; ?>/admin"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
                             <?php else: ?>
                                 <li><a class="dropdown-item" href="<?php echo URL_ROOT; ?>/perfil"><i class="bi bi-person-fill"></i> Mi Perfil</a></li>
-                                <li><a class="dropdown-item" href="<?php echo URL_ROOT; ?>/reservas/paso1"><i class="bi bi-calendar-plus-fill"></i> Nueva Reserva</a></li>
+                                <li><a class="dropdown-item" href="<?php echo URL_ROOT; ?>/#cumpleanos"><i class="bi bi-calendar-plus-fill"></i> Nueva Reserva</a></li>
                             <?php endif; ?>
                             
                             <li><hr class="dropdown-divider"></li>

@@ -26,7 +26,7 @@ require APP_ROOT . '/views/includes/header.php';
                 <h2 class="fuente_bouncy">¡Hola, <?php echo htmlspecialchars($_SESSION['usuario_nombre']); ?>!</h2>
                 <p>Aquí puedes ver el estado de todas tus reservas.</p>
             </div>
-            <a href="<?php echo URL_ROOT; ?>/reservas/paso1" class="perfil-btn-reservar">
+            <a href="<?php echo URL_ROOT; ?>/#cumpleanos" class="perfil-btn-reservar">
                 <i class="bi bi-calendar-plus-fill"></i> Hacer una reserva
             </a>
         </div>
@@ -83,7 +83,7 @@ require APP_ROOT . '/views/includes/header.php';
                         <i class="bi bi-info-circle-fill"></i> No hay reservas que coincidan con estos filtros.
                     <?php else: ?>
                         <i class="bi bi-info-circle-fill"></i> Aún no tienes ninguna reserva registrada.
-                        <a href="<?php echo URL_ROOT; ?>/reservas/paso1" class="alert-link">¡Haz tu primera reserva aquí!</a>
+                        <a href="<?php echo URL_ROOT; ?>/#cumpleanos" class="alert-link">¡Haz tu primera reserva aquí!</a>
                     <?php endif; ?>
                 </div>
 

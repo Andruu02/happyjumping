@@ -36,15 +36,35 @@ class ReservasController extends Controller {
     }
 
     /**
-     * PASO 1: Muestra Acordeón, Calendario, etc.
+     * FLUJO DE RESERVA (todo en una sola página: paquete ya elegido, extras,
+     * fecha/hora, detalles del cumpleañero y pago).
+     *
+     * El paquete YA debe venir elegido desde la sección "Cumpleaños" del
+     * inicio (?paquete=ID) - aquí ya no se puede cambiar de paquete. Si no
+     * llega un paquete válido, se manda de vuelta a esa sección para que
+     * elija uno.
      */
     public function paso1() {
-        $this->proteger(); 
-        $paquetesDesdeDB = $this->paqueteModel->obtenerPaquetesActivos();
-        
+        $this->proteger();
+
+        $idPaquete = isset($_GET['paquete']) ? (int) $_GET['paquete'] : 0;
+        $paquete = null;
+
+        foreach ($this->paqueteModel->obtenerPaquetesActivos() as $p) {
+            if ((int) $p->id_paquete === $idPaquete) {
+                $paquete = $p;
+                break;
+            }
+        }
+
+        if (!$paquete) {
+            header('Location: ' . URL_ROOT . '/#cumpleanos');
+            exit();
+        }
+
         $datos = [
-            'titulo' => 'Reserva (Paso 1) - Happy&Jumping',
-            'paquetes' => $paquetesDesdeDB 
+            'titulo'  => 'Reserva - Happy&Jumping',
+            'paquete' => $paquete,
         ];
         $this->view('reservas/paso1', $datos);
     }
