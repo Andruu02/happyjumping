@@ -605,6 +605,8 @@
         const indicadorNumero = document.getElementById('paso-indicador-numero');
         const indicadorLabel = document.getElementById('paso-indicador-label');
         let progresoPaso2 = 0.5;
+        let puntoInicioY = 0;
+        let puntoFinY = 0;
 
         // Título de cada paso (viene de data-titulo en cada tarjeta; las
         // tarjetas ya no tienen su propio <h2> porque el título viaja junto
@@ -658,6 +660,17 @@
             const d2 = dist(p2, p3);
             progresoPaso2 = (d1 + d2) > 0 ? d1 / (d1 + d2) : 0.5;
 
+            // El ScrollTrigger tiene que arrancar/terminar EXACTAMENTE en la
+            // posición de p1/p3 (no en el borde de todo el contenedor). Si
+            // se usa el contenedor completo como referencia de scroll (que
+            // incluye el padding de arriba y todo el contenido que sigue
+            // después del punto 3, como el QR y el formulario de pago), el
+            // progreso 0-1 del scroll ya no coincide con el progreso 0-1 a
+            // lo largo de la ruta -el punto 3 queda "muy arriba" dentro de
+            // ese rango y el indicador se atrasa, sin llegar a tiempo.
+            puntoInicioY = p1.y;
+            puntoFinY = p3.y;
+
             return true;
         }
 
@@ -700,9 +713,14 @@
                 },
                 ease: 'none',
                 scrollTrigger: {
-                    trigger: '.reserva-pasos',
-                    start: 'top center',
-                    end: 'bottom center',
+                    trigger: contenedorPasos,
+                    // "top+=Npx center": el punto que está N px debajo del
+                    // borde superior del contenedor. Usamos la posición real
+                    // de los waypoints 1 y 3 (no el contenedor completo), así
+                    // el progreso 0-1 del scroll coincide con el progreso
+                    // 0-1 a lo largo de la ruta.
+                    start: () => `top+=${puntoInicioY} center`,
+                    end: () => `top+=${puntoFinY} center`,
                     scrub: true,
                     onUpdate: (self) => {
                         let numero = '1';
