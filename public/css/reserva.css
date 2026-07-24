@@ -72,11 +72,11 @@ body {
 /* ---------- Cabecera (mini-hero, mismo degradado que el banner de perfil) ---------- */
 .reserva-hero {
     background: linear-gradient(90deg, var(--morado), var(--rosa), var(--naranja));
-    padding: 76px 24px 56px;
+    padding: 44px 24px 32px;
     text-align: center;
     color: #fff;
 }
-.reserva-hero h1 { font-size: 2.5rem; margin-bottom: 10px; }
+.reserva-hero h1 { font-size: 2.2rem; margin-bottom: 6px; }
 .reserva-hero p { font-size: 1.1rem; opacity: .95; max-width: 560px; margin: 0 auto; }
 
 /* ---------- Línea/timeline de pasos ---------- */
@@ -185,15 +185,6 @@ body {
 }
 #card-paso2 { border-top-color: var(--celeste); }
 #card-paso3 { border-top-color: var(--naranja); }
-
-.step-card h2 {
-    color: var(--morado);
-    font-weight: 700;
-    margin-bottom: 26px;
-    font-size: 1.5rem;
-}
-#card-paso2 h2 { color: var(--celeste); }
-#card-paso3 h2 { color: var(--naranja); }
 
 .step-card h3 {
     color: var(--morado);

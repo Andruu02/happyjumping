@@ -44,7 +44,7 @@
 
         <header class="reserva-hero">
             <h1 class="fuente_bouncy">Arma tu Reserva</h1>
-            <p>Completa los datos de tu fiesta: puedes rellenarlos en el orden que prefieras mientras sigues bajando.</p>
+            <p>Completa los datos de tu fiesta.</p>
         </header>
 
         <div class="wrap reserva-pasos">
@@ -70,8 +70,7 @@
                 <div class="paso-numero-col">
                     <span class="paso-punto" data-paso-num="1"></span>
                 </div>
-                <div class="step-card" id="card-paso1" data-paso="1">
-                    <h2>Personaliza tu Fiesta</h2>
+                <div class="step-card" id="card-paso1" data-paso="1" data-titulo="Personaliza tu Fiesta">
 
                     <?php
                         $contenidoPaquetes = [
@@ -161,8 +160,7 @@
                 <div class="paso-numero-col">
                     <span class="paso-punto" data-paso-num="2"></span>
                 </div>
-                <div class="step-card" id="card-paso2" data-paso="2">
-                    <h2>Detalles del Cumpleañero</h2>
+                <div class="step-card" id="card-paso2" data-paso="2" data-titulo="Detalles del Cumpleañero">
 
                     <div class="row g-4">
 
@@ -209,8 +207,7 @@
                 <div class="paso-numero-col">
                     <span class="paso-punto" data-paso-num="3"></span>
                 </div>
-                <div class="step-card" id="card-paso3" data-paso="3">
-                    <h2>Realiza tu Pago</h2>
+                <div class="step-card" id="card-paso3" data-paso="3" data-titulo="Realiza tu Pago">
 
                     <div class="row g-4">
 
@@ -609,12 +606,12 @@
         const indicadorLabel = document.getElementById('paso-indicador-label');
         let progresoPaso2 = 0.5;
 
-        // Título de cada paso (se lee directo del <h2> de cada tarjeta, así
-        // queda sincronizado si algún día cambia el texto).
+        // Título de cada paso (viene de data-titulo en cada tarjeta; las
+        // tarjetas ya no tienen su propio <h2> porque el título viaja junto
+        // al número del indicador).
         const titulosPaso = {};
         document.querySelectorAll('.step-card[data-paso]').forEach(card => {
-            const h2 = card.querySelector('h2');
-            if (h2) titulosPaso[card.dataset.paso] = h2.textContent.trim();
+            titulosPaso[card.dataset.paso] = card.dataset.titulo || '';
         });
 
         function construirRutaPasos() {
@@ -631,7 +628,20 @@
             });
             const [p1, p2, p3] = coords;
 
-            const alturaTotal = contenedorPasos.scrollHeight;
+            // OJO: no usar contenedorPasos.scrollHeight acá. El propio SVG y
+            // el indicador son "position:absolute" dentro de .reserva-pasos,
+            // así que su alto influye en el scrollHeight del contenedor -
+            // si se usara ese valor, cada reconstrucción de la ruta podría
+            // inflar el alto un poco más que la anterior (más espacio en
+            // blanco debajo de la tarjeta 3, y la ruta mal calculada hace
+            // que el indicador se atrase). Por eso medimos el alto real del
+            // contenido a partir de la última fila (que sí está en flujo
+            // normal, no es absoluta).
+            const filas = document.querySelectorAll('.paso-fila');
+            const ultimaFila = filas[filas.length - 1];
+            const rectUltimaFila = ultimaFila.getBoundingClientRect();
+            const alturaTotal = rectUltimaFila.bottom - rectContenedor.top;
+
             svgRuta.setAttribute('viewBox', `0 0 ${rectContenedor.width} ${alturaTotal}`);
             svgRuta.setAttribute('width', rectContenedor.width);
             svgRuta.setAttribute('height', alturaTotal);
