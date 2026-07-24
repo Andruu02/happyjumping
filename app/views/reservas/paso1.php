@@ -79,45 +79,73 @@
                             3 => ['3 horas de uso completo del local.', '1 hora y media de trampolines, pared de escalar y tirolesa.', 'Maquillaje neón y Glitter.', 'Combo Happy: Popcorn + bebida (frugos, agua o gaseosa).'],
                             4 => ['5 horas de uso exclusivo del local.', 'Acceso a trampolines, tirolesa y pared de escalar.', 'Dinámicas con premios y muñecos inflables.', 'Combo Happy: Popcorn + bebida + pan con hotdog.'],
                         ];
+                        $imagenesPaquetes = [
+                            1 => 'trampolin.webp',
+                            2 => 'trampolin2.webp',
+                            3 => 'pared_escalar.webp',
+                            4 => 'HJ1.webp',
+                        ];
+                        $imagenPaquete = $imagenesPaquetes[$paquete->id_paquete] ?? 'trampolin.webp';
                     ?>
                     <div class="paquete-elegido-box">
-                        <span class="paquete-elegido-label">Paquete elegido</span>
-                        <h4><?php echo htmlspecialchars($paquete->nombre); ?></h4>
-                        <div class="paquete-elegido-precios">
-                            <span>S/<?php echo number_format($paquete->precio_semana, 2); ?> (L-V)</span>
-                            <span>S/<?php echo number_format($paquete->precio_fin_semana, 2); ?> (S-D)</span>
-                        </div>
-                        <?php if (isset($contenidoPaquetes[$paquete->id_paquete])): ?>
-                        <ul class="paquete-elegido-lista">
-                            <?php foreach ($contenidoPaquetes[$paquete->id_paquete] as $item): ?>
-                                <li><i class="bi bi-check-circle-fill"></i> <?php echo $item; ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                        <?php endif; ?>
-                        <a href="<?php echo URL_ROOT; ?>/#cumpleanos" class="paquete-elegido-cambiar"><i class="bi bi-arrow-repeat"></i> ¿Cambiar de paquete?</a>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h5 class="fw-semibold">1. Extras (S/15 c/u por reserva)</h5>
-                            <div class="mb-3">
-                                <label><input type="checkbox" class="experience-select" value="15" id="pintura"> Cuarto de Pintura</label><br>
-                                <label><input type="checkbox" class="experience-select" value="15" id="destruccion"> Cuarto de Destrucción</label>
+                        <div class="paquete-elegido-img" style="background-image:url('<?php echo URL_ROOT; ?>/img/<?php echo $imagenPaquete; ?>');"></div>
+                        <div class="paquete-elegido-info">
+                            <span class="paquete-elegido-label">Paquete elegido</span>
+                            <h4><?php echo htmlspecialchars($paquete->nombre); ?></h4>
+                            <div class="paquete-elegido-precios">
+                                <span>S/<?php echo number_format($paquete->precio_semana, 2); ?> (L-V)</span>
+                                <span>S/<?php echo number_format($paquete->precio_fin_semana, 2); ?> (S-D)</span>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <h5 class="fw-semibold">2. Cantidad de personas</h5>
-                            <div class="mb-4">
-                                <label for="cantidad" class="form-label visually-hidden">Cantidad de personas:</label>
-                                <input type="number" id="cantidad" class="form-control" min="10" max="30" value="10" style="max-width:150px;">
-                            </div>
+                            <?php if (isset($contenidoPaquetes[$paquete->id_paquete])): ?>
+                            <ul class="paquete-elegido-lista">
+                                <?php foreach ($contenidoPaquetes[$paquete->id_paquete] as $item): ?>
+                                    <li><i class="bi bi-check-circle-fill"></i> <?php echo $item; ?></li>
+                                <?php endforeach; ?>
+                            </ul>
+                            <?php endif; ?>
+                            <a href="<?php echo URL_ROOT; ?>/#cumpleanos" class="paquete-elegido-cambiar"><i class="bi bi-arrow-repeat"></i> ¿Cambiar de paquete?</a>
                         </div>
                     </div>
 
-                    <hr class="my-4">
-                    <h5 class="mb-3 fw-semibold">3. Selecciona Fecha y Hora de Inicio</h5>
+                    <div class="paso-subtitulo">
+                        <span class="paso-subtitulo-num">1</span>
+                        <span class="paso-subtitulo-texto">Extras <small>S/15 c/u por reserva</small></span>
+                    </div>
+                    <div class="row g-3 mb-2">
+                        <div class="col-sm-6">
+                            <label class="extra-chip">
+                                <input type="checkbox" class="experience-select" value="15" id="pintura">
+                                <span class="extra-chip-icono"><i class="bi bi-palette-fill"></i></span>
+                                <span class="extra-chip-texto">Cuarto de Pintura</span>
+                                <span class="extra-chip-check"><i class="bi bi-check-circle-fill"></i></span>
+                            </label>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="extra-chip">
+                                <input type="checkbox" class="experience-select" value="15" id="destruccion">
+                                <span class="extra-chip-icono"><i class="bi bi-hammer"></i></span>
+                                <span class="extra-chip-texto">Cuarto de Destrucción</span>
+                                <span class="extra-chip-check"><i class="bi bi-check-circle-fill"></i></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="paso-subtitulo">
+                        <span class="paso-subtitulo-num">2</span>
+                        <span class="paso-subtitulo-texto">Cantidad de personas</span>
+                    </div>
+                    <div class="cantidad-stepper">
+                        <button type="button" class="cantidad-btn" id="cantidad-menos" aria-label="Restar persona"><i class="bi bi-dash-lg"></i></button>
+                        <label for="cantidad" class="visually-hidden">Cantidad de personas</label>
+                        <input type="number" id="cantidad" class="cantidad-input" min="10" max="30" value="10">
+                        <button type="button" class="cantidad-btn" id="cantidad-mas" aria-label="Sumar persona"><i class="bi bi-plus-lg"></i></button>
+                        <span class="cantidad-hint">personas (mín. 10, máx. 30)</span>
+                    </div>
+
+                    <div class="paso-subtitulo">
+                        <span class="paso-subtitulo-num">3</span>
+                        <span class="paso-subtitulo-texto">Selecciona Fecha y Hora de Inicio</span>
+                    </div>
                     <div class="row g-3">
                         <div class="col-lg-7">
                             <div class="calendar-wrapper">
@@ -150,8 +178,9 @@
                         </div>
                     </div>
 
-                    <hr class="my-4">
-                    <div class="total-box" id="total-paso1">Total: S/0.00</div>
+                    <div class="paso-total-wrapper">
+                        <div class="total-box" id="total-paso1">Total: S/0.00</div>
+                    </div>
                 </div>
             </div>
 
@@ -168,17 +197,17 @@
                             <h3>Completa los datos</h3>
 
                             <div class="mb-3">
-                                <label for="nombre_cumpleanero" class="form-label">Nombre del Cumpleañero</label>
+                                <label for="nombre_cumpleanero" class="form-label"><i class="bi bi-person-hearts"></i> Nombre del Cumpleañero</label>
                                 <input type="text" class="form-control" id="nombre_cumpleanero" placeholder="Ingresa el nombre">
                             </div>
 
                             <div class="mb-3">
-                                <label for="edad_cumpleanero" class="form-label">Edad que cumple</label>
+                                <label for="edad_cumpleanero" class="form-label"><i class="bi bi-balloon-heart-fill"></i> Edad que cumple</label>
                                 <input type="number" class="form-control" id="edad_cumpleanero" placeholder="Ej: 7" min="1">
                             </div>
 
                             <div class="mb-3">
-                                <label for="observaciones" class="form-label">Observaciones (Opcional)</label>
+                                <label for="observaciones" class="form-label"><i class="bi bi-chat-square-text-fill"></i> Observaciones (Opcional)</label>
                                 <textarea class="form-control" id="observaciones" rows="3" placeholder="Ej: Alergias, temática de fútbol, etc."></textarea>
                             </div>
 
@@ -460,6 +489,15 @@
         experiencias.forEach(e => e.addEventListener('change', actualizarResumenGlobal));
         cantidadInput.addEventListener('input', () => {
             if (cantidadInput.value < 10) cantidadInput.value = 10;
+            actualizarResumenGlobal();
+        });
+
+        document.getElementById('cantidad-menos').addEventListener('click', () => {
+            cantidadInput.value = Math.max(10, (parseInt(cantidadInput.value) || 10) - 1);
+            actualizarResumenGlobal();
+        });
+        document.getElementById('cantidad-mas').addEventListener('click', () => {
+            cantidadInput.value = Math.min(30, (parseInt(cantidadInput.value) || 10) + 1);
             actualizarResumenGlobal();
         });
 

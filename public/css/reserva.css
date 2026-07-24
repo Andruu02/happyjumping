@@ -187,14 +187,53 @@ body {
 #card-paso3 { border-top-color: var(--naranja); }
 
 .step-card h3 {
+    font-family: 'Fredoka', sans-serif;
     color: var(--morado);
-    font-weight: 700;
+    font-weight: 600;
     margin-bottom: 20px;
-    font-size: 1.15rem;
+    font-size: 1.3rem;
 }
 .step-card h5.fw-semibold { color: #444; }
 
+/* ---------- Subtítulo numerado dentro de una tarjeta (Extras, Cantidad...) ---------- */
+.paso-subtitulo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 30px 0 18px;
+}
+.paso-fila:first-child .paso-subtitulo:first-of-type,
+.step-card > .paso-subtitulo:first-child { margin-top: 4px; }
+.paso-subtitulo-num {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--morado), var(--rosa));
+    color: #fff;
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 700;
+    font-size: .9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.paso-subtitulo-texto {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    color: #333;
+    font-size: 1.08rem;
+}
+.paso-subtitulo-texto small {
+    display: block;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 400;
+    color: #999;
+    font-size: .8rem;
+}
+
 .step-card .form-label { font-weight: 600; color: var(--morado); }
+.step-card .form-label i { color: var(--rosa); margin-right: 4px; }
 
 .step-card .form-control,
 .step-card .form-select {
@@ -223,11 +262,22 @@ body {
 
 /* --- Paquete elegido (ya viene decidido desde la sección "Cumpleaños") --- */
 .paquete-elegido-box {
+    display: flex;
+    gap: 24px;
     background: linear-gradient(135deg, var(--morado-claro), #fff);
     border: 2px solid var(--morado-claro);
     border-radius: 16px;
     padding: 22px 26px;
 }
+.paquete-elegido-img {
+    flex: 0 0 190px;
+    min-height: 190px;
+    border-radius: 14px;
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 8px 20px rgba(30,10,60,.18);
+}
+.paquete-elegido-info { flex: 1; min-width: 0; }
 .paquete-elegido-label {
     display: inline-block;
     background: var(--morado);
@@ -268,6 +318,81 @@ body {
     text-decoration: none;
 }
 .paquete-elegido-cambiar:hover { text-decoration: underline; }
+
+/* --- Chips de extras (reemplaza los checkbox sueltos de toda la vida) --- */
+.extra-chip {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border: 2px solid #eee;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: border-color .2s ease, background .2s ease;
+    margin: 0;
+}
+.extra-chip input { position: absolute; opacity: 0; width: 0; height: 0; }
+.extra-chip-icono {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--morado-claro);
+    color: var(--morado);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    transition: background .2s ease, color .2s ease;
+}
+.extra-chip-texto { flex: 1; font-weight: 600; color: #444; }
+.extra-chip-check { color: #ddd; font-size: 1.2rem; transition: color .2s ease; }
+.extra-chip:has(input:checked) {
+    border-color: var(--rosa);
+    background: #fff5fa;
+}
+.extra-chip:has(input:checked) .extra-chip-icono { background: var(--rosa); color: #fff; }
+.extra-chip:has(input:checked) .extra-chip-check { color: var(--rosa); }
+.extra-chip:has(input:focus-visible) { outline: 2px solid var(--celeste); outline-offset: 2px; }
+
+/* --- Stepper de cantidad de personas --- */
+.cantidad-stepper { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.cantidad-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 2px solid var(--morado-claro);
+    background: #fff;
+    color: var(--morado);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s ease, color .2s ease;
+}
+.cantidad-btn:hover { background: var(--morado); color: #fff; }
+.cantidad-input {
+    width: 76px;
+    text-align: center;
+    border: 2px solid #eee;
+    border-radius: 10px;
+    padding: 10px 6px;
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: var(--morado);
+}
+.cantidad-input:focus {
+    border-color: var(--rosa);
+    box-shadow: 0 0 10px rgba(255, 60, 141, 0.3);
+    outline: none;
+}
+.cantidad-hint { color: #999; font-size: .85rem; }
+
+.paso-total-wrapper {
+    margin-top: 30px;
+    padding-top: 22px;
+    border-top: 1px solid #f0f0f0;
+}
 
 .experience-select {
     accent-color: var(--naranja);
@@ -475,9 +600,9 @@ body {
     }
 
     .step-card { width: 100%; padding: 22px 18px; border-radius: 16px; }
-    .step-card h2 { font-size: 1.3rem; }
 
-    .paquete-elegido-box { padding: 18px 20px; }
+    .paquete-elegido-box { flex-direction: column; padding: 18px 20px; }
+    .paquete-elegido-img { flex-basis: auto; width: 100%; height: 150px; }
 
     .calendar-wrapper { width: 100%; }
     .day { width: 38px; height: 38px; font-size: 0.8rem; }
