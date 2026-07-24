@@ -60,7 +60,10 @@
                 </defs>
                 <path id="reserva-path" fill="none" stroke="url(#reserva-path-gradient)" stroke-width="3" stroke-dasharray="2 14" stroke-linecap="round"/>
             </svg>
-            <div id="paso-indicador" class="paso-indicador">1</div>
+            <div id="paso-indicador" class="paso-indicador">
+                <span class="paso-indicador-label" id="paso-indicador-label">Personaliza tu Fiesta</span>
+                <span id="paso-indicador-numero">1</span>
+            </div>
 
             <!-- ============== PASO 1: EXTRAS, CANTIDAD, FECHA Y HORA ============== -->
             <div class="paso-fila">
@@ -333,7 +336,15 @@
                 calendarGrid.innerHTML += `<div class="${classes}" data-date="${dateStr}">${day}</div>`;
             }
 
-            if (window.ScrollTrigger) setTimeout(() => ScrollTrigger.refresh(), 50);
+            // El calendario carga sus días de forma asíncrona (fetch), lo que
+            // cambia la altura de la tarjeta 1 recién después de esta espera.
+            // Hay que reconstruir la ruta del GSAP con las medidas ya
+            // definitivas; si no, el indicador queda calculado con una
+            // altura vieja (más corta) y se atrasa/no llega a los siguientes
+            // pasos.
+            if (typeof inicializarGSAP === 'function') {
+                setTimeout(inicializarGSAP, 50);
+            }
         }
         prevMonthBtn.addEventListener('click', () => {
             currentDate.setMonth(currentDate.getMonth() - 1);
@@ -594,7 +605,17 @@
         const svgRuta = document.getElementById('reserva-path-svg');
         const pathRuta = document.getElementById('reserva-path');
         const indicador = document.getElementById('paso-indicador');
+        const indicadorNumero = document.getElementById('paso-indicador-numero');
+        const indicadorLabel = document.getElementById('paso-indicador-label');
         let progresoPaso2 = 0.5;
+
+        // Título de cada paso (se lee directo del <h2> de cada tarjeta, así
+        // queda sincronizado si algún día cambia el texto).
+        const titulosPaso = {};
+        document.querySelectorAll('.step-card[data-paso]').forEach(card => {
+            const h2 = card.querySelector('h2');
+            if (h2) titulosPaso[card.dataset.paso] = h2.textContent.trim();
+        });
 
         function construirRutaPasos() {
             const rectContenedor = contenedorPasos.getBoundingClientRect();
@@ -630,11 +651,22 @@
             return true;
         }
 
-        let scrollTriggerActivo = null;
+        function actualizarNumeroYEtiqueta(numero) {
+            if (indicadorNumero.textContent === numero) return;
+            indicadorNumero.textContent = numero;
+            indicadorLabel.textContent = titulosPaso[numero] || '';
+            gsap.fromTo(indicador, { scale: 0.65 }, { scale: 1, duration: 0.35, ease: 'back.out(3)' });
+            gsap.fromTo(indicadorLabel, { opacity: 0, x: 8 }, { opacity: 1, x: 0, duration: 0.3, ease: 'power2.out' });
+        }
 
         function inicializarGSAP() {
             if (!construirRutaPasos()) return;
 
+            // Se destruye y se vuelve a crear por completo (en vez de solo
+            // "refrescar") cada vez que el layout puede haber cambiado
+            // (calendario recién cargado, resize, fuentes listas), para que
+            // la ruta y el ScrollTrigger queden calculados con las medidas
+            // reales y el indicador no se quede atrasado.
             ScrollTrigger.getAll().forEach(st => st.kill());
 
             gsap.set(indicador, {
@@ -645,9 +677,10 @@
                     start: 0
                 }
             });
-            indicador.textContent = '1';
+            indicadorNumero.textContent = '1';
+            indicadorLabel.textContent = titulosPaso['1'] || '';
 
-            scrollTriggerActivo = gsap.to(indicador, {
+            gsap.to(indicador, {
                 motionPath: {
                     path: '#reserva-path',
                     align: '#reserva-path',
@@ -660,16 +693,12 @@
                     trigger: '.reserva-pasos',
                     start: 'top center',
                     end: 'bottom center',
-                    scrub: 0.6,
+                    scrub: true,
                     onUpdate: (self) => {
                         let numero = '1';
                         if (self.progress >= 0.999) numero = '3';
                         else if (self.progress >= progresoPaso2) numero = '2';
-
-                        if (indicador.textContent !== numero) {
-                            indicador.textContent = numero;
-                            gsap.fromTo(indicador, { scale: 0.65 }, { scale: 1, duration: 0.35, ease: 'back.out(3)' });
-                        }
+                        actualizarNumeroYEtiqueta(numero);
                     }
                 }
             });
@@ -678,7 +707,7 @@
         window.addEventListener('load', () => {
             inicializarGSAP();
             if (document.fonts && document.fonts.ready) {
-                document.fonts.ready.then(() => ScrollTrigger.refresh());
+                document.fonts.ready.then(inicializarGSAP);
             }
         });
 
