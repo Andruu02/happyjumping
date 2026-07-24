@@ -413,6 +413,7 @@ body {
 
 /* --- Botón principal (único de todo el flujo: "Finalizar Reserva") --- */
 .btn-next {
+    display: inline-block;
     background: linear-gradient(90deg, var(--rosa), var(--naranja));
     color: #fff;
     font-weight: 700;
@@ -420,6 +421,7 @@ body {
     padding: 14px 30px;
     border-radius: 999px;
     font-size: 1.05rem;
+    text-decoration: none;
     box-shadow: 0 10px 24px -8px rgba(255,60,141,.5);
     transition: transform .2s ease, box-shadow .2s ease, background .3s ease;
 }
@@ -450,6 +452,82 @@ body {
     background: var(--celeste);
     color: #fff;
     transform: translateY(-2px);
+}
+
+/* --- Botón secundario (píldora con borde, para acciones no principales) --- */
+.btn-secundario {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    color: var(--morado);
+    font-weight: 700;
+    border: 2px solid var(--morado-claro);
+    padding: 14px 30px;
+    border-radius: 999px;
+    font-size: 1.05rem;
+    text-decoration: none;
+    transition: background .2s ease, transform .2s ease;
+}
+.btn-secundario:hover {
+    background: var(--morado-claro);
+    color: var(--morado);
+    transform: translateY(-2px);
+}
+
+/* --- Página de éxito (reserva pendiente) --- */
+.exito-wrap {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 90px 24px;
+}
+.exito-card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 50px 40px;
+    text-align: center;
+    box-shadow: 0 20px 45px rgba(30,10,60,.18);
+    border-top: 6px solid var(--rosa);
+}
+.exito-icono {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--verde), #6cf0c2);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    box-shadow: 0 14px 30px rgba(0,208,132,.35);
+}
+.exito-card h1 {
+    color: var(--morado);
+    font-size: 2rem;
+    margin-bottom: 16px;
+}
+.exito-texto { color: #444; font-size: 1.1rem; line-height: 1.5; margin-bottom: 8px; }
+.exito-subtexto { color: #888; font-size: .95rem; margin-bottom: 26px; }
+
+.exito-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 26px;
+    padding-top: 24px;
+    border-top: 1px solid #f0f0f0;
+}
+
+@media (max-width: 768px) {
+    .exito-wrap { padding: 50px 18px; }
+    .exito-card { padding: 36px 22px; border-radius: 18px; }
+    .exito-icono { width: 80px; height: 80px; font-size: 2.4rem; }
+    .exito-card h1 { font-size: 1.6rem; }
+    .exito-acciones { flex-direction: column; }
+    .exito-acciones .btn-next,
+    .exito-acciones .btn-secundario { width: 100%; justify-content: center; text-align: center; }
 }
 
 /* --- Calendario --- */
