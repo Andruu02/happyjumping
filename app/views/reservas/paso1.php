@@ -214,16 +214,23 @@
                         </div>
 
                         <div class="col-lg-5">
-                            <div class="resumen-box">
-                                <h5>Resumen de tu Reserva</h5>
-                                <p><strong>Paquete:</strong> <span id="resumen_paquete"><?php echo htmlspecialchars($paquete->nombre); ?></span></p>
-                                <p><strong>Cantidad:</strong> <span id="resumen_cantidad">—</span></p>
-                                <p><strong>Extras:</strong> <span id="resumen_extras">—</span></p>
-                                <p><strong>Fecha:</strong> <span id="resumen_fecha">—</span></p>
-                                <p><strong>Hora:</strong> <span id="resumen_hora">—</span></p>
+                            <div class="spotify-box">
+                                <h5><i class="bi bi-spotify"></i> Arma la playlist de tu fiesta</h5>
+                                <p class="spotify-hint">Busca canciones y agrégalas - se las pasamos a nuestra anfitriona el día del evento. (Opcional)</p>
 
-                                <hr>
-                                <div class="total-box" id="total-resumen">Total: S/0.00</div>
+                                <div class="spotify-buscador">
+                                    <label for="spotify-buscar-input" class="visually-hidden">Buscar canción</label>
+                                    <input type="text" id="spotify-buscar-input" class="form-control" placeholder="Busca una canción o artista...">
+                                    <button type="button" id="spotify-buscar-btn" class="spotify-buscar-btn" aria-label="Buscar"><i class="bi bi-search"></i></button>
+                                </div>
+
+                                <div id="spotify-resultados" class="spotify-resultados"></div>
+
+                                <div class="spotify-seleccion">
+                                    <h6>Tu playlist <span id="spotify-contador">(0)</span></h6>
+                                    <p id="spotify-vacio" class="text-muted small mb-0">Aún no has agregado canciones.</p>
+                                    <ul id="spotify-lista-elegidas" class="spotify-lista-elegidas"></ul>
+                                </div>
                             </div>
                         </div>
 
@@ -249,6 +256,18 @@
                                     <br>
                                     <strong>¡Importante!</strong> Guarda la captura de tu pago.
                                 </p>
+                            </div>
+
+                            <div class="resumen-box mt-4">
+                                <h5>Resumen de tu Reserva</h5>
+                                <p><strong>Paquete:</strong> <span id="resumen_paquete"><?php echo htmlspecialchars($paquete->nombre); ?></span></p>
+                                <p><strong>Cantidad:</strong> <span id="resumen_cantidad">—</span></p>
+                                <p><strong>Extras:</strong> <span id="resumen_extras">—</span></p>
+                                <p><strong>Fecha:</strong> <span id="resumen_fecha">—</span></p>
+                                <p><strong>Hora:</strong> <span id="resumen_hora">—</span></p>
+
+                                <hr>
+                                <div class="total-box" id="total-resumen">Total: S/0.00</div>
                             </div>
                         </div>
 
@@ -537,6 +556,98 @@
         const edadInput = document.getElementById('edad_cumpleanero');
         const observacionesInput = document.getElementById('observaciones');
 
+        /* ================= PASO 2: Playlist con Spotify (opcional) ================= */
+
+        let cancionesSeleccionadas = [];
+        const MAX_CANCIONES = 15;
+
+        const spotifyBuscarInput = document.getElementById('spotify-buscar-input');
+        const spotifyBuscarBtn = document.getElementById('spotify-buscar-btn');
+        const spotifyResultados = document.getElementById('spotify-resultados');
+        const spotifyListaElegidas = document.getElementById('spotify-lista-elegidas');
+        const spotifyContador = document.getElementById('spotify-contador');
+        const spotifyVacio = document.getElementById('spotify-vacio');
+
+        async function buscarCancionesSpotify() {
+            const texto = spotifyBuscarInput.value.trim();
+            if (texto === '') return;
+
+            spotifyResultados.innerHTML = '<p class="text-muted small mb-0">Buscando...</p>';
+
+            try {
+                const respuesta = await fetch(`<?php echo URL_ROOT; ?>/reservas/buscarCancionesSpotify?q=${encodeURIComponent(texto)}`);
+                const canciones = await respuesta.json();
+                renderResultadosSpotify(canciones);
+            } catch (error) {
+                spotifyResultados.innerHTML = '<p class="text-danger small mb-0">No se pudo buscar. Intenta de nuevo.</p>';
+            }
+        }
+
+        function renderResultadosSpotify(canciones) {
+            if (!Array.isArray(canciones) || canciones.length === 0) {
+                spotifyResultados.innerHTML = '<p class="text-muted small mb-0">Sin resultados. Prueba con otro nombre.</p>';
+                return;
+            }
+
+            spotifyResultados.innerHTML = '';
+            canciones.forEach((cancion) => {
+                const item = document.createElement('div');
+                item.className = 'spotify-resultado-item';
+                item.innerHTML = `
+                    <img src="${cancion.imagen}" alt="">
+                    <div class="spotify-resultado-info">
+                        <strong>${cancion.nombre}</strong>
+                        <span>${cancion.artista}</span>
+                    </div>
+                    <button type="button" class="spotify-agregar-btn" aria-label="Agregar a la playlist"><i class="bi bi-plus-lg"></i></button>
+                `;
+                item.querySelector('.spotify-agregar-btn').addEventListener('click', () => agregarCancion(cancion));
+                spotifyResultados.appendChild(item);
+            });
+        }
+
+        function agregarCancion(cancion) {
+            const yaExiste = cancionesSeleccionadas.some(c => c.spotify_url === cancion.spotify_url);
+            if (yaExiste) return;
+
+            if (cancionesSeleccionadas.length >= MAX_CANCIONES) {
+                alert(`Puedes agregar hasta ${MAX_CANCIONES} canciones.`);
+                return;
+            }
+
+            cancionesSeleccionadas.push(cancion);
+            renderListaElegidas();
+        }
+
+        function quitarCancion(indice) {
+            cancionesSeleccionadas.splice(indice, 1);
+            renderListaElegidas();
+        }
+
+        function renderListaElegidas() {
+            spotifyContador.textContent = `(${cancionesSeleccionadas.length})`;
+            spotifyVacio.style.display = cancionesSeleccionadas.length ? 'none' : 'block';
+
+            spotifyListaElegidas.innerHTML = '';
+            cancionesSeleccionadas.forEach((cancion, indice) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>${cancion.nombre} <small>${cancion.artista}</small></span>
+                    <button type="button" aria-label="Quitar canción"><i class="bi bi-x-lg"></i></button>
+                `;
+                li.querySelector('button').addEventListener('click', () => quitarCancion(indice));
+                spotifyListaElegidas.appendChild(li);
+            });
+        }
+
+        spotifyBuscarBtn.addEventListener('click', buscarCancionesSpotify);
+        spotifyBuscarInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                buscarCancionesSpotify();
+            }
+        });
+
         /* ================= PASO 3 + VALIDACIÓN FINAL ================= */
 
         const form = document.getElementById('form-finalizar');
@@ -623,7 +734,8 @@
                 duracion_minutos: paqueteElegido.duracion,
                 nombre_cumpleanero: nombreInput.value.trim(),
                 edad_cumpleanero: parseInt(edadInput.value),
-                observaciones: observacionesInput.value.trim()
+                observaciones: observacionesInput.value.trim(),
+                canciones: cancionesSeleccionadas
             };
 
             hiddenInput.value = JSON.stringify(reservaData);

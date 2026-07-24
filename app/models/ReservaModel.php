@@ -72,16 +72,54 @@ class ReservaModel extends Model {
             $this->bind(':ruta_captura', $datos['ruta_captura']);
             $this->execute();
 
-            // 8. ¡Éxito! Confirmar la transacción
-            return $this->dbh->commit();
+            // 7.5. Insertar las canciones sugeridas para la playlist de la
+            // fiesta (buscadas en Spotify durante el Paso 2), si mandó alguna.
+            if (!empty($datos['canciones']) && is_array($datos['canciones'])) {
+                foreach ($datos['canciones'] as $cancion) {
+                    $this->query("INSERT INTO reserva_canciones (id_reserva, nombre, artista, spotify_url)
+                                  VALUES (:id_reserva, :nombre, :artista, :spotify_url)");
+                    $this->bind(':id_reserva', $id_reserva_nueva);
+                    $this->bind(':nombre', $cancion['nombre'] ?? '');
+                    $this->bind(':artista', $cancion['artista'] ?? '');
+                    $this->bind(':spotify_url', $cancion['spotify_url'] ?? '');
+                    $this->execute();
+                }
+            }
+
+            // 8. ¡Éxito! Confirmar la transacción y devolver el ID nuevo
+            // (lo necesita el controlador para poder armar el link de
+            // "Agregar a Google Calendar" en la página de éxito).
+            if (!$this->dbh->commit()) {
+                return false;
+            }
+            return $id_reserva_nueva;
 
         } catch (Exception $e) {
             // 9. ¡Error! Revertir todo
             $this->dbh->rollBack();
-            
+
             // Muéstrame el error real de la BD
-            die('Error de Base de Datos: ' . $e->getMessage()); 
+            die('Error de Base de Datos: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Datos de una reserva puntual (paquete, fecha/hora, cumpleañero) para
+     * armar el link de "Agregar a Google Calendar" en la página de éxito.
+     * Se filtra también por id_usuario para que nadie pueda ver el detalle
+     * de una reserva ajena solo cambiando el ID en la URL.
+     */
+    public function obtenerDetalleParaCalendario($id_reserva, $id_usuario) {
+        $this->query("SELECT p.nombre AS paquete_nombre, r.cantidad_personas, r.nombre_cumpleanero,
+                             h.fecha, h.hora_inicio, h.hora_fin
+                      FROM reservas r
+                      JOIN paquetes p ON r.id_paquete = p.id_paquete
+                      JOIN horarios_disponibles h ON r.id_horario = h.id_horario
+                      WHERE r.id_reserva = :id_reserva AND r.id_usuario = :id_usuario
+                      LIMIT 1");
+        $this->bind(':id_reserva', $id_reserva);
+        $this->bind(':id_usuario', $id_usuario);
+        return $this->single();
     }
 }
 ?>

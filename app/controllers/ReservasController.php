@@ -9,13 +9,15 @@
 class ReservasController extends Controller {
 
     private $paqueteModel;
-    private $horarioModel; 
-    private $reservaModel; 
+    private $horarioModel;
+    private $reservaModel;
+    private $spotifyModel;
 
     public function __construct() {
         $this->paqueteModel = $this->model('PaqueteModel');
-        $this->horarioModel = $this->model('HorarioModel'); 
-        $this->reservaModel = $this->model('ReservaModel'); 
+        $this->horarioModel = $this->model('HorarioModel');
+        $this->reservaModel = $this->model('ReservaModel');
+        $this->spotifyModel = $this->model('SpotifyModel');
     }
 
     /*
@@ -86,6 +88,24 @@ class ReservasController extends Controller {
         exit();
     }
     
+    /**
+     * FUNCIÓN DE AJAX: busca canciones en Spotify para la playlist de la
+     * fiesta (Paso 2). Requiere sesión iniciada, igual que el resto del
+     * flujo de reservas.
+     */
+    public function buscarCancionesSpotify() {
+        $this->proteger();
+        header('Content-Type: application/json');
+
+        $texto = trim($_GET['q'] ?? '');
+        if ($texto === '') {
+            echo json_encode([]);
+            return;
+        }
+
+        echo json_encode($this->spotifyModel->buscarCanciones($texto));
+    }
+
     /**
      * FUNCIÓN DE AJAX PARA EL CALENDARIO (del Paso 1)
      */
@@ -200,12 +220,14 @@ class ReservasController extends Controller {
                 'nombre_cumpleanero' => $reserva_data['nombre_cumpleanero'],
                 'edad_cumpleanero' => $reserva_data['edad_cumpleanero'],
                 'observaciones' => $reserva_data['observaciones'],
+                'canciones' => $reserva_data['canciones'] ?? [],
                 'ruta_captura' => $ruta_captura_final // Nombre del archivo guardado
             ];
             
-            // Guardar en la DB
-            if ($this->reservaModel->crearReservaCompleta($datos_completos)) {
-                header('Location: ' . URL_ROOT . '/reservas/exito');
+            // Guardar en la DB (devuelve el id_reserva nuevo, o false si falló)
+            $id_reserva_nueva = $this->reservaModel->crearReservaCompleta($datos_completos);
+            if ($id_reserva_nueva) {
+                header('Location: ' . URL_ROOT . '/reservas/exito/' . $id_reserva_nueva);
                 exit();
             } else {
                 // Si falla la DB, intentamos borrar el archivo que ya subimos.
@@ -222,10 +244,56 @@ class ReservasController extends Controller {
         }
     }
     
-    /** PÁGINA DE ÉXITO: Muestra el mensaje final */
-    public function exito() {
-        $this->proteger(); 
-        $datos = [ 'titulo' => 'Reserva Completada' ];
+    /**
+     * PÁGINA DE ÉXITO: muestra el mensaje final y, si se pudo obtener el
+     * detalle de la reserva recién creada, un botón para agregarla a Google
+     * Calendar (link "Agregar a Google Calendar" con la fecha/hora ya
+     * llenadas - no requiere ninguna API key ni login con Google).
+     */
+    public function exito($id_reserva = 0) {
+        $this->proteger();
+
+        $googleCalendarUrl = null;
+        $detalle = $this->reservaModel->obtenerDetalleParaCalendario((int) $id_reserva, $_SESSION['id_usuario']);
+
+        if ($detalle) {
+            $googleCalendarUrl = $this->construirLinkGoogleCalendar($detalle);
+        }
+
+        $datos = [
+            'titulo' => 'Reserva Completada',
+            'googleCalendarUrl' => $googleCalendarUrl,
+        ];
         $this->view('reservas/exito', $datos);
+    }
+
+    /**
+     * Arma la URL "Agregar a Google Calendar" (google.com/calendar/render)
+     * con los datos de la reserva ya llenados. El usuario solo tiene que
+     * confirmar "Guardar" en Google Calendar - no hace falta ninguna
+     * credencial ni integración OAuth para esto.
+     */
+    private function construirLinkGoogleCalendar($detalle) {
+        $tzLima = new DateTimeZone('America/Lima');
+
+        $inicio = new DateTime($detalle->fecha . ' ' . $detalle->hora_inicio, $tzLima);
+        $fin    = new DateTime($detalle->fecha . ' ' . $detalle->hora_fin, $tzLima);
+
+        $inicio->setTimezone(new DateTimeZone('UTC'));
+        $fin->setTimezone(new DateTimeZone('UTC'));
+
+        $rangoFechas = $inicio->format('Ymd\THis\Z') . '/' . $fin->format('Ymd\THis\Z');
+
+        $texto = 'Fiesta de ' . $detalle->nombre_cumpleanero . ' - Happy&Jumping';
+        $detalles = 'Paquete: ' . $detalle->paquete_nombre . "\n" .
+                    'Cantidad de personas: ' . $detalle->cantidad_personas . "\n" .
+                    'Recuerda llegar unos minutos antes. ¡Nos vemos en la fiesta!';
+        $ubicacion = '-6.5058575638378375, -76.35724119120785'; // mismas coordenadas del mapa del inicio
+
+        return 'https://www.google.com/calendar/render?action=TEMPLATE'
+             . '&text=' . rawurlencode($texto)
+             . '&dates=' . $rangoFechas
+             . '&details=' . rawurlencode($detalles)
+             . '&location=' . rawurlencode($ubicacion);
     }
 }
