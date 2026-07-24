@@ -7,72 +7,18 @@
 <title><?php echo $titulo; ?></title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-<style>
-    body { font-family: 'Poppins', Arial, sans-serif; background: #f4f8ff; margin: 0; overflow-x: hidden; }
-    .sidebar {
-        width: 240px; height: 100vh; background: #7F00FF;
-        position: fixed; top: 0; left: 0; padding-top: 25px;
-        color: white; display: flex; flex-direction: column; align-items: center;
-    }
-    .sidebar img { width: 120px; margin-bottom: 25px; }
-    .sidebar a {
-        width: 100%; text-decoration: none; padding: 14px 20px 14px 30px;
-        color: white; font-weight: bold; font-size: 17px; transition: 0.3s;
-    }
-    .sidebar a i { margin-right: 10px; }
-    .sidebar a:hover, .sidebar a.active { background: #6200c4; }
-    .sidebar .btn-logout {
-        background: #00d8ff; color: black; font-weight: bold; border-radius: 8px;
-        width: 80%; margin-top: auto; margin-bottom: 20px; text-align: center; padding-left: 14px;
-    }
-    .sidebar .btn-logout:hover { background: #fff; }
-    .content { margin-left: 240px; padding: 30px; }
-    .title { font-size: 32px; font-weight: bold; color: #7F00FF; }
-    .notif-card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 0 14px rgba(0,0,0,0.08); }
-    .plantilla-btn {
-        cursor: pointer; border: 2px solid #e0d4ff; border-radius: 12px;
-        padding: 12px 16px; transition: 0.2s; background: white; text-align: left; width: 100%;
-    }
-    .plantilla-btn:hover { border-color: #7F00FF; background: #f8f0ff; }
-    .plantilla-btn .emoji { font-size: 1.6rem; }
-    .plantilla-btn .texto { font-size: 0.85rem; color: #555; margin-top: 2px; }
-    .historial-item {
-        border-left: 4px solid #7F00FF; padding: 10px 15px;
-        background: #f8f0ff; border-radius: 0 10px 10px 0; margin-bottom: 10px;
-    }
-    .historial-item .hora { font-size: 0.75rem; color: #999; }
-    #preview-box {
-        background: #fff; border: 1px solid #e6e6e6;
-        border-radius: 16px; padding: 14px 16px; color: #1c1c1c;
-        max-width: 320px; box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-    }
-    #preview-box .preview-cabecera {
-        display: flex; align-items: center; gap: 8px;
-        font-size: 0.75rem; color: #777; margin-bottom: 6px;
-    }
-    #preview-box .preview-cabecera img { width: 16px; height: 16px; border-radius: 4px; }
-    #preview-box .preview-cabecera .preview-ahora { margin-left: auto; }
-    #preview-box .titulo-preview { font-weight: 700; font-size: 0.92rem; }
-    #preview-box .msg-preview { font-size: 0.85rem; margin-top: 2px; line-height: 1.4; color: #333; }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fredoka:wght@500;600;700&family=Baloo+2:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/admin.css?v=<?php echo filemtime(PUBLIC_ROOT . '/css/admin.css'); ?>">
 </head>
 <body>
 
-<div class="sidebar">
-    <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.webp" alt="Logo">
-    <a href="<?php echo URL_ROOT; ?>/admin"><i class="bi bi-house-door-fill"></i> Dashboard</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/reservas"><i class="bi bi-calendar-fill"></i> Reservas</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/codigos"><i class="bi bi-ticket-perforated-fill"></i> Códigos</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/notificaciones" class="active"><i class="bi bi-bell-fill"></i> Notificaciones</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/correos"><i class="bi bi-envelope-fill"></i> Correos</a>
-    <a href="<?php echo URL_ROOT; ?>/usuarios/logout" class="btn btn-logout">Cerrar sesión</a>
-</div>
+<?php require APP_ROOT . '/views/admin/includes/sidebar.php'; ?>
 
 <div class="content">
-    <p class="title"><i class="bi bi-bell-fill me-2"></i>Notificaciones</p>
-    <p class="text-muted fs-5">
+    <h1 class="titulo-admin"><i class="bi bi-bell-fill"></i> Notificaciones</h1>
+    <p class="subtitulo-admin">
         Envía notificaciones push reales al celular de tus clientes (aparecen en la bandeja del sistema, aunque el sitio esté cerrado).
-        <span class="badge rounded-pill" style="background:#f3e5ff;color:#7F00FF;"><i class="bi bi-phone-fill me-1"></i><?php echo $totalSuscritos; ?> dispositivo(s) suscrito(s)</span>
+        <span class="badge rounded-pill" style="background:var(--morado-claro);color:var(--morado);"><i class="bi bi-phone-fill me-1"></i><?php echo $totalSuscritos; ?> dispositivo(s) suscrito(s)</span>
     </p>
 
     <?php if (isset($resultado)): ?>
@@ -87,8 +33,8 @@
 
         <!-- Formulario -->
         <div class="col-lg-7">
-            <div class="notif-card">
-                <h5 class="fw-bold mb-1" style="color:#7F00FF">
+            <div class="admin-card">
+                <h5 class="fw-bold mb-1" style="color:var(--morado)">
                     <i class="bi bi-send-fill me-2"></i>Nueva notificación
                 </h5>
                 <p class="text-muted small mb-4">El mensaje llegará como notificación del sistema a todos los dispositivos suscritos, tengan o no el sitio abierto.</p>
@@ -121,9 +67,8 @@
                         ><?php echo isset($mensajeAnterior) ? htmlspecialchars($mensajeAnterior) : ''; ?></textarea>
                         <div class="form-text text-end" id="contador">0 / 200 caracteres</div>
                     </div>
-                    <button type="submit" class="btn btn-lg w-100 fw-bold text-white"
-                        style="background:#7F00FF; border-radius:12px;">
-                        <i class="bi bi-send-fill me-2"></i>Enviar a todos los usuarios
+                    <button type="submit" class="btn-admin-primario w-100 justify-content-center py-3" style="font-size:1.05rem;">
+                        <i class="bi bi-send-fill"></i> Enviar a todos los usuarios
                     </button>
                 </form>
             </div>
@@ -131,7 +76,7 @@
 
         <!-- Preview + Historial -->
         <div class="col-lg-5">
-            <div class="notif-card mb-4">
+            <div class="admin-card mb-4">
                 <p class="fw-semibold mb-3 text-center">📱 Así se verá en la bandeja de notificaciones</p>
                 <div id="preview-box" class="mx-auto">
                     <div class="preview-cabecera">
@@ -144,9 +89,9 @@
                 </div>
             </div>
 
-            <div class="notif-card">
+            <div class="admin-card">
                 <p class="fw-semibold mb-3">
-                    <i class="bi bi-clock-history me-2" style="color:#7F00FF"></i>Últimas enviadas
+                    <i class="bi bi-clock-history me-2" style="color:var(--morado)"></i>Últimas enviadas
                 </p>
                 <?php if (empty($historial)): ?>
                     <p class="text-muted small">Aún no se han enviado notificaciones.</p>
@@ -183,12 +128,6 @@
 </script>
 <script>
 window.HJ_URL_ROOT = "<?php echo URL_ROOT; ?>";
-</script>
-
-<script>
-
-window.HJ_URL_ROOT="<?= URL_ROOT ?>";
-
 </script>
 
 <script src="<?= URL_ROOT ?>/js/chatbot_admin.js"></script>

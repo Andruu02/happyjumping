@@ -7,79 +7,16 @@
 <title><?php echo $titulo; ?></title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-<style>
-    body { font-family: 'Poppins', Arial, sans-serif; background: #f4f8ff; margin: 0; overflow-x: hidden; }
-    .sidebar {
-        width: 240px; height: 100vh; background: #7F00FF;
-        position: fixed; top: 0; left: 0; padding-top: 25px;
-        color: white; display: flex; flex-direction: column; align-items: center;
-    }
-    .sidebar img { width: 120px; margin-bottom: 25px; }
-    .sidebar a {
-        width: 100%; text-decoration: none; padding: 14px 20px 14px 30px;
-        color: white; font-weight: bold; font-size: 17px; transition: 0.3s;
-    }
-    .sidebar a i { margin-right: 10px; }
-    .sidebar a:hover, .sidebar a.active { background: #6200c4; }
-    .sidebar .btn-logout {
-        background: #00d8ff; color: black; font-weight: bold; border-radius: 8px;
-        width: 80%; margin-top: auto; margin-bottom: 20px; text-align: center; padding-left: 14px;
-    }
-    .sidebar .btn-logout:hover { background: #fff; }
-    .content { margin-left: 240px; padding: 30px; }
-    .title { font-size: 32px; font-weight: bold; color: #7F00FF; }
-    .card-seccion {
-        background: white; border-radius: 16px; padding: 28px;
-        box-shadow: 0 0 14px rgba(0,0,0,0.07); margin-bottom: 24px;
-    }
-    /* Plantillas */
-    .plantilla-card {
-        border: 2px solid #e0d4ff; border-radius: 14px; padding: 16px;
-        cursor: pointer; transition: .2s; background: white; text-align: left;
-        width: 100%; position: relative;
-    }
-    .plantilla-card:hover  { border-color: #7F00FF; background: #f9f0ff; }
-    .plantilla-card.activa { border-color: #7F00FF; background: #f3e5ff; box-shadow: 0 0 0 3px rgba(127,0,255,.15); }
-    .plantilla-card .emoji { font-size: 1.8rem; }
-    .plantilla-card .badge-activa {
-        position: absolute; top: 10px; right: 10px;
-        background: #7F00FF; color: white; font-size: .7rem;
-        padding: 2px 8px; border-radius: 20px; display: none;
-    }
-    .plantilla-card.activa .badge-activa { display: inline; }
-    /* Extras dinámicos */
-    .extras-panel { display: none; }
-    .extras-panel.visible { display: block; }
-    /* Tabla de clientes */
-    .cliente-row td { vertical-align: middle; font-size: .9rem; }
-    .badge-reservas { background: #f3e5ff; color: #7F00FF; border-radius: 20px; padding: 2px 10px; font-size: .8rem; }
-    /* Historial */
-    .hist-item {
-        border-left: 4px solid #7F00FF; padding: 10px 15px;
-        background: #f8f0ff; border-radius: 0 10px 10px 0; margin-bottom: 10px;
-    }
-    .hist-item .meta { font-size: .75rem; color: #999; }
-    /* Contadores */
-    #contador-sel { font-weight: 700; color: #7F00FF; }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fredoka:wght@500;600;700&family=Baloo+2:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/admin.css?v=<?php echo filemtime(PUBLIC_ROOT . '/css/admin.css'); ?>">
 </head>
 <body>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-    <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.webp" alt="Logo">
-    <a href="<?php echo URL_ROOT; ?>/admin"><i class="bi bi-house-door-fill"></i> Dashboard</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/reservas"><i class="bi bi-calendar-fill"></i> Reservas</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/codigos"><i class="bi bi-ticket-perforated-fill"></i> Códigos</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/notificaciones"><i class="bi bi-bell-fill"></i> Notificaciones</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/correos" class="active"><i class="bi bi-envelope-fill"></i> Correos</a>
-    <a href="<?php echo URL_ROOT; ?>/usuarios/logout" class="btn btn-logout">Cerrar sesión</a>
-</div>
+<?php require APP_ROOT . '/views/admin/includes/sidebar.php'; ?>
 
-<!-- CONTENIDO -->
 <div class="content">
-    <p class="title"><i class="bi bi-envelope-fill me-2"></i>Correos Masivos</p>
-    <p class="text-muted fs-5">Envía correos personalizados a tus clientes desde el panel.</p>
+    <h1 class="titulo-admin"><i class="bi bi-envelope-fill"></i> Correos Masivos</h1>
+    <p class="subtitulo-admin">Envía correos personalizados a tus clientes desde el panel.</p>
 
     <?php if (!empty($resultado)): ?>
         <div class="alert alert-<?php echo $resultado['tipo']; ?> alert-dismissible fade show">
@@ -97,8 +34,8 @@
             <div class="col-lg-7">
 
                 <!-- 1. Seleccionar plantilla -->
-                <div class="card-seccion">
-                    <h5 class="fw-bold mb-1" style="color:#7F00FF">
+                <div class="admin-card mb-4">
+                    <h5 class="fw-bold mb-1" style="color:var(--morado)">
                         <i class="bi bi-layout-text-sidebar-reverse me-2"></i>1. Elige una plantilla
                     </h5>
                     <p class="text-muted small mb-4">Selecciona el tipo de correo que quieres enviar.</p>
@@ -108,10 +45,10 @@
                     <div class="row g-3">
                         <?php
                         $plantillas_ui = [
-                            ['key'=>'recordatorio', 'emoji'=>'🎂', 'titulo'=>'Recordatorio de reserva', 'desc'=>'Avisa a los clientes que su fiesta se acerca pronto.', 'color'=>'#FF6B6B'],
-                            ['key'=>'promo',        'emoji'=>'🎉', 'titulo'=>'Promoción especial',      'desc'=>'Anuncia una oferta, descuento o 2x1.',              'color'=>'#7F00FF'],
-                            ['key'=>'puntos',       'emoji'=>'🏆', 'titulo'=>'Puntos acumulados',       'desc'=>'Recuérdales que tienen puntos listos para canjear.','color'=>'#f7971e'],
-                            ['key'=>'personalizado','emoji'=>'💬', 'titulo'=>'Mensaje personalizado',   'desc'=>'Escribe un mensaje totalmente libre para tus clientes.','color'=>'#E100FF'],
+                            ['key'=>'recordatorio', 'emoji'=>'🎂', 'titulo'=>'Recordatorio de reserva', 'desc'=>'Avisa a los clientes que su fiesta se acerca pronto.'],
+                            ['key'=>'promo',        'emoji'=>'🎉', 'titulo'=>'Promoción especial',      'desc'=>'Anuncia una oferta, descuento o 2x1.'],
+                            ['key'=>'puntos',       'emoji'=>'🏆', 'titulo'=>'Puntos acumulados',       'desc'=>'Recuérdales que tienen puntos listos para canjear.'],
+                            ['key'=>'personalizado','emoji'=>'💬', 'titulo'=>'Mensaje personalizado',   'desc'=>'Escribe un mensaje totalmente libre para tus clientes.'],
                         ];
                         foreach ($plantillas_ui as $p): ?>
                         <div class="col-6">
@@ -128,8 +65,8 @@
                 </div>
 
                 <!-- 2. Campos extra por plantilla -->
-                <div class="card-seccion" id="extras-wrapper" style="display:none;">
-                    <h5 class="fw-bold mb-3" style="color:#7F00FF">
+                <div class="admin-card" id="extras-wrapper" style="display:none;">
+                    <h5 class="fw-bold mb-3" style="color:var(--morado)">
                         <i class="bi bi-sliders me-2"></i>2. Personaliza el contenido
                     </h5>
 
@@ -181,8 +118,8 @@
             <div class="col-lg-5">
 
                 <!-- Destinatarios -->
-                <div class="card-seccion">
-                    <h5 class="fw-bold mb-1" style="color:#7F00FF">
+                <div class="admin-card mb-4">
+                    <h5 class="fw-bold mb-1" style="color:var(--morado)">
                         <i class="bi bi-people-fill me-2"></i>3. Destinatarios
                     </h5>
                     <p class="text-muted small mb-3">
@@ -249,9 +186,9 @@
                 </div>
 
                 <!-- Historial -->
-                <div class="card-seccion">
+                <div class="admin-card">
                     <p class="fw-semibold mb-3">
-                        <i class="bi bi-clock-history me-2" style="color:#7F00FF"></i>Últimos envíos
+                        <i class="bi bi-clock-history me-2" style="color:var(--morado)"></i>Últimos envíos
                     </p>
                     <?php if (empty($historial)): ?>
                         <p class="text-muted small">Aún no se han enviado correos desde el panel.</p>
@@ -276,9 +213,8 @@
 
         <!-- Botón enviar -->
         <div class="d-grid mt-2">
-            <button type="submit" id="btn-enviar" class="btn btn-lg fw-bold text-white py-3" disabled
-                style="background:#7F00FF;border-radius:14px;font-size:1.1rem;">
-                <i class="bi bi-send-fill me-2"></i>
+            <button type="submit" id="btn-enviar" class="btn-admin-primario justify-content-center py-3" disabled style="font-size:1.05rem;">
+                <i class="bi bi-send-fill"></i>
                 <span id="btn-texto">Selecciona una plantilla y destinatarios</span>
             </button>
         </div>
@@ -401,12 +337,6 @@
 </script>
 <script>
 window.HJ_URL_ROOT = "<?php echo URL_ROOT; ?>";
-</script>
-
-<script>
-
-window.HJ_URL_ROOT="<?= URL_ROOT ?>";
-
 </script>
 
 <script src="<?= URL_ROOT ?>/js/chatbot_admin.js"></script>

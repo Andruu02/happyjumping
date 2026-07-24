@@ -7,56 +7,16 @@
 <title><?php echo $titulo; ?></title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-<style>
-    body { font-family: 'Poppins', Arial, sans-serif; background: #f4f8ff; margin: 0; }
-    .sidebar {
-        width: 240px; height: 100vh; background: #7F00FF;
-        position: fixed; top: 0; left: 0; padding-top: 25px;
-        color: white; display: flex; flex-direction: column; align-items: center;
-    }
-    .sidebar img { width: 120px; margin-bottom: 25px; }
-    .sidebar a {
-        width: 100%; text-decoration: none; padding: 14px 30px;
-        color: white; font-weight: bold; font-size: 17px; transition: 0.3s;
-    }
-    .sidebar a i { margin-right: 10px; }
-    .sidebar a:hover, .sidebar a.active { background: #6200c4; }
-    .sidebar .btn-logout {
-        background: #00d8ff; color: black; font-weight: bold;
-        border-radius: 8px; width: 80%; margin-top: auto;
-        margin-bottom: 20px; text-align: center; padding: 10px;
-    }
-    .sidebar .btn-logout:hover { background: #fff; }
-    .content { margin-left: 240px; padding: 30px; }
-    .title { font-size: 32px; font-weight: bold; color: #7F00FF; }
-    .table-reservas th { background-color: #7F00FF; color: white; }
-    .status-badge { padding: 5px 12px; border-radius: 10px; font-weight: bold; font-size: 13px; display: inline-block; }
-    .status-pendiente  { background: #fff3cd; color: #856404; }
-    .status-confirmada { background: #d1e7dd; color: #0a3622; }
-    .status-cancelada  { background: #f8d7da; color: #58151c; }
-    .sel-pendiente  { background-color: #fff3cd !important; color: #856404 !important; border-color: #ffc107 !important; font-weight: bold; }
-    .sel-confirmada { background-color: #d1e7dd !important; color: #0a3622 !important; border-color: #198754 !important; font-weight: bold; }
-    .sel-cancelada  { background-color: #f8d7da !important; color: #58151c !important; border-color: #dc3545 !important; font-weight: bold; }
-    .filtros-card { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 0 14px rgba(0,0,0,0.06); margin-bottom: 20px; }
-    .pagina-info { font-size: .9rem; color: #666; }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fredoka:wght@500;600;700&family=Baloo+2:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/admin.css?v=<?php echo filemtime(PUBLIC_ROOT . '/css/admin.css'); ?>">
 </head>
 <body>
 
-<div class="sidebar">
-    <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.webp" alt="Logo">
-    <a href="<?php echo URL_ROOT; ?>/admin"><i class="bi bi-house-door-fill"></i> Dashboard</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/reservas" class="active"><i class="bi bi-calendar-fill"></i> Reservas</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/codigos"><i class="bi bi-ticket-perforated-fill"></i> Códigos</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/notificaciones"><i class="bi bi-bell-fill"></i> Notificaciones</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/correos"><i class="bi bi-envelope-fill"></i> Correos</a>
-
-    <a href="<?php echo URL_ROOT; ?>/usuarios/logout" class="btn-logout"><i class="bi bi-box-arrow-right"></i> Cerrar sesion</a>
-</div>
+<?php require APP_ROOT . '/views/admin/includes/sidebar.php'; ?>
 
 <div class="content">
-    <p class="title">Gestion de Reservas</p>
-    <p class="text-muted fs-5">Controla las solicitudes y pagos de los clientes.</p>
+    <h1 class="titulo-admin"><i class="bi bi-calendar-fill"></i> Gestión de Reservas</h1>
+    <p class="subtitulo-admin">Controla las solicitudes y pagos de los clientes.</p>
 
     <?php if (!empty($mensaje)): ?>
         <div class="alert alert-<?php echo $mensaje['tipo']; ?> alert-dismissible fade show" role="alert">
@@ -114,9 +74,9 @@
         </form>
     </div>
 
-    <div class="card p-4 shadow-sm">
+    <div class="admin-card">
         <div class="table-responsive">
-            <table class="table table-striped table-hover table-reservas">
+            <table class="table table-hover admin-table">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -200,7 +160,7 @@
                         $activa = $p === $pagina;
                     ?>
                         <li class="page-item <?php echo $activa ? 'active' : ''; ?>">
-                            <a class="page-link" href="?<?php echo http_build_query($qs); ?>" <?php echo $activa ? 'style="background:#7F00FF;border-color:#7F00FF;"' : ''; ?>><?php echo $p; ?></a>
+                            <a class="page-link" href="?<?php echo http_build_query($qs); ?>"><?php echo $p; ?></a>
                         </li>
                     <?php endfor; ?>
                 </ul>
@@ -213,13 +173,13 @@
 <!-- Modal detalle -->
 <div class="modal fade" id="modalDetalle" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Detalle Reserva #<span id="d_id"></span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="modal-content" style="border-radius:18px;overflow:hidden;border:none;">
+            <div class="modal-header modal-header-admin border-0">
+                <h5 class="modal-title fw-bold text-white mb-0">Detalle Reserva #<span id="d_id"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="d_body"></div>
-            <div class="modal-footer">
+            <div class="modal-footer border-0">
                 <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
@@ -290,12 +250,6 @@ function confirmarCambio(form) {
 </script>
 <script>
 window.HJ_URL_ROOT = "<?php echo URL_ROOT; ?>";
-</script>
-
-<script>
-
-window.HJ_URL_ROOT="<?= URL_ROOT ?>";
-
 </script>
 
 <script src="<?= URL_ROOT ?>/js/chatbot_admin.js"></script>

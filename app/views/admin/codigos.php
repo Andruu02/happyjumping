@@ -7,53 +7,16 @@
 <title><?php echo $titulo; ?></title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-<style>
-    body { font-family: 'Poppins', Arial, sans-serif; background: #f4f8ff; margin: 0; }
-    .sidebar {
-        width: 240px; height: 100vh; background: #7F00FF;
-        position: fixed; top: 0; left: 0; padding-top: 25px;
-        color: white; display: flex; flex-direction: column; align-items: center;
-    }
-    .sidebar img { width: 120px; margin-bottom: 25px; }
-    .sidebar a {
-        width: 100%; text-decoration: none; padding: 14px 30px;
-        color: white; font-weight: bold; font-size: 17px; transition: 0.3s;
-    }
-    .sidebar a i { margin-right: 10px; }
-    .sidebar a:hover, .sidebar a.active { background: #6200c4; }
-    .sidebar .btn-logout {
-        background: #00d8ff; color: black; font-weight: bold;
-        border-radius: 8px; width: 80%; margin-top: auto;
-        margin-bottom: 20px; text-align: center; padding: 10px;
-    }
-    .sidebar .btn-logout:hover { background: #fff; }
-    .content { margin-left: 240px; padding: 30px; }
-    .title { font-size: 32px; font-weight: bold; color: #7F00FF; }
-    .table-codigos th { background-color: #7F00FF; color: white; }
-    .status-badge { padding: 5px 12px; border-radius: 10px; font-weight: bold; font-size: 13px; display: inline-block; }
-    .status-disponible { background: #d1e7dd; color: #0a3622; }
-    .status-usado      { background: #e2e3e5; color: #41464b; }
-    .sel-disponible { background-color: #d1e7dd !important; color: #0a3622 !important; border-color: #198754 !important; font-weight: bold; }
-    .sel-usado      { background-color: #e2e3e5 !important; color: #41464b !important; border-color: #6c757d !important; font-weight: bold; }
-    .codigo-text { font-family: monospace; font-size: 15px; font-weight: bold; letter-spacing: 2px; color: #7F00FF; }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fredoka:wght@500;600;700&family=Baloo+2:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/admin.css?v=<?php echo filemtime(PUBLIC_ROOT . '/css/admin.css'); ?>">
 </head>
 <body>
 
-<div class="sidebar">
-    <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.webp" alt="Logo">
-    <a href="<?php echo URL_ROOT; ?>/admin"><i class="bi bi-house-door-fill"></i> Dashboard</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/reservas"><i class="bi bi-calendar-fill"></i> Reservas</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/codigos" class="active"><i class="bi bi-ticket-perforated-fill"></i> Códigos</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/notificaciones"><i class="bi bi-bell-fill"></i> Notificaciones</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/correos"><i class="bi bi-envelope-fill"></i> Correos</a>
-
-    <a href="<?php echo URL_ROOT; ?>/usuarios/logout" class="btn-logout"><i class="bi bi-box-arrow-right"></i> Cerrar sesion</a>
-</div>
+<?php require APP_ROOT . '/views/admin/includes/sidebar.php'; ?>
 
 <div class="content">
-    <p class="title">Códigos Canjeados</p>
-    <p class="text-muted fs-5">Gestiona los códigos de promoción generados por los usuarios.</p>
+    <h1 class="titulo-admin"><i class="bi bi-ticket-perforated-fill"></i> Códigos Canjeados</h1>
+    <p class="subtitulo-admin">Gestiona los códigos de promoción generados por los usuarios.</p>
 
     <?php if (!empty($mensaje)): ?>
         <div class="alert alert-<?php echo $mensaje['tipo']; ?> alert-dismissible fade show" role="alert">
@@ -63,7 +26,7 @@
     <?php endif; ?>
 
     <!-- Filtros -->
-    <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div class="filtros-card d-flex justify-content-between align-items-center flex-wrap gap-3">
         <h4 class="mb-0">Códigos encontrados: <strong><?php echo count($codigos); ?></strong></h4>
         <form method="GET" action="<?php echo URL_ROOT; ?>/admin/codigos" class="d-flex align-items-center gap-2 flex-wrap">
             <label class="mb-0 fw-bold">Estado:</label>
@@ -81,7 +44,7 @@
             <input type="text" name="buscar" value="<?php echo htmlspecialchars($buscar); ?>"
                    class="form-control w-auto" placeholder="Nombre o correo..."
                    style="min-width:180px">
-            <button type="submit" class="btn" style="background:#7F00FF;color:white;">
+            <button type="submit" class="btn-admin-primario">
                 <i class="bi bi-search"></i> Buscar
             </button>
             <?php if ($estado_filtro !== 'all' || $buscar !== '' || $codigo_filtro !== ''): ?>
@@ -92,9 +55,9 @@
         </form>
     </div>
 
-    <div class="card p-4 shadow-sm">
+    <div class="admin-card">
         <div class="table-responsive">
-            <table class="table table-striped table-hover table-codigos">
+            <table class="table table-hover admin-table">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -177,12 +140,6 @@ function confirmarCambio(form) {
 </script>
 <script>
 window.HJ_URL_ROOT = "<?php echo URL_ROOT; ?>";
-</script>
-
-<script>
-
-window.HJ_URL_ROOT="<?= URL_ROOT ?>";
-
 </script>
 
 <script src="<?= URL_ROOT ?>/js/chatbot_admin.js"></script>

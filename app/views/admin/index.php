@@ -11,67 +11,17 @@
 <title><?php echo $titulo; ?></title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-    body { font-family: 'Poppins', Arial, sans-serif; background: #f4f8ff; margin: 0; overflow-x: hidden; }
-
-    /* Sidebar */
-    .sidebar { width:240px; height:100vh; background:#7F00FF; position:fixed; top:0; left:0; padding-top:25px; color:white; display:flex; flex-direction:column; align-items:center; }
-    .sidebar img { width:120px; margin-bottom:25px; }
-    .sidebar a { width:100%; text-decoration:none; padding:14px 20px 14px 30px; color:white; font-weight:bold; text-align:left; transition:0.3s; font-size:17px; }
-    .sidebar a i { margin-right:10px; }
-    .sidebar a:hover, .sidebar a.active { background:#6200c4; }
-    .sidebar .btn-logout { background:#00d8ff; color:black; font-weight:bold; border-radius:8px; width:80%; margin-top:auto; margin-bottom:20px; text-align:center; padding-left:14px; }
-    .sidebar .btn-logout:hover { background:#fff; }
-
-    /* Contenido */
-    .content { margin-left:240px; padding:30px; }
-    .title { font-size:32px; font-weight:bold; color:#7F00FF; }
-
-    /* Cards estadísticas */
-    .stat-card { background:#fff; border-radius:14px; padding:20px; box-shadow:0 0 12px rgba(0,0,0,.08); display:flex; align-items:center; }
-    .stat-card-icon { font-size:2.5rem; padding:15px; border-radius:10px; margin-right:15px; }
-    .stat-card-info h5 { font-size:1rem; color:#888; font-weight:600; margin-bottom:5px; }
-    .stat-card-info .stat-number { font-size:2rem; font-weight:700; color:#333; }
-    .icon-clientes   { background:#e0f7fa; color:#00838f; }
-    .icon-ingresos   { background:#e8f5e9; color:#2e7d32; }
-    .icon-pendientes { background:#fff8e1; color:#f9a825; }
-
-    /* Cards sección */
-    .card-section { background:#ffffff; border-radius:14px; padding:20px; box-shadow:0 0 12px rgba(0,0,0,.08); border:none; height:350px; }
-    .card-section h5 { color:#7F00FF; font-weight:bold; }
-    .reservas-list { list-style:none; padding:0; max-height:280px; overflow-y:auto; }
-    .reservas-list li { display:flex; justify-content:space-between; padding:12px 5px; border-bottom:1px solid #eee; }
-    .reservas-list li .nombre { font-weight:600; color:#333; }
-    .reservas-list li .fecha  { font-weight:500; color:#7F00FF; }
-
-    /* Selector de meses */
-    .mes-btn { border:1.5px solid #e0d0ff; background:#fff; color:#444; border-radius:10px; padding:8px 4px; font-size:13px; font-weight:500; cursor:pointer; text-align:center; transition:all .15s; user-select:none; width:100%; }
-    .mes-btn:hover:not(.mes-disabled)  { background:#f0e6ff; border-color:#7F00FF; color:#7F00FF; }
-    .mes-btn.mes-start  { background:#7F00FF!important; color:#fff!important; border-color:#7F00FF!important; border-radius:10px 0 0 10px!important; }
-    .mes-btn.mes-end    { background:#7F00FF!important; color:#fff!important; border-color:#7F00FF!important; border-radius:0 10px 10px 0!important; }
-    .mes-btn.mes-single { background:#7F00FF!important; color:#fff!important; border-color:#7F00FF!important; border-radius:10px!important; }
-    .mes-btn.mes-range  { background:#ede7ff!important; color:#7F00FF!important; border-color:#c9a9ff!important; border-radius:0!important; }
-    .mes-btn.mes-disabled { color:#ccc!important; cursor:not-allowed; background:#fafafa!important; pointer-events:none; }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fredoka:wght@500;600;700&family=Baloo+2:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/admin.css?v=<?php echo filemtime(PUBLIC_ROOT . '/css/admin.css'); ?>">
 </head>
 <body>
 
-<!-- ══ SIDEBAR ══ -->
-<div class="sidebar">
-    <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.webp" alt="Logo">
-    <a href="<?php echo URL_ROOT; ?>/admin"              class="active"><i class="bi bi-house-door-fill"></i> Dashboard</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/reservas">             <i class="bi bi-calendar-fill"></i> Reservas</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/codigos">              <i class="bi bi-ticket-perforated-fill"></i> Códigos</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/notificaciones">       <i class="bi bi-bell-fill"></i> Notificaciones</a>
-    <a href="<?php echo URL_ROOT; ?>/admin/correos">               <i class="bi bi-envelope-fill"></i> Correos</a>
-    <a href="<?php echo URL_ROOT; ?>/usuarios/logout" class="btn btn-logout">Cerrar sesión</a>
-</div>
+<?php require APP_ROOT . '/views/admin/includes/sidebar.php'; ?>
 
 <!-- ══ CONTENIDO ══ -->
 <div class="content">
-    <p class="title">Panel de Control</p>
-    <p class="text-muted fs-5">Bienvenido de nuevo, <?php echo $_SESSION['usuario_nombre']; ?>.</p>
+    <h1 class="titulo-admin"><i class="bi bi-speedometer2"></i> Panel de Control</h1>
+    <p class="subtitulo-admin">Bienvenido de nuevo, <?php echo htmlspecialchars($_SESSION['usuario_nombre']); ?>.</p>
 
     <!-- Tarjetas estadísticas -->
     <div class="row g-4 mt-2">
@@ -106,19 +56,17 @@
 
     <!-- Botón Generar Reporte -->
     <div class="d-flex justify-content-end mt-3 mb-1">
-        <button class="btn fw-bold px-4 py-2"
-                style="background:#7F00FF;color:#fff;border-radius:10px;font-size:15px;"
-                data-bs-toggle="modal" data-bs-target="#modalReporte">
-            <i class="bi bi-file-earmark-bar-graph-fill me-2"></i>Generar Reporte
+        <button class="btn-admin-primario" data-bs-toggle="modal" data-bs-target="#modalReporte">
+            <i class="bi bi-file-earmark-bar-graph-fill"></i> Generar Reporte
         </button>
     </div>
 
     <!-- ══ MODAL REPORTE ══ -->
     <div class="modal fade" id="modalReporte" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" style="max-width:500px;">
-            <div class="modal-content" style="border-radius:18px;overflow:hidden;border:none;box-shadow:0 8px 40px rgba(127,0,255,.18);">
+            <div class="modal-content" style="border-radius:18px;overflow:hidden;border:none;box-shadow:0 8px 40px rgba(123,47,247,.18);">
 
-                <div class="modal-header border-0" style="background:#7F00FF;">
+                <div class="modal-header border-0 modal-header-admin">
                     <i class="bi bi-file-earmark-bar-graph-fill text-white fs-5 me-2"></i>
                     <h5 class="modal-title fw-bold text-white mb-0">Generar Reporte</h5>
                     <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal"></button>
@@ -129,7 +77,7 @@
                     <!-- Estado -->
                     <div class="mb-3">
                         <label class="form-label fw-semibold text-secondary" style="font-size:12px;text-transform:uppercase;letter-spacing:.5px;">Estado de pago</label>
-                        <select id="r-estado" class="form-select" style="border-radius:10px;border:1.5px solid #e0d0ff;">
+                        <select id="r-estado" class="form-select">
                             <option value="all">Todos los estados</option>
                             <option value="confirmada">✔ Confirmadas</option>
                             <option value="pendiente">⏳ Pendientes</option>
@@ -140,17 +88,17 @@
                     <!-- Selector de periodo -->
                     <label class="form-label fw-semibold text-secondary mb-2 d-block" style="font-size:12px;text-transform:uppercase;letter-spacing:.5px;">
                         Periodo del reporte
-                        <span class="badge ms-1" style="background:#7F00FF;font-size:10px;">mín 1 mes · máx 2 meses</span>
+                        <span class="badge ms-1" style="background:var(--morado);font-size:10px;">mín 1 mes · máx 2 meses</span>
                     </label>
 
-                    <div style="background:#fff;border-radius:14px;border:1.5px solid #e0d0ff;padding:16px;">
+                    <div style="background:#fff;border-radius:14px;border:1.5px solid var(--morado-claro);padding:16px;">
                         <!-- Navegador de año -->
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <button type="button" onclick="mpCambiarAnio(-1)"
-                                style="background:#f0e6ff;color:#7F00FF;border:none;border-radius:8px;width:32px;height:32px;font-size:18px;line-height:1;cursor:pointer;">‹</button>
+                                style="background:var(--morado-claro);color:var(--morado);border:none;border-radius:8px;width:32px;height:32px;font-size:18px;line-height:1;cursor:pointer;">‹</button>
                             <span id="mp-anio" class="fw-bold" style="color:#2D2D2D;font-size:15px;"></span>
                             <button type="button" onclick="mpCambiarAnio(1)"
-                                style="background:#f0e6ff;color:#7F00FF;border:none;border-radius:8px;width:32px;height:32px;font-size:18px;line-height:1;cursor:pointer;">›</button>
+                                style="background:var(--morado-claro);color:var(--morado);border:none;border-radius:8px;width:32px;height:32px;font-size:18px;line-height:1;cursor:pointer;">›</button>
                         </div>
                         <!-- Grid 4×3 -->
                         <div id="mp-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;"></div>
@@ -198,7 +146,7 @@
                     <?php else: ?>
                         <?php foreach($proximasReservas as $reserva): ?>
                             <li>
-                                <span class="nombre"><?php echo $reserva->nombre_cumpleanero; ?></span>
+                                <span class="nombre"><?php echo htmlspecialchars($reserva->nombre_cumpleanero); ?></span>
                                 <span class="fecha"><?php echo date('d/m/Y', strtotime($reserva->fecha)); ?></span>
                             </li>
                         <?php endforeach; ?>
@@ -225,10 +173,10 @@
             datasets: [{
                 label: 'Ingresos (S/)',
                 data: dataValues,
-                borderColor: '#7F00FF',
-                backgroundColor: 'rgba(127,0,255,0.08)',
+                borderColor: '#7b2ff7',
+                backgroundColor: 'rgba(123,47,247,0.08)',
                 borderWidth: 2,
-                pointBackgroundColor: '#7F00FF',
+                pointBackgroundColor: '#7b2ff7',
                 pointRadius: 4,
                 fill: true,
                 tension: 0.4
@@ -337,7 +285,7 @@
         const ni = MESES[selStart.m] + ' ' + selStart.y;
         const nf = MESES[selEnd.m]   + ' ' + selEnd.y;
         resEl.innerHTML =
-            '<span style="color:#7F00FF;font-weight:600;">📅 ' +
+            '<span style="color:var(--morado);font-weight:600;">📅 ' +
             (diff === 1 ? ni : ni + ' → ' + nf) +
             ' &nbsp;·&nbsp; ' + diff + ' mes' + (diff > 1 ? 'es' : '') +
             '</span>';
