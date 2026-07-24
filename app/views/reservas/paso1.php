@@ -371,16 +371,9 @@
 
                 calendarGrid.innerHTML += `<div class="${classes}" data-date="${dateStr}">${day}</div>`;
             }
-
-            // El calendario carga sus días de forma asíncrona (fetch), lo que
-            // cambia la altura de la tarjeta 1 recién después de esta espera.
-            // Hay que reconstruir la ruta del GSAP con las medidas ya
-            // definitivas; si no, el indicador queda calculado con una
-            // altura vieja (más corta) y se atrasa/no llega a los siguientes
-            // pasos.
-            if (typeof inicializarGSAP === 'function') {
-                setTimeout(inicializarGSAP, 50);
-            }
+            // (La reconstrucción de la ruta del GSAP tras esta carga
+            // asíncrona la dispara solo el ResizeObserver de más abajo,
+            // que detecta el cambio de alto de la tarjeta.)
         }
         prevMonthBtn.addEventListener('click', () => {
             currentDate.setMonth(currentDate.getMonth() - 1);
@@ -885,6 +878,21 @@
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(inicializarGSAP, 250);
         });
+
+        // Cualquier tarjeta de paso puede cambiar de alto después de cargada
+        // (resultados de búsqueda de canciones, canciones agregadas/quitadas,
+        // el calendario, el texto de "termina a las..."). En vez de acordarse
+        // de reconstruir la ruta manualmente en cada uno de esos lugares, se
+        // observa el alto real de las 3 tarjetas y se reconstruye sola cada
+        // vez que cambia - así el indicador nunca se queda corto.
+        if (window.ResizeObserver) {
+            let resizeObserverTimeout;
+            const alturaPasosObserver = new ResizeObserver(() => {
+                clearTimeout(resizeObserverTimeout);
+                resizeObserverTimeout = setTimeout(inicializarGSAP, 80);
+            });
+            document.querySelectorAll('.step-card').forEach(card => alturaPasosObserver.observe(card));
+        }
     </script>
 </body>
 </html>
