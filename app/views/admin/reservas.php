@@ -239,7 +239,44 @@ document.querySelectorAll('[data-reserva]').forEach(function(btn) {
             '<p><strong>Fecha:</strong> ' + r.fecha + ' a las ' + r.hora_inicio.substring(0,5) + '</p>' +
             '<p><strong>Monto:</strong> S/ ' + parseFloat(r.monto).toFixed(2) + '</p>' +
             '<p><strong>Observaciones:</strong> ' + (r.observaciones || 'Ninguna') + '</p>' +
-            '<p><strong>Estado:</strong> <span class="status-badge status-' + r.estado_pago + '">' + r.estado_pago.toUpperCase() + '</span></p>';
+            '<p><strong>Estado:</strong> <span class="status-badge status-' + r.estado_pago + '">' + r.estado_pago.toUpperCase() + '</span></p>' +
+            '<p><strong>🎵 Playlist sugerida:</strong></p>' +
+            '<div id="d_playlist"><span class="text-muted">Cargando...</span></div>';
+
+        fetch(window.HJ_URL_ROOT + '/admin/cancionesReserva/' + r.id_reserva)
+            .then(function(resp) { return resp.json(); })
+            .then(function(canciones) {
+                var contenedor = document.getElementById('d_playlist');
+                if (!contenedor) return; // el usuario ya cerró el modal / abrió otro
+
+                if (!Array.isArray(canciones) || canciones.length === 0) {
+                    contenedor.innerHTML = '<span class="text-muted">El cliente no sugirió canciones.</span>';
+                    return;
+                }
+
+                var lista = document.createElement('ul');
+                lista.className = 'mb-0 ps-3';
+                canciones.forEach(function(c) {
+                    var li = document.createElement('li');
+                    if (c.enlace) {
+                        var a = document.createElement('a');
+                        a.href = c.enlace;
+                        a.target = '_blank';
+                        a.rel = 'noopener';
+                        a.textContent = c.nombre + ' — ' + c.artista;
+                        li.appendChild(a);
+                    } else {
+                        li.textContent = c.nombre + ' — ' + c.artista;
+                    }
+                    lista.appendChild(li);
+                });
+                contenedor.innerHTML = '';
+                contenedor.appendChild(lista);
+            })
+            .catch(function() {
+                var contenedor = document.getElementById('d_playlist');
+                if (contenedor) contenedor.innerHTML = '<span class="text-danger">No se pudo cargar la playlist.</span>';
+            });
     });
 });
 </script>

@@ -124,6 +124,16 @@ class AdminController extends Controller {
         exit;
     }
 
+    /**
+     * FUNCIÓN DE AJAX: canciones que el cliente sugirió para la playlist de
+     * su fiesta (se muestran en el modal "Ver" de Gestión de Reservas, para
+     * que la anfitriona sepa qué reproducir el día del evento).
+     */
+    public function cancionesReserva($id_reserva = 0) {
+        header('Content-Type: application/json');
+        echo json_encode($this->adminModel->getCancionesPorReserva((int) $id_reserva));
+    }
+
     // ── CÓDIGOS DE PROMOCIÓN ─────────────────────────────────────────────────
     public function codigos() {
         $mensaje = null;

@@ -233,6 +233,17 @@ class AdminModel extends Model {
         return $this->single();
     }
 
+    // Canciones que el cliente sugirió para la playlist de su fiesta
+    // (para que la anfitriona las reproduzca el día del evento).
+    public function getCancionesPorReserva($id_reserva) {
+        $this->query("SELECT nombre, artista, enlace
+                      FROM reserva_canciones
+                      WHERE id_reserva = :id
+                      ORDER BY id_cancion ASC");
+        $this->bind(':id', (int) $id_reserva, PDO::PARAM_INT);
+        return $this->resultSet();
+    }
+
     // ── Notificaciones Firebase ──────────────────────────────────────────────
 
     public function guardarNotificacion($mensaje, $id_admin) {

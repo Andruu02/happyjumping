@@ -560,24 +560,28 @@ body {
     flex-direction: column;
     align-items: flex-end;
     gap: 2px;
-    background: #fff;
-    border: 2px solid var(--morado-claro);
+    background: linear-gradient(135deg, var(--morado), var(--rosa));
     border-radius: 16px;
-    padding: 10px 20px;
-    box-shadow: 0 14px 32px rgba(30,10,60,.25);
+    padding: 12px 22px;
+    box-shadow: 0 14px 32px rgba(123,47,247,.45);
+    animation: total-flotante-pop .4s ease;
 }
 .total-flotante-label {
     font-size: .68rem;
     font-weight: 700;
-    color: #999;
+    color: rgba(255,255,255,.85);
     text-transform: uppercase;
     letter-spacing: .04em;
 }
 .total-flotante-valor {
     font-family: 'Baloo 2', sans-serif;
     font-weight: 700;
-    font-size: 1.3rem;
-    color: var(--morado);
+    font-size: 1.4rem;
+    color: #fff;
+}
+@keyframes total-flotante-pop {
+    from { transform: scale(.85); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
 }
 
 /* --- Pago (Paso 3) --- */
@@ -642,7 +646,7 @@ body {
 
 .musica-seleccion { border-top: 1px solid #ecdcff; padding-top: 14px; }
 .musica-seleccion h6 { color: #333; font-weight: 700; margin-bottom: 8px; }
-.musica-lista-elegidas { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.musica-lista-elegidas { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; min-width: 0; }
 .musica-lista-elegidas li {
     display: flex;
     align-items: center;
@@ -653,8 +657,15 @@ body {
     padding: 8px 12px;
     font-size: .85rem;
     color: #444;
+    min-width: 0;
 }
-.musica-lista-elegidas li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.musica-lista-elegidas li span {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 .musica-lista-elegidas li small { color: #999; margin-left: 4px; }
 .musica-lista-elegidas li button {
     flex-shrink: 0;
