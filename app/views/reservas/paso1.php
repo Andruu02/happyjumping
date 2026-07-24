@@ -177,10 +177,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="paso-total-wrapper">
-                        <div class="total-box" id="total-paso1">Total: S/0.00</div>
-                    </div>
                 </div>
             </div>
 
@@ -214,22 +210,22 @@
                         </div>
 
                         <div class="col-lg-5">
-                            <div class="spotify-box">
-                                <h5><i class="bi bi-spotify"></i> Arma la playlist de tu fiesta</h5>
-                                <p class="spotify-hint">Busca canciones y agrégalas - se las pasamos a nuestra anfitriona el día del evento. (Opcional)</p>
+                            <div class="musica-box">
+                                <h5><i class="bi bi-music-note-beamed"></i> Arma la playlist de tu fiesta</h5>
+                                <p class="musica-hint">Busca canciones y agrégalas - se las pasamos a nuestra anfitriona el día del evento. (Opcional)</p>
 
-                                <div class="spotify-buscador">
-                                    <label for="spotify-buscar-input" class="visually-hidden">Buscar canción</label>
-                                    <input type="text" id="spotify-buscar-input" class="form-control" placeholder="Busca una canción o artista...">
-                                    <button type="button" id="spotify-buscar-btn" class="spotify-buscar-btn" aria-label="Buscar"><i class="bi bi-search"></i></button>
+                                <div class="musica-buscador">
+                                    <label for="musica-buscar-input" class="visually-hidden">Buscar canción</label>
+                                    <input type="text" id="musica-buscar-input" class="form-control" placeholder="Busca una canción o artista...">
+                                    <button type="button" id="musica-buscar-btn" class="musica-buscar-btn" aria-label="Buscar"><i class="bi bi-search"></i></button>
                                 </div>
 
-                                <div id="spotify-resultados" class="spotify-resultados"></div>
+                                <div id="musica-resultados" class="musica-resultados"></div>
 
-                                <div class="spotify-seleccion">
-                                    <h6>Tu playlist <span id="spotify-contador">(0)</span></h6>
-                                    <p id="spotify-vacio" class="text-muted small mb-0">Aún no has agregado canciones.</p>
-                                    <ul id="spotify-lista-elegidas" class="spotify-lista-elegidas"></ul>
+                                <div class="musica-seleccion">
+                                    <h6>Tu playlist <span id="musica-contador">(0)</span></h6>
+                                    <p id="musica-vacio" class="text-muted small mb-0">Aún no has agregado canciones.</p>
+                                    <ul id="musica-lista-elegidas" class="musica-lista-elegidas"></ul>
                                 </div>
                             </div>
                         </div>
@@ -248,26 +244,18 @@
                     <div class="row g-4">
 
                         <div class="col-lg-6">
-                            <div class="qr-code-wrapper">
+                            <div class="qr-code-wrapper qr-code-compacto">
                                 <h4>Monto a Pagar: <span id="monto_pagar">S/0.00</span></h4>
                                 <img src="<?php echo URL_ROOT; ?>/img/yape_qr.webp" alt="Código QR de Yape">
-                                <p class="mt-3">
-                                    Escanea el código para pagar.
-                                    <br>
-                                    <strong>¡Importante!</strong> Guarda la captura de tu pago.
-                                </p>
+                                <p class="mb-0">Escanea y paga. <strong>¡Guarda la captura!</strong></p>
                             </div>
 
-                            <div class="resumen-box mt-4">
-                                <h5>Resumen de tu Reserva</h5>
-                                <p><strong>Paquete:</strong> <span id="resumen_paquete"><?php echo htmlspecialchars($paquete->nombre); ?></span></p>
-                                <p><strong>Cantidad:</strong> <span id="resumen_cantidad">—</span></p>
-                                <p><strong>Extras:</strong> <span id="resumen_extras">—</span></p>
-                                <p><strong>Fecha:</strong> <span id="resumen_fecha">—</span></p>
-                                <p><strong>Hora:</strong> <span id="resumen_hora">—</span></p>
-
-                                <hr>
-                                <div class="total-box" id="total-resumen">Total: S/0.00</div>
+                            <div class="resumen-compacto">
+                                <div class="resumen-chip"><i class="bi bi-box-seam-fill"></i> <span id="resumen_paquete"><?php echo htmlspecialchars($paquete->nombre); ?></span></div>
+                                <div class="resumen-chip"><i class="bi bi-people-fill"></i> <span id="resumen_cantidad">—</span></div>
+                                <div class="resumen-chip"><i class="bi bi-stars"></i> <span id="resumen_extras">—</span></div>
+                                <div class="resumen-chip"><i class="bi bi-calendar-event-fill"></i> <span id="resumen_fecha">—</span></div>
+                                <div class="resumen-chip"><i class="bi bi-clock-fill"></i> <span id="resumen_hora">—</span></div>
                             </div>
                         </div>
 
@@ -283,9 +271,7 @@
 
                                 <input type="hidden" name="reserva_data" id="reserva_data_input">
 
-                                <hr class="my-4">
-
-                                <p class="text-muted small">Al hacer clic en "Finalizar", tu reserva quedará en estado "Pendiente" hasta que un administrador verifique tu pago. Todos los campos de los 3 pasos son obligatorios (excepto observaciones).</p>
+                                <p class="text-muted small mt-3 mb-3">Tu reserva queda "Pendiente" hasta verificar el pago. Todos los campos son obligatorios (excepto observaciones).</p>
 
                                 <button type="submit" class="btn-next w-100" id="btnFinalizar">
                                     Finalizar Reserva
@@ -298,6 +284,11 @@
             </div>
 
         </div>
+    </div>
+
+    <div class="total-flotante">
+        <span class="total-flotante-label">Total</span>
+        <span class="total-flotante-valor" id="total-flotante-valor">S/0.00</span>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -330,7 +321,7 @@
 
         const experiencias = document.querySelectorAll('.experience-select');
         const cantidadInput = document.getElementById('cantidad');
-        const totalEl1 = document.getElementById('total-paso1');
+        const totalFlotanteValor = document.getElementById('total-flotante-valor');
         const calendarGrid = document.querySelector('.calendar-grid');
         const monthYearEl = document.getElementById('month-year');
         const prevMonthBtn = document.getElementById('prev-month');
@@ -444,11 +435,12 @@
             });
 
             total = totalBase + extras;
-            totalEl1.textContent = `Total: S/${total.toFixed(2)}`;
+            totalFlotanteValor.textContent = `S/${total.toFixed(2)}`;
         }
 
-        // Refresca en vivo el total del Paso 1, el resumen del Paso 2 y el
-        // monto a pagar del Paso 3, sin importar en qué orden se llenen.
+        // Refresca en vivo la tarjetita flotante de total, el resumen del
+        // Paso 3 y el monto a pagar, sin importar en qué orden se llenen
+        // los pasos.
         function actualizarResumenGlobal() {
             calcularTotal();
 
@@ -476,7 +468,6 @@
             else if (destruccion) extrasTexto = 'Cuarto de Destrucción';
             document.getElementById('resumen_extras').textContent = extrasTexto;
 
-            document.getElementById('total-resumen').textContent = `Total: S/${total.toFixed(2)}`;
             document.getElementById('monto_pagar').textContent = `S/${total.toFixed(2)}`;
         }
 
@@ -556,58 +547,58 @@
         const edadInput = document.getElementById('edad_cumpleanero');
         const observacionesInput = document.getElementById('observaciones');
 
-        /* ================= PASO 2: Playlist con Spotify (opcional) ================= */
+        /* ================= PASO 2: Playlist con Deezer (opcional) ================= */
 
         let cancionesSeleccionadas = [];
         const MAX_CANCIONES = 15;
 
-        const spotifyBuscarInput = document.getElementById('spotify-buscar-input');
-        const spotifyBuscarBtn = document.getElementById('spotify-buscar-btn');
-        const spotifyResultados = document.getElementById('spotify-resultados');
-        const spotifyListaElegidas = document.getElementById('spotify-lista-elegidas');
-        const spotifyContador = document.getElementById('spotify-contador');
-        const spotifyVacio = document.getElementById('spotify-vacio');
+        const musicaBuscarInput = document.getElementById('musica-buscar-input');
+        const musicaBuscarBtn = document.getElementById('musica-buscar-btn');
+        const musicaResultados = document.getElementById('musica-resultados');
+        const musicaListaElegidas = document.getElementById('musica-lista-elegidas');
+        const musicaContador = document.getElementById('musica-contador');
+        const musicaVacio = document.getElementById('musica-vacio');
 
-        async function buscarCancionesSpotify() {
-            const texto = spotifyBuscarInput.value.trim();
+        async function buscarCancionesMusica() {
+            const texto = musicaBuscarInput.value.trim();
             if (texto === '') return;
 
-            spotifyResultados.innerHTML = '<p class="text-muted small mb-0">Buscando...</p>';
+            musicaResultados.innerHTML = '<p class="text-muted small mb-0">Buscando...</p>';
 
             try {
-                const respuesta = await fetch(`<?php echo URL_ROOT; ?>/reservas/buscarCancionesSpotify?q=${encodeURIComponent(texto)}`);
+                const respuesta = await fetch(`<?php echo URL_ROOT; ?>/reservas/buscarCanciones?q=${encodeURIComponent(texto)}`);
                 const canciones = await respuesta.json();
-                renderResultadosSpotify(canciones);
+                renderResultadosMusica(canciones);
             } catch (error) {
-                spotifyResultados.innerHTML = '<p class="text-danger small mb-0">No se pudo buscar. Intenta de nuevo.</p>';
+                musicaResultados.innerHTML = '<p class="text-danger small mb-0">No se pudo buscar. Intenta de nuevo.</p>';
             }
         }
 
-        function renderResultadosSpotify(canciones) {
+        function renderResultadosMusica(canciones) {
             if (!Array.isArray(canciones) || canciones.length === 0) {
-                spotifyResultados.innerHTML = '<p class="text-muted small mb-0">Sin resultados. Prueba con otro nombre.</p>';
+                musicaResultados.innerHTML = '<p class="text-muted small mb-0">Sin resultados. Prueba con otro nombre.</p>';
                 return;
             }
 
-            spotifyResultados.innerHTML = '';
+            musicaResultados.innerHTML = '';
             canciones.forEach((cancion) => {
                 const item = document.createElement('div');
-                item.className = 'spotify-resultado-item';
+                item.className = 'musica-resultado-item';
                 item.innerHTML = `
                     <img src="${cancion.imagen}" alt="">
-                    <div class="spotify-resultado-info">
+                    <div class="musica-resultado-info">
                         <strong>${cancion.nombre}</strong>
                         <span>${cancion.artista}</span>
                     </div>
-                    <button type="button" class="spotify-agregar-btn" aria-label="Agregar a la playlist"><i class="bi bi-plus-lg"></i></button>
+                    <button type="button" class="musica-agregar-btn" aria-label="Agregar a la playlist"><i class="bi bi-plus-lg"></i></button>
                 `;
-                item.querySelector('.spotify-agregar-btn').addEventListener('click', () => agregarCancion(cancion));
-                spotifyResultados.appendChild(item);
+                item.querySelector('.musica-agregar-btn').addEventListener('click', () => agregarCancion(cancion));
+                musicaResultados.appendChild(item);
             });
         }
 
         function agregarCancion(cancion) {
-            const yaExiste = cancionesSeleccionadas.some(c => c.spotify_url === cancion.spotify_url);
+            const yaExiste = cancionesSeleccionadas.some(c => c.enlace === cancion.enlace);
             if (yaExiste) return;
 
             if (cancionesSeleccionadas.length >= MAX_CANCIONES) {
@@ -625,10 +616,10 @@
         }
 
         function renderListaElegidas() {
-            spotifyContador.textContent = `(${cancionesSeleccionadas.length})`;
-            spotifyVacio.style.display = cancionesSeleccionadas.length ? 'none' : 'block';
+            musicaContador.textContent = `(${cancionesSeleccionadas.length})`;
+            musicaVacio.style.display = cancionesSeleccionadas.length ? 'none' : 'block';
 
-            spotifyListaElegidas.innerHTML = '';
+            musicaListaElegidas.innerHTML = '';
             cancionesSeleccionadas.forEach((cancion, indice) => {
                 const li = document.createElement('li');
                 li.innerHTML = `
@@ -636,15 +627,15 @@
                     <button type="button" aria-label="Quitar canción"><i class="bi bi-x-lg"></i></button>
                 `;
                 li.querySelector('button').addEventListener('click', () => quitarCancion(indice));
-                spotifyListaElegidas.appendChild(li);
+                musicaListaElegidas.appendChild(li);
             });
         }
 
-        spotifyBuscarBtn.addEventListener('click', buscarCancionesSpotify);
-        spotifyBuscarInput.addEventListener('keydown', (e) => {
+        musicaBuscarBtn.addEventListener('click', buscarCancionesMusica);
+        musicaBuscarInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                buscarCancionesSpotify();
+                buscarCancionesMusica();
             }
         });
 

@@ -46,7 +46,6 @@ if (getenv('URL_ROOT')) {
 require_once APP_ROOT . '/config/database.php';
 require_once APP_ROOT . '/config/jwt.php';
 require_once APP_ROOT . '/config/apisperu.php';
-require_once APP_ROOT . '/config/spotify.php';
 require_once APP_ROOT . '/core/App.php';
 require_once APP_ROOT . '/core/Controller.php';
 require_once APP_ROOT . '/core/Model.php';
