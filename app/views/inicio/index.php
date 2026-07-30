@@ -4,7 +4,6 @@
 // Incluye, en una sola página con scroll, el contenido de Entradas,
 // Cumpleaños y Conócenos (antes rutas separadas).
 require_once APP_ROOT . '/views/includes/header.php';
-require_once APP_ROOT . '/config/googlemaps.php';
 ?>
 
 <section class="hero">
@@ -319,14 +318,7 @@ require_once APP_ROOT . '/config/googlemaps.php';
 
     <div class="map-container">
         <h2 class="section-title fuente_bouncy titulo-arcoiris">¡Ubícanos!</h2>
-        <div id="mapa-ubicanos" role="img" aria-label="Mapa de ubicación de Happy Jumping Perú">
-            <?php if (!GOOGLE_MAPS_API_KEY): ?>
-            <div class="mapa-fallback">
-                <p>📍 Encuéntranos aquí</p>
-                <a href="https://www.google.com/maps/dir/?api=1&destination=-6.5058575638378375,-76.35724119120785" target="_blank" rel="noopener" class="btn-contratar">Ver en Google Maps</a>
-            </div>
-            <?php endif; ?>
-        </div>
+        <div id="mapa-ubicanos" role="img" aria-label="Mapa de ubicación de Happy Jumping Perú"></div>
     </div>
     </div>
 </section>
@@ -389,7 +381,5 @@ require_once APP_ROOT . '/views/includes/footer.php';
 <script src="<?php echo URL_ROOT; ?>/js/amenidad-expandir.js"></script>
 <script src="<?php echo URL_ROOT; ?>/js/calendario-disponibilidad.js"></script>
 
-<?php if (GOOGLE_MAPS_API_KEY): ?>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="<?php echo URL_ROOT; ?>/js/mapa.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=<?php echo GOOGLE_MAPS_API_KEY; ?>&callback=iniciarMapaUbicanos&loading=async" async defer></script>
-<?php endif; ?>

@@ -21,6 +21,7 @@ $esInicio = isset($active_page) && $active_page === 'inicio';
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/style.css">
     <?php if ($esInicio): ?>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="<?php echo URL_ROOT; ?>/css/inicio.css">
     <?php endif; ?>
 </head>
