@@ -18,7 +18,7 @@
     <h1 class="titulo-admin"><i class="bi bi-bell-fill"></i> Notificaciones</h1>
     <p class="subtitulo-admin">
         Envía notificaciones push reales al celular de tus clientes (aparecen en la bandeja del sistema, aunque el sitio esté cerrado).
-        <span class="badge rounded-pill" style="background:var(--morado-claro);color:var(--morado);"><i class="bi bi-phone-fill me-1"></i><?php echo $totalSuscritos; ?> dispositivo(s) suscrito(s)</span>
+        <span class="badge rounded-pill" style="background:var(--morado-claro);color:var(--morado);" title="<?php echo $totalWebPush; ?> navegador(es) + <?php echo $totalFcm; ?> app(s) móvil(es)"><i class="bi bi-phone-fill me-1"></i><?php echo $totalSuscritos; ?> dispositivo(s) suscrito(s)</span>
     </p>
 
     <?php if (isset($resultado)): ?>

@@ -206,6 +206,8 @@ class AdminController extends Controller {
             } else {
                 require_once APP_ROOT . '/core/WebPush.php';
                 require_once APP_ROOT . '/config/vapid.php';
+                require_once APP_ROOT . '/core/FcmSender.php';
+                require_once APP_ROOT . '/config/firebase.php';
 
                 $payload = json_encode([
                     'title' => 'Happy Jumping Peru 🎈',
@@ -229,6 +231,15 @@ class AdminController extends Controller {
                     }
                 }
 
+                foreach ($pushModel->obtenerTokensFcm() as $t) {
+                    $r = FcmSender::enviar($t->token, 'Happy Jumping Peru 🎈', $mensaje, URL_ROOT);
+                    if ($r === 'expirada') {
+                        $pushModel->eliminarTokenFcm($t->token);
+                    } elseif ($r === true) {
+                        $enviados++;
+                    }
+                }
+
                 $this->adminModel->guardarNotificacion($mensaje, $_SESSION['id_usuario'] ?? 0);
 
                 if ($enviados > 0) {
@@ -240,13 +251,18 @@ class AdminController extends Controller {
             }
         }
 
+        $totalWebPush = $pushModel->contarSuscripciones();
+        $totalFcm     = $pushModel->contarTokensFcm();
+
         $datos = [
             'titulo'          => 'Notificaciones - Admin',
             'plantillas'      => $plantillas,
             'historial'       => $this->adminModel->getHistorialNotificaciones(),
             'resultado'       => $resultado,
             'mensajeAnterior' => $mensajeAnterior,
-            'totalSuscritos'  => $pushModel->contarSuscripciones(),
+            'totalSuscritos'  => $totalWebPush + $totalFcm,
+            'totalWebPush'    => $totalWebPush,
+            'totalFcm'        => $totalFcm,
         ];
 
         $this->view('admin/notificaciones', $datos);

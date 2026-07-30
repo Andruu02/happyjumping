@@ -60,7 +60,13 @@ class ApiController extends Controller {
             return;
         }
 
-        $input    = json_decode(file_get_contents("php://input"), true);
+        $input = json_decode(file_get_contents("php://input"), true);
+
+        if ($accion === 'fcm-suscribir') {
+            $this->pushFcmSuscribir($input);
+            return;
+        }
+
         $endpoint = $input['endpoint'] ?? '';
 
         if (empty($endpoint)) {
@@ -88,6 +94,42 @@ class ApiController extends Controller {
         $userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255);
 
         $ok = $pushModel->guardarSuscripcion($endpoint, $p256dh, $auth, $idUsuario, $userAgent);
+
+        echo json_encode(["success" => (bool) $ok]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | NOTIFICACIONES PUSH NATIVAS (Firebase Cloud Messaging)
+    | POST /api/push/fcm-suscribir → guarda/actualiza el token FCM de la app Flutter
+    |--------------------------------------------------------------------------
+    | Pública (sin JWT obligatorio): la app puede reenviar su token aunque el
+    | usuario no tenga sesión guardada localmente. Si viene un Bearer válido y
+    | el body no trae id_usuario, se usa el del token para asociar el dispositivo.
+    */
+    private function pushFcmSuscribir($input) {
+        $token      = trim($input['token'] ?? '');
+        $plataforma = trim($input['plataforma'] ?? '');
+
+        if (empty($token) || empty($plataforma)) {
+            echo json_encode(["success" => false, "message" => "Faltan datos (token/plataforma)"]);
+            return;
+        }
+
+        $idUsuario = isset($input['id_usuario']) ? (int) $input['id_usuario'] : null;
+
+        if ($idUsuario === null) {
+            $header = $this->getAuthorizationHeader();
+            if ($header && stripos($header, 'Bearer ') === 0) {
+                $payload = JwtHandler::decode(trim(substr($header, 7)));
+                if ($payload && isset($payload['id_usuario'])) {
+                    $idUsuario = (int) $payload['id_usuario'];
+                }
+            }
+        }
+
+        $pushModel = $this->model('PushModel');
+        $ok = $pushModel->guardarTokenFcm($token, $plataforma, $idUsuario);
 
         echo json_encode(["success" => (bool) $ok]);
     }
