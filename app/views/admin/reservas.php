@@ -149,7 +149,7 @@
         </div>
 
         <?php if ($totalPaginas > 1): ?>
-        <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+        <div class="paginacion-admin mt-3">
             <span class="pagina-info">Página <?php echo $pagina; ?> de <?php echo $totalPaginas; ?></span>
             <nav>
                 <ul class="pagination pagination-sm mb-0">
@@ -165,6 +165,7 @@
                     <?php endfor; ?>
                 </ul>
             </nav>
+            <span class="pagina-spacer"></span>
         </div>
         <?php endif; ?>
     </div>

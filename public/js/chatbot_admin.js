@@ -20,6 +20,34 @@
     // ── Historial de la sesión (no persiste en BD directamente, eso lo hace el PHP) ──
     let historial = [];
 
+    // ── Persistencia entre pestañas del panel admin ─────────────────────────
+    // El panel admin no es un SPA: cada link del sidebar (Dashboard, Reservas,
+    // Códigos...) recarga la página completa, así que sin esto el widget se
+    // reconstruye de cero y se pierde toda la conversación. Usamos
+    // sessionStorage para que sobreviva a la navegación dentro de la misma
+    // pestaña del navegador (se limpia solo al cerrar la pestaña/ventana).
+    const HJ_STORAGE_KEY = 'hj_admin_chat_v1';
+    let mensajesGuardados = [];
+
+    function guardarEstado() {
+        try {
+            sessionStorage.setItem(HJ_STORAGE_KEY, JSON.stringify({
+                mensajes: mensajesGuardados,
+                historial: historial,
+                panelAbierto: panel ? !panel.classList.contains('hj-oculto') : false,
+            }));
+        } catch (e) { /* sessionStorage no disponible, seguimos sin persistir */ }
+    }
+
+    function cargarEstado() {
+        try {
+            const raw = sessionStorage.getItem(HJ_STORAGE_KEY);
+            return raw ? JSON.parse(raw) : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
     // ── Crear el HTML del widget ──────────────────────────────────────────────
     const widget = document.createElement('div');
     widget.id = 'hj-chat-widget';
@@ -353,8 +381,12 @@
     btnAbrir.addEventListener('click', () => {
         panel.classList.toggle('hj-oculto');
         if (!panel.classList.contains('hj-oculto')) input.focus();
+        guardarEstado();
     });
-    btnCerrar.addEventListener('click', () => panel.classList.add('hj-oculto'));
+    btnCerrar.addEventListener('click', () => {
+        panel.classList.add('hj-oculto');
+        guardarEstado();
+    });
 
     // ── Sugerencias ───────────────────────────────────────────────────────────
     sugerencias.forEach(btn => {
@@ -403,6 +435,7 @@
                 historial.push({ role: 'assistant', content: data.respuesta });
                 // Máximo 12 mensajes en memoria
                 if (historial.length > 12) historial = historial.slice(-12);
+                guardarEstado();
             }
         } catch (err) {
             cargando.remove();
@@ -414,7 +447,7 @@
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
-    function agregarMensaje(texto, tipo) {
+    function agregarMensaje(texto, tipo, guardar) {
         const row = document.createElement('div');
         row.className = 'hj-msg-row hj-msg-row-' + tipo;
 
@@ -433,8 +466,29 @@
 
         mensajes.appendChild(row);
         mensajes.scrollTop = mensajes.scrollHeight;
+
+        if (guardar !== false) {
+            mensajesGuardados.push({ tipo: tipo, texto: texto });
+            // Máximo 20 mensajes guardados para no inflar sessionStorage
+            if (mensajesGuardados.length > 20) mensajesGuardados = mensajesGuardados.slice(-20);
+            guardarEstado();
+        }
+
         return row;
     }
+
+    // ── Restaurar conversación guardada (si venimos de navegar entre pestañas) ──
+    (function restaurarEstado() {
+        const estado = cargarEstado();
+        if (!estado || !Array.isArray(estado.mensajes) || !estado.mensajes.length) return;
+
+        // No se borra el saludo inicial del template: se agrega la conversación
+        // guardada a continuación, como al reabrir un chat real.
+        estado.mensajes.forEach(m => agregarMensaje(m.texto, m.tipo, false));
+        mensajesGuardados = estado.mensajes;
+        historial = Array.isArray(estado.historial) ? estado.historial : [];
+        if (estado.panelAbierto) panel.classList.remove('hj-oculto');
+    })();
 
     function agregarTyping() {
         const row = document.createElement('div');
