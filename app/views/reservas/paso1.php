@@ -243,11 +243,34 @@
 
                     <div class="row g-4">
 
-                        <div class="col-lg-6">
-                            <div class="qr-code-wrapper qr-code-compacto">
-                                <h4>Monto a Pagar: <span id="monto_pagar">S/0.00</span></h4>
-                                <img src="<?php echo URL_ROOT; ?>/img/yape_qr.webp" alt="Código QR de Yape">
-                                <p class="mb-0">Escanea y paga. <strong>¡Guarda la captura!</strong></p>
+                        <div class="col-lg-7">
+
+                            <!-- Panel Yape (vía Mercado Pago: cobro automático) -->
+                            <div class="metodo-panel" id="panel-yape" data-metodo="yape_mp">
+                                <h3><i class="bi bi-phone-fill"></i> Paga con Yape</h3>
+                                <p class="text-muted small">Ingresa tu celular Yape y el código OTP que te llega en la app. El cobro es automático: tu reserva queda <strong>Confirmada</strong> al toque si el pago se aprueba.</p>
+
+                                <div class="row g-3">
+                                    <div class="col-sm-6">
+                                        <label for="yape_celular" class="form-label"><i class="bi bi-telephone-fill"></i> Celular Yape</label>
+                                        <input type="tel" class="form-control" id="yape_celular" placeholder="987654321" maxlength="9" inputmode="numeric">
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label for="yape_otp" class="form-label"><i class="bi bi-shield-lock-fill"></i> Código OTP</label>
+                                        <input type="text" class="form-control" id="yape_otp" placeholder="123456" maxlength="6" inputmode="numeric">
+                                    </div>
+                                </div>
+                                <p class="form-text mt-2 mb-0">Abre tu app de Yape, genera el código y escríbelo acá.</p>
+
+                                <div id="yape-pago-error" class="pago-error hidden"></div>
+                            </div>
+
+                            <!-- Panel Plin (manual: solo QR) -->
+                            <div class="metodo-panel hidden" id="panel-plin" data-metodo="plin">
+                                <div class="qr-code-wrapper qr-code-compacto">
+                                    <img src="<?php echo URL_ROOT; ?>/img/plin_qr.webp" alt="Código QR de Plin">
+                                    <p class="mb-0">Escanea con tu app Plin y paga el monto exacto.<br><strong>A nombre de Ana Escalona.</strong></p>
+                                </div>
                             </div>
 
                             <div class="resumen-compacto">
@@ -259,25 +282,34 @@
                             </div>
                         </div>
 
-                        <div class="col-lg-6">
-                            <h3>Sube tu Captura de Pago</h3>
+                        <div class="col-lg-5">
+
+                            <div class="pago-total-box">
+                                <span>Total a pagar</span>
+                                <strong id="monto_pagar">S/0.00</strong>
+                            </div>
+
+                            <div class="metodo-pago-tabs">
+                                <p class="metodo-pago-tabs-label">Método de pago</p>
+                                <button type="button" class="metodo-pago-tab activo" data-metodo="yape_mp"><i class="bi bi-phone-fill"></i> Yape</button>
+                                <button type="button" class="metodo-pago-tab" data-metodo="plin"><i class="bi bi-qr-code"></i> Plin</button>
+                            </div>
 
                             <form action="<?php echo URL_ROOT; ?>/reservas/finalizar" method="POST" enctype="multipart/form-data" id="form-finalizar">
 
                                 <div class="upload-box">
-                                    <label for="captura_pago" class="form-label">Adjunta tu captura (JPG, PNG, PDF)</label>
+                                    <label for="captura_pago" class="form-label">Adjunta tu captura (opcional)</label>
                                     <input class="form-control" type="file" id="captura_pago" name="captura_pago" accept="image/png, image/jpeg, application/pdf">
                                 </div>
 
                                 <input type="hidden" name="reserva_data" id="reserva_data_input">
 
-                                <p class="text-muted small mt-3 mb-3">Tu reserva queda "Pendiente" hasta verificar el pago. Todos los campos son obligatorios (excepto observaciones).</p>
+                                <p class="text-muted small mt-3 mb-3" id="texto-ayuda-finalizar">Con Yape el cobro es automático. Con Plin tu reserva queda "Pendiente" hasta que verifiquemos el pago.</p>
 
                                 <button type="submit" class="btn-next w-100" id="btnFinalizar">
-                                    Finalizar Reserva
+                                    Pagar con Yape y Finalizar
                                 </button>
                             </form>
-
                         </div>
                     </div>
                 </div>
@@ -306,6 +338,11 @@
             precioFinde: <?php echo (float) $paquete->precio_fin_semana; ?>,
             duracion: <?php echo (int) $paquete->duracion; ?>
         };
+
+        // Public Key de Mercado Pago (segura de exponer en el navegador,
+        // se usa para tokenizar el celular+OTP de Yape antes de mandarlo
+        // a nuestro backend, que es el único que ve el Access Token secreto).
+        const MP_PUBLIC_KEY = <?php echo json_encode($mpPublicKey); ?>;
 
         // --- BOTÓN DE RETROCEDER: vuelve a la pestaña/página anterior ---
         document.getElementById('btnBack').addEventListener('click', function (e) {
@@ -638,6 +675,62 @@
         const hiddenInput = document.getElementById('reserva_data_input');
         const fileInput = document.getElementById('captura_pago');
 
+        /* ---------- Selector de método de pago (Yape vía MP / Plin) ---------- */
+        const metodoPagoTabs = document.querySelectorAll('.metodo-pago-tab');
+        const panelYape = document.getElementById('panel-yape');
+        const panelPlin = document.getElementById('panel-plin');
+        const metodoPagoHidden = { value: 'yape_mp' }; // no es un <input>, solo guarda el método elegido
+        const yapeCelularInput = document.getElementById('yape_celular');
+        const yapeOtpInput = document.getElementById('yape_otp');
+        const yapePagoError = document.getElementById('yape-pago-error');
+        const textoAyudaFinalizar = document.getElementById('texto-ayuda-finalizar');
+        const btnFinalizar = document.getElementById('btnFinalizar');
+
+        function mostrarErrorPago(mensaje) {
+            yapePagoError.textContent = mensaje;
+            yapePagoError.classList.remove('hidden');
+            yapePagoError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        function ocultarErrorPago() {
+            yapePagoError.classList.add('hidden');
+            yapePagoError.textContent = '';
+        }
+
+        function seleccionarMetodoPago(metodo) {
+            metodoPagoHidden.value = metodo;
+            metodoPagoTabs.forEach(btn => btn.classList.toggle('activo', btn.dataset.metodo === metodo));
+            panelYape.classList.toggle('hidden', metodo !== 'yape_mp');
+            panelPlin.classList.toggle('hidden', metodo !== 'plin');
+            ocultarErrorPago();
+
+            if (metodo === 'yape_mp') {
+                btnFinalizar.textContent = 'Pagar con Yape y Finalizar';
+                textoAyudaFinalizar.textContent = 'Con Yape el cobro es automático: tu reserva queda "Confirmada" al toque si el pago se aprueba.';
+            } else {
+                btnFinalizar.textContent = 'Finalizar Reserva';
+                textoAyudaFinalizar.textContent = 'Escanea el QR de Plin y paga el monto exacto. Tu reserva queda "Pendiente" hasta que verifiquemos el pago.';
+            }
+        }
+        metodoPagoTabs.forEach(btn => btn.addEventListener('click', () => seleccionarMetodoPago(btn.dataset.metodo)));
+
+        /* ---------- Cobro de Yape vía Mercado Pago ---------- */
+        async function generarTokenYape(celular, otp) {
+            const requestId = (window.crypto && crypto.randomUUID)
+                ? crypto.randomUUID()
+                : 'req-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+
+            const resp = await fetch(`https://api.mercadopago.com/platforms/pci/yape/v1/payment?public_key=${encodeURIComponent(MP_PUBLIC_KEY)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phoneNumber: celular, otp: otp, requestId: requestId })
+            });
+            const data = await resp.json();
+            if (!resp.ok || !data.id) {
+                throw new Error(data.message || 'No se pudo validar tu Yape. Revisa el celular y el código OTP.');
+            }
+            return data.id;
+        }
+
         function limpiarErrores() {
             document.querySelectorAll('.campo-invalido').forEach(el => el.classList.remove('campo-invalido'));
             document.querySelectorAll('.numero-error').forEach(el => el.classList.remove('numero-error'));
@@ -661,8 +754,13 @@
             if (edadInput.value === '' || parseInt(edadInput.value) < 1) {
                 errores.push({ paso: 2, mensaje: 'Ingresa una edad válida.', el: edadInput });
             }
-            if (fileInput.files.length === 0) {
-                errores.push({ paso: 3, mensaje: 'Adjunta la captura de tu pago.', el: fileInput });
+            if (metodoPagoHidden.value === 'yape_mp') {
+                if (!/^9\d{8}$/.test(yapeCelularInput.value.trim())) {
+                    errores.push({ paso: 3, mensaje: 'Ingresa un celular Yape válido (9 dígitos).', el: yapeCelularInput });
+                }
+                if (!/^\d{6}$/.test(yapeOtpInput.value.trim())) {
+                    errores.push({ paso: 3, mensaje: 'Ingresa el código OTP de 6 dígitos de tu app Yape.', el: yapeOtpInput });
+                }
             }
 
             return errores;
@@ -697,9 +795,10 @@
             }
         }
 
-        form.addEventListener('submit', function (e) {
+        form.addEventListener('submit', async function (e) {
             e.preventDefault();
             limpiarErrores();
+            ocultarErrorPago();
 
             const errores = validarTodo();
             if (errores.length > 0) {
@@ -719,8 +818,41 @@
                 nombre_cumpleanero: nombreInput.value.trim(),
                 edad_cumpleanero: parseInt(edadInput.value),
                 observaciones: observacionesInput.value.trim(),
-                canciones: cancionesSeleccionadas
+                canciones: cancionesSeleccionadas,
+                metodo_pago: metodoPagoHidden.value
             };
+
+            if (metodoPagoHidden.value === 'yape_mp') {
+                const textoOriginalBtn = btnFinalizar.textContent;
+                btnFinalizar.disabled = true;
+                btnFinalizar.textContent = 'Procesando pago...';
+
+                try {
+                    const tokenId = await generarTokenYape(yapeCelularInput.value.trim(), yapeOtpInput.value.trim());
+
+                    const pagoResp = await fetch(`<?php echo URL_ROOT; ?>/reservas/pagar-yape`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: tokenId, monto: total })
+                    });
+                    const pagoData = await pagoResp.json();
+
+                    if (!pagoData.ok) {
+                        throw new Error(pagoData.error || 'No se pudo procesar el pago con Yape.');
+                    }
+                    if (pagoData.status === 'rejected') {
+                        throw new Error('Tu pago con Yape fue rechazado. Verifica tu saldo/límite de Yape, o paga con Plin.');
+                    }
+
+                    reservaData.mp_payment_id = pagoData.mp_payment_id;
+
+                } catch (err) {
+                    mostrarErrorPago(err.message || 'No se pudo procesar el pago con Yape.');
+                    btnFinalizar.disabled = false;
+                    btnFinalizar.textContent = textoOriginalBtn;
+                    return;
+                }
+            }
 
             hiddenInput.value = JSON.stringify(reservaData);
 

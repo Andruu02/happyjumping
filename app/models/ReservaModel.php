@@ -39,11 +39,14 @@ class ReservaModel extends Model {
             $id_horario_nuevo = $this->dbh->lastInsertId();
 
             // 5. Insertar en 'reservas'
-            $this->query("INSERT INTO reservas (id_usuario, id_paquete, id_horario, cantidad_personas, 
-                                            extra_pintura, extra_destruccion, nombre_cumpleanero, edad_cumpleanero, observaciones)
-                          VALUES (:id_usuario, :id_paquete, :id_horario, :cantidad, 
-                                  :extra_pintura, :extra_destruccion, :nombre_cumple, :edad_cumple, :observaciones)");
-            
+            // estado va también acá (no solo en 'pagos'): el chatbot y los
+            // reportes de ingresos filtran por reservas.estado = 'confirmada',
+            // así que tiene que quedar en sync desde la creación.
+            $this->query("INSERT INTO reservas (id_usuario, id_paquete, id_horario, cantidad_personas,
+                                            extra_pintura, extra_destruccion, nombre_cumpleanero, edad_cumpleanero, observaciones, estado)
+                          VALUES (:id_usuario, :id_paquete, :id_horario, :cantidad,
+                                  :extra_pintura, :extra_destruccion, :nombre_cumple, :edad_cumple, :observaciones, :estado)");
+
             /*
              * ======================================================
              * ¡AQUÍ ESTABA EL ERROR! (Corregido a ->)
@@ -58,18 +61,25 @@ class ReservaModel extends Model {
             $this->bind(':nombre_cumple', $datos['nombre_cumpleanero']);
             $this->bind(':edad_cumple', $datos['edad_cumpleanero']);
             $this->bind(':observaciones', $datos['observaciones']);
-            
+            $this->bind(':estado', $datos['estado_pago'] ?? 'pendiente');
+
             $this->execute();
-            
+
             $id_reserva_nueva = $this->dbh->lastInsertId();
 
             // 7. Insertar en 'pagos'
-            $this->query("INSERT INTO pagos (id_reserva, monto, estado, ruta_captura)
-                          VALUES (:id_reserva, :monto, 'pendiente', :ruta_captura)");
-                          
+            // estado_pago llega ya resuelto desde el controlador: 'confirmada'
+            // si Mercado Pago aprobó el Yape al toque, 'pendiente' en cualquier
+            // otro caso (Plin manual, o Yape en revisión/rechazado).
+            $this->query("INSERT INTO pagos (id_reserva, monto, estado, ruta_captura, metodo_pago, mp_payment_id)
+                          VALUES (:id_reserva, :monto, :estado, :ruta_captura, :metodo_pago, :mp_payment_id)");
+
             $this->bind(':id_reserva', $id_reserva_nueva);
             $this->bind(':monto', $datos['total_calculado']);
+            $this->bind(':estado', $datos['estado_pago'] ?? 'pendiente');
             $this->bind(':ruta_captura', $datos['ruta_captura']);
+            $this->bind(':metodo_pago', $datos['metodo_pago'] ?? 'yape');
+            $this->bind(':mp_payment_id', $datos['mp_payment_id'] ?? null);
             $this->execute();
 
             // 7.5. Insertar las canciones sugeridas para la playlist de la

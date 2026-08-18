@@ -792,6 +792,71 @@ body.body-exito { padding-bottom: 0; }
 .qr-code-compacto h4 { font-size: 1.1rem; margin-top: 0; }
 .qr-code-compacto p { font-size: .88rem; margin-top: 10px; }
 
+/* --- Paso 3: método de pago (Yape vía Mercado Pago / Plin) --- */
+.metodo-panel.hidden { display: none; }
+.metodo-panel h3 { color: var(--morado); font-weight: 700; margin-bottom: 6px; }
+.metodo-panel h3 i { color: var(--rosa); margin-right: 6px; }
+
+.pago-error {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #fff0f3;
+    border: 1px solid #ffc2d1;
+    color: #c9184a;
+    font-weight: 600;
+    font-size: .9rem;
+}
+.pago-error.hidden { display: none; }
+
+.pago-total-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, var(--morado), var(--rosa));
+    color: #fff;
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+.pago-total-box strong { font-size: 1.4rem; }
+
+.metodo-pago-tabs-label {
+    font-weight: 700;
+    color: var(--morado);
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: 8px;
+}
+.metodo-pago-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+.metodo-pago-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 2px solid var(--morado-claro);
+    background: #fff;
+    color: var(--morado);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s ease;
+}
+.metodo-pago-tab:hover { border-color: var(--rosa); }
+.metodo-pago-tab.activo {
+    background: linear-gradient(90deg, var(--rosa), var(--naranja));
+    border-color: transparent;
+    color: #fff;
+}
+
 .upload-box {
     border: 2px dashed var(--celeste);
     border-radius: 14px;

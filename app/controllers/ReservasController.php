@@ -6,6 +6,8 @@
 | - CORREGIDO: Lógica de subida de archivos en finalizar() (Evita Warning y Error de Directorio).
 | - CORREGIDO: Manejo de Warning de sesión 'usuario_rol'.
 */
+require_once APP_ROOT . '/services/MercadoPagoService.php';
+
 class ReservasController extends Controller {
 
     private $paqueteModel;
@@ -65,8 +67,9 @@ class ReservasController extends Controller {
         }
 
         $datos = [
-            'titulo'  => 'Reserva - Happy&Jumping',
-            'paquete' => $paquete,
+            'titulo'      => 'Reserva - Happy&Jumping',
+            'paquete'     => $paquete,
+            'mpPublicKey' => MercadoPagoService::publicKey(),
         ];
         $this->view('reservas/paso1', $datos);
     }
@@ -142,6 +145,44 @@ class ReservasController extends Controller {
     }
 
     /**
+     * AJAX del Paso 3: cobra un pago de Yape a través de Mercado Pago.
+     * Recibe el token que el navegador ya generó (celular + OTP) con la
+     * Public Key, y usa el Access Token (secreto) para crear el pago.
+     * Devuelve el resultado; el front recién ahí decide si sigue a
+     * finalizar() o le muestra el error al usuario.
+     */
+    public function pagarYape() {
+        $this->proteger();
+        header('Content-Type: application/json');
+
+        $input  = json_decode(file_get_contents('php://input'), true);
+        $token  = $input['token'] ?? '';
+        $monto  = isset($input['monto']) ? (float) $input['monto'] : 0;
+        $correo = $_SESSION['usuario_correo'] ?? '';
+
+        if ($token === '' || $monto <= 0 || $correo === '') {
+            http_response_code(400);
+            echo json_encode(['ok' => false, 'error' => 'Datos de pago incompletos.']);
+            return;
+        }
+
+        $mp = new MercadoPagoService();
+        $resultado = $mp->crearPagoYape($token, $monto, $correo, 'Reserva Happy Jumping');
+
+        if (isset($resultado['error'])) {
+            echo json_encode(['ok' => false, 'error' => $resultado['error']]);
+            return;
+        }
+
+        echo json_encode([
+            'ok'            => true,
+            'status'        => $resultado['status'],
+            'status_detail' => $resultado['status_detail'],
+            'mp_payment_id' => $resultado['id'],
+        ]);
+    }
+
+    /**
      * ACCIÓN FINAL: Recibe el POST del Paso 3 y guarda la reserva
      */
     public function finalizar() {
@@ -196,14 +237,42 @@ class ReservasController extends Controller {
                         $error_subida = 'Error: Tipo de archivo no permitido (solo JPG, PNG, PDF).';
                     }
                 }
-            } else {
-                 $error_subida = 'Error: Debes subir la captura de pantalla del pago.';
             }
-            
+            // Si no mandó archivo, no es error: la captura es opcional ahora
+            // que Yape (vía Mercado Pago) y Plin no la requieren para verificar.
+
             // --- 3. VALIDAR Y GUARDAR ---
             if (!empty($error_subida)) {
                  // Si hubo error de subida, mostramos el mensaje de error y detenemos la ejecución
                  die($error_subida); 
+            }
+
+            // --- 2.5. RESOLVER MÉTODO Y ESTADO DE PAGO (del lado del servidor) ---
+            // No se confía en lo que mande el navegador para esto: alguien
+            // podría mandar metodo_pago/estado "confirmada" a mano sin haber
+            // pagado. Solo se acepta 'yape_mp' o 'plin'; y si es Yape, el
+            // estado real se vuelve a consultar directo en Mercado Pago con
+            // el id de pago recibido, nunca se confía en un status del front.
+            $metodo_pago_recibido = $reserva_data['metodo_pago'] ?? 'plin';
+            $metodo_pago = in_array($metodo_pago_recibido, ['yape_mp', 'plin'], true) ? $metodo_pago_recibido : 'plin';
+            $mp_payment_id_final = null;
+            $estado_pago = 'pendiente';
+
+            if ($metodo_pago === 'yape_mp' && !empty($reserva_data['mp_payment_id'])) {
+                $mp = new MercadoPagoService();
+                $pago = $mp->consultarPago($reserva_data['mp_payment_id']);
+
+                if (!isset($pago['error'])) {
+                    $mp_payment_id_final = $pago['id'];
+                    if ($pago['status'] === 'approved') {
+                        $estado_pago = 'confirmada';
+                    } elseif ($pago['status'] === 'rejected' || $pago['status'] === 'cancelled') {
+                        $estado_pago = 'cancelada';
+                    } else {
+                        $estado_pago = 'pendiente'; // in_process / pending
+                    }
+                }
+                // Si la consulta falla, queda 'pendiente' (el admin lo revisa a mano).
             }
 
             // Si llegamos aquí, la subida fue exitosa y $ruta_captura_final está definida
@@ -221,9 +290,12 @@ class ReservasController extends Controller {
                 'edad_cumpleanero' => $reserva_data['edad_cumpleanero'],
                 'observaciones' => $reserva_data['observaciones'],
                 'canciones' => $reserva_data['canciones'] ?? [],
-                'ruta_captura' => $ruta_captura_final // Nombre del archivo guardado
+                'ruta_captura' => $ruta_captura_final, // Nombre del archivo guardado (opcional)
+                'metodo_pago' => $metodo_pago,
+                'mp_payment_id' => $mp_payment_id_final,
+                'estado_pago' => $estado_pago,
             ];
-            
+
             // Guardar en la DB (devuelve el id_reserva nuevo, o false si falló)
             $id_reserva_nueva = $this->reservaModel->crearReservaCompleta($datos_completos);
             if ($id_reserva_nueva) {

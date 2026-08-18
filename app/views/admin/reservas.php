@@ -83,6 +83,7 @@
                         <th>Fecha</th>
                         <th>Cliente / Paquete</th>
                         <th>Monto</th>
+                        <th>Método</th>
                         <th>Estado actual</th>
                         <th>Cambiar estado</th>
                         <th>Acciones</th>
@@ -90,7 +91,7 @@
                 </thead>
                 <tbody>
                 <?php if (empty($reservas)): ?>
-                    <tr><td colspan="7" class="text-center text-muted">No hay reservas con este filtro.</td></tr>
+                    <tr><td colspan="8" class="text-center text-muted">No hay reservas con este filtro.</td></tr>
                 <?php else: ?>
                     <?php foreach ($reservas as $reserva): ?>
                     <tr>
@@ -104,6 +105,16 @@
                             <small class="text-info"><?php echo htmlspecialchars($reserva->nombre_paquete); ?></small>
                         </td>
                         <td>S/ <?php echo number_format($reserva->monto, 2); ?></td>
+                        <td>
+                            <?php
+                                $metodoLabels = ['yape_mp' => 'Yape · MP', 'plin' => 'Plin', 'yape' => 'Yape (manual)'];
+                                $metodoTexto = $metodoLabels[$reserva->metodo_pago] ?? ucfirst($reserva->metodo_pago);
+                            ?>
+                            <span class="badge-metodo badge-metodo-<?php echo htmlspecialchars($reserva->metodo_pago); ?>"><?php echo htmlspecialchars($metodoTexto); ?></span>
+                            <?php if (!empty($reserva->mp_payment_id)): ?>
+                                <br><small class="text-muted">#<?php echo htmlspecialchars($reserva->mp_payment_id); ?></small>
+                            <?php endif; ?>
+                        </td>
                         <td>
                             <span class="status-badge status-<?php echo $reserva->estado_pago; ?>">
                                 <?php echo strtoupper($reserva->estado_pago); ?>
@@ -199,6 +210,8 @@ document.querySelectorAll('[data-reserva]').forEach(function(btn) {
             '<p><strong>Paquete:</strong> ' + r.nombre_paquete + '</p>' +
             '<p><strong>Fecha:</strong> ' + r.fecha + ' a las ' + r.hora_inicio.substring(0,5) + '</p>' +
             '<p><strong>Monto:</strong> S/ ' + parseFloat(r.monto).toFixed(2) + '</p>' +
+            '<p><strong>Método de pago:</strong> ' + ({yape_mp:'Yape (Mercado Pago)', plin:'Plin', yape:'Yape (manual)'}[r.metodo_pago] || r.metodo_pago) +
+                (r.mp_payment_id ? ' — id de pago: ' + r.mp_payment_id : '') + '</p>' +
             '<p><strong>Observaciones:</strong> ' + (r.observaciones || 'Ninguna') + '</p>' +
             '<p><strong>Estado:</strong> <span class="status-badge status-' + r.estado_pago + '">' + r.estado_pago.toUpperCase() + '</span></p>' +
             '<p><strong>🎵 Playlist sugerida:</strong></p>' +

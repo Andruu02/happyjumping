@@ -209,6 +209,12 @@ body {
 .status-badge { padding: 6px 16px; border-radius: 999px; font-weight: 700; font-size: .78rem; display: inline-block; letter-spacing: .02em; }
 .status-pendiente  { background: #fff4e0; color: #b6690a; }
 .status-confirmada { background: #e3faf0; color: #0a8a53; }
+
+/* ---------- Badge de método de pago ---------- */
+.badge-metodo { padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: .72rem; display: inline-block; letter-spacing: .02em; }
+.badge-metodo-yape_mp { background: #f3eeff; color: #6c00ff; }
+.badge-metodo-plin    { background: #e6f7ff; color: #0091d1; }
+.badge-metodo-yape    { background: #eee; color: #666; }
 .status-cancelada  { background: #ffe8ec; color: #c81e3d; }
 .status-disponible { background: #e3faf0; color: #0a8a53; }
 .status-usado      { background: #eee; color: #666; }

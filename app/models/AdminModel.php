@@ -110,7 +110,9 @@ class AdminModel extends Model {
                     pg.monto,
                     COALESCE(NULLIF(pg.estado, ''), 'pendiente') AS estado_pago,
                     pg.ruta_captura,
-                    pg.id_pago
+                    pg.id_pago,
+                    COALESCE(NULLIF(pg.metodo_pago, ''), 'yape') AS metodo_pago,
+                    pg.mp_payment_id
                 FROM reservas r
                 INNER JOIN usuarios u             ON r.id_usuario  = u.id_usuario
                 INNER JOIN paquetes p             ON r.id_paquete  = p.id_paquete
