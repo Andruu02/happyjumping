@@ -42,6 +42,10 @@ class MercadoPagoService {
             return ['error' => 'Falta configurar las credenciales de Mercado Pago en el servidor.'];
         }
 
+        // JSON_PRESERVE_ZERO_FRACTION: sin esto, PHP manda montos redondos
+        // (1.00, 250.00) como "1" / "250" en el JSON (sin decimales), y la
+        // API de Mercado Pago los rechaza con "Invalid value for
+        // transaction_amount" porque espera un número con decimales.
         $payload = json_encode([
             'token'              => $token,
             'transaction_amount' => (float) $monto,
@@ -49,7 +53,7 @@ class MercadoPagoService {
             'installments'       => 1,
             'payment_method_id'  => 'yape',
             'payer'              => ['email' => $email],
-        ]);
+        ], JSON_PRESERVE_ZERO_FRACTION);
 
         $ch = curl_init('https://api.mercadopago.com/v1/payments');
         curl_setopt_array($ch, [
