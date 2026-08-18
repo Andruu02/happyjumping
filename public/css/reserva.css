@@ -916,6 +916,7 @@ body.body-exito { padding-bottom: 0; }
     font-size: .85rem;
     font-weight: 600;
     word-break: break-word;
+    white-space: pre-wrap;
 }
 .test-yape-resultado.hidden { display: none; }
 .test-yape-resultado.exito { background: #e3faf0; color: #0a8a53; border: 1px solid #b7f0d6; }

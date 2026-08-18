@@ -170,7 +170,11 @@ class ReservasController extends Controller {
         $resultado = $mp->crearPagoYape($token, $monto, $correo, 'Reserva Happy Jumping');
 
         if (isset($resultado['error'])) {
-            echo json_encode(['ok' => false, 'error' => $resultado['error']]);
+            echo json_encode([
+                'ok'    => false,
+                'error' => $resultado['error'],
+                'debug' => $resultado['debug'] ?? null,
+            ]);
             return;
         }
 

@@ -813,7 +813,9 @@
                 const data = await resp.json();
 
                 if (!data.ok) {
-                    mostrarResultadoTestYape('Error de Mercado Pago: ' + (data.error || 'desconocido'), false);
+                    let msg = 'Error de Mercado Pago: ' + (data.error || 'desconocido');
+                    if (data.debug) msg += '\n\n' + data.debug;
+                    mostrarResultadoTestYape(msg, false);
                 } else {
                     mostrarResultadoTestYape(
                         `Resultado: ${data.status}${data.status_detail ? ' (' + data.status_detail + ')' : ''} — id de pago: ${data.mp_payment_id}`,

@@ -83,7 +83,12 @@ class MercadoPagoService {
         // ej. 400) - no alcanza con `isset($data['status'])` para saber si
         // el pago se creó bien, hay que mirar el código HTTP real.
         if ($httpCode < 200 || $httpCode >= 300 || !isset($data['id'])) {
-            return ['error' => $this->extraerMensajeError($data)];
+            return [
+                'error' => $this->extraerMensajeError($data),
+                // Cuerpo crudo de Mercado Pago, para poder ver el detalle
+                // completo (cause con códigos, etc.) mientras se prueba.
+                'debug' => 'HTTP ' . $httpCode . ': ' . $respuesta,
+            ];
         }
 
         return [
@@ -140,7 +145,10 @@ class MercadoPagoService {
 
         $data = json_decode($respuesta, true);
         if ($httpCode < 200 || $httpCode >= 300 || !isset($data['id'])) {
-            return ['error' => $this->extraerMensajeError($data)];
+            return [
+                'error' => $this->extraerMensajeError($data),
+                'debug' => 'HTTP ' . $httpCode . ': ' . $respuesta,
+            ];
         }
 
         return [
