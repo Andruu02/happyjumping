@@ -350,6 +350,7 @@
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/MotionPathPlugin.min.js"></script>
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
 
     <script>
         // El paquete ya viene elegido desde el inicio (?paquete=ID); acá solo
@@ -366,6 +367,10 @@
         // se usa para tokenizar el celular+OTP de Yape antes de mandarlo
         // a nuestro backend, que es el único que ve el Access Token secreto).
         const MP_PUBLIC_KEY = <?php echo json_encode($mpPublicKey); ?>;
+        // El SDK de Mercado Pago (cargado arriba) es quien sabe hablar con su
+        // endpoint de tokenización de Yape: una llamada fetch directa desde
+        // acá choca con su política de CORS, por eso se usa el SDK y no fetch.
+        const mp = new MercadoPago(MP_PUBLIC_KEY);
 
         // --- BOTÓN DE RETROCEDER: vuelve a la pestaña/página anterior ---
         document.getElementById('btnBack').addEventListener('click', function (e) {
@@ -742,20 +747,19 @@
 
         /* ---------- Cobro de Yape vía Mercado Pago ---------- */
         async function generarTokenYape(celular, otp) {
-            const requestId = (window.crypto && crypto.randomUUID)
-                ? crypto.randomUUID()
-                : 'req-' + Date.now() + '-' + Math.random().toString(16).slice(2);
-
-            const resp = await fetch(`https://api.mercadopago.com/platforms/pci/yape/v1/payment?public_key=${encodeURIComponent(MP_PUBLIC_KEY)}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phoneNumber: celular, otp: otp, requestId: requestId })
-            });
-            const data = await resp.json();
-            if (!resp.ok || !data.id) {
-                throw new Error(data.message || 'No se pudo validar tu Yape. Revisa el celular y el código OTP.');
+            // Tiene que ser el SDK (mp.yape().create()), no un fetch directo:
+            // el endpoint de tokenización de Yape bloquea llamadas CORS desde
+            // cualquier origen que no sea el propio SDK de Mercado Pago.
+            try {
+                const yape = mp.yape({ otp, phoneNumber: celular });
+                const yapeToken = await yape.create();
+                if (!yapeToken || !yapeToken.id) {
+                    throw new Error('Respuesta inesperada al validar tu Yape.');
+                }
+                return yapeToken.id;
+            } catch (err) {
+                throw new Error(err.message || 'No se pudo validar tu Yape. Revisa el celular y el código OTP.');
             }
-            return data.id;
         }
 
         /* ---------- Botón de prueba: cobra S/1.00 y muestra el resultado, sin reservar nada ---------- */
