@@ -64,6 +64,7 @@ class MercadoPagoService {
             CURLOPT_TIMEOUT => 20,
         ]);
         $respuesta = curl_exec($ch);
+        $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $errorCurl = curl_error($ch);
         curl_close($ch);
 
@@ -72,9 +73,13 @@ class MercadoPagoService {
         }
 
         $data = json_decode($respuesta, true);
-        if (!isset($data['status'])) {
-            $mensaje = $data['message'] ?? 'Mercado Pago devolvió una respuesta inesperada.';
-            return ['error' => $mensaje];
+
+        // OJO: cuando Mercado Pago rechaza la petición, su respuesta de
+        // error también trae un campo "status" (el código HTTP del error,
+        // ej. 400) - no alcanza con `isset($data['status'])` para saber si
+        // el pago se creó bien, hay que mirar el código HTTP real.
+        if ($httpCode < 200 || $httpCode >= 300 || !isset($data['id'])) {
+            return ['error' => $this->extraerMensajeError($data)];
         }
 
         return [
@@ -82,6 +87,24 @@ class MercadoPagoService {
             'status'        => $data['status'],        // approved | in_process | rejected
             'status_detail' => $data['status_detail'] ?? '',
         ];
+    }
+
+    /**
+     * Arma un mensaje legible a partir de una respuesta de error de
+     * Mercado Pago (trae "message" y, casi siempre, una lista "cause" con
+     * el detalle real de qué campo/dato vino mal).
+     */
+    private function extraerMensajeError($data) {
+        $mensaje = $data['message'] ?? 'Mercado Pago devolvió una respuesta inesperada.';
+        if (!empty($data['cause']) && is_array($data['cause'])) {
+            $detalles = array_filter(array_map(function ($c) {
+                return $c['description'] ?? ($c['code'] ?? '');
+            }, $data['cause']));
+            if ($detalles) {
+                $mensaje .= ' (' . implode('; ', $detalles) . ')';
+            }
+        }
+        return $mensaje;
     }
 
     /**
@@ -103,6 +126,7 @@ class MercadoPagoService {
             CURLOPT_TIMEOUT        => 15,
         ]);
         $respuesta = curl_exec($ch);
+        $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $errorCurl = curl_error($ch);
         curl_close($ch);
 
@@ -111,8 +135,8 @@ class MercadoPagoService {
         }
 
         $data = json_decode($respuesta, true);
-        if (!isset($data['status'])) {
-            return ['error' => $data['message'] ?? 'No se pudo verificar el pago en Mercado Pago.'];
+        if ($httpCode < 200 || $httpCode >= 300 || !isset($data['id'])) {
+            return ['error' => $this->extraerMensajeError($data)];
         }
 
         return [
