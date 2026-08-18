@@ -892,6 +892,35 @@ body.body-exito { padding-bottom: 0; }
 }
 .pago-error.hidden { display: none; }
 
+/* --- Botón de prueba del cobro (solo testing, no toca la reserva real) --- */
+.btn-test-yape {
+    margin-top: 14px;
+    width: 100%;
+    padding: 9px 14px;
+    border-radius: 10px;
+    border: 1.5px dashed #999;
+    background: #f7f7f7;
+    color: #444;
+    font-weight: 600;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: all .15s ease;
+}
+.btn-test-yape:hover:not(:disabled) { background: #eee; border-color: #666; }
+.btn-test-yape:disabled { opacity: .7; cursor: wait; }
+
+.test-yape-resultado {
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: .85rem;
+    font-weight: 600;
+    word-break: break-word;
+}
+.test-yape-resultado.hidden { display: none; }
+.test-yape-resultado.exito { background: #e3faf0; color: #0a8a53; border: 1px solid #b7f0d6; }
+.test-yape-resultado.error { background: #fff0f3; color: #c9184a; border: 1px solid #ffc2d1; }
+
 .pago-total-box {
     display: flex;
     justify-content: space-between;

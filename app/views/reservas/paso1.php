@@ -278,6 +278,12 @@
                                         <p class="form-text mb-0">Abre tu app de Yape, genera el código y escríbelo acá.</p>
 
                                         <div id="yape-pago-error" class="pago-error hidden"></div>
+
+                                        <button type="button" class="btn-test-yape" id="btn-test-yape">
+                                            <i class="bi bi-bug-fill"></i> Probar cobro mínimo (S/ 1.00)
+                                        </button>
+                                        <p class="form-text mb-0">Solo para pruebas: cobra S/1.00 vía Mercado Pago y muestra el resultado acá abajo, sin crear ninguna reserva.</p>
+                                        <div id="test-yape-resultado" class="test-yape-resultado hidden"></div>
                                     </div>
                                 </div>
                             </div>
@@ -750,6 +756,62 @@
                 throw new Error(data.message || 'No se pudo validar tu Yape. Revisa el celular y el código OTP.');
             }
             return data.id;
+        }
+
+        /* ---------- Botón de prueba: cobra S/1.00 y muestra el resultado, sin reservar nada ---------- */
+        const btnTestYape = document.getElementById('btn-test-yape');
+        const testYapeResultado = document.getElementById('test-yape-resultado');
+
+        btnTestYape.addEventListener('click', async function () {
+            const celular = yapeCelularInput.value.trim();
+            const otp = yapeOtpInput.value.trim();
+
+            testYapeResultado.classList.add('hidden');
+            testYapeResultado.textContent = '';
+
+            if (!/^9\d{8}$/.test(celular)) {
+                yapeCelularInput.classList.add('campo-invalido');
+                return mostrarResultadoTestYape('Ingresa un celular Yape válido (9 dígitos) para poder probar.', false);
+            }
+            if (!/^\d{6}$/.test(otp)) {
+                yapeOtpInput.classList.add('campo-invalido');
+                return mostrarResultadoTestYape('Ingresa el código OTP de 6 dígitos de tu app Yape para poder probar.', false);
+            }
+
+            const textoOriginal = btnTestYape.innerHTML;
+            btnTestYape.disabled = true;
+            btnTestYape.innerHTML = '<i class="bi bi-hourglass-split"></i> Probando...';
+
+            try {
+                const tokenId = await generarTokenYape(celular, otp);
+
+                const resp = await fetch(`<?php echo URL_ROOT; ?>/reservas/pagar-yape`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: tokenId, monto: 1.00 })
+                });
+                const data = await resp.json();
+
+                if (!data.ok) {
+                    mostrarResultadoTestYape('Error de Mercado Pago: ' + (data.error || 'desconocido'), false);
+                } else {
+                    mostrarResultadoTestYape(
+                        `Resultado: ${data.status}${data.status_detail ? ' (' + data.status_detail + ')' : ''} — id de pago: ${data.mp_payment_id}`,
+                        data.status === 'approved'
+                    );
+                }
+            } catch (err) {
+                mostrarResultadoTestYape(err.message || 'No se pudo probar el cobro.', false);
+            }
+
+            btnTestYape.disabled = false;
+            btnTestYape.innerHTML = textoOriginal;
+        });
+
+        function mostrarResultadoTestYape(mensaje, esExito) {
+            testYapeResultado.textContent = mensaje;
+            testYapeResultado.classList.remove('hidden', 'exito', 'error');
+            testYapeResultado.classList.add(esExito ? 'exito' : 'error');
         }
 
         function limpiarErrores() {
