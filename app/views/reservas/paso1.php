@@ -282,10 +282,14 @@
                                         <button type="button" class="btn-test-yape" id="btn-datos-prueba">
                                             <i class="bi bi-magic"></i> Usar datos de prueba (aprobado)
                                         </button>
+                                        <div class="test-monto-wrap">
+                                            <label for="test_monto" class="form-label mb-1">Monto a probar (S/)</label>
+                                            <input type="number" class="form-control" id="test_monto" value="1.00" min="0.10" step="0.10">
+                                        </div>
                                         <button type="button" class="btn-test-yape" id="btn-test-yape">
-                                            <i class="bi bi-bug-fill"></i> Probar cobro mínimo (S/ 1.00)
+                                            <i class="bi bi-bug-fill"></i> Probar cobro
                                         </button>
-                                        <p class="form-text mb-0">Solo para pruebas: en modo TEST, Mercado Pago no reconoce tu celular real ni un OTP inventado — usa el celular <strong>111111111</strong> con OTP <strong>123456</strong> para simular un pago aprobado (u otros números del 111111112 al 111111118 para simular distintos rechazos). Este botón cobra S/1.00 y muestra el resultado acá abajo, sin crear ninguna reserva.</p>
+                                        <p class="form-text mb-0">Solo para pruebas: en modo TEST, Mercado Pago no reconoce tu celular real ni un OTP inventado — usa el celular <strong>111111111</strong> con OTP <strong>123456</strong> para simular un pago aprobado (u otros números del 111111112 al 111111118 para simular distintos rechazos). Este botón cobra el monto de arriba y muestra el resultado acá abajo, sin crear ninguna reserva.</p>
                                         <div id="test-yape-resultado" class="test-yape-resultado hidden"></div>
                                     </div>
                                 </div>
@@ -804,11 +808,12 @@
 
             try {
                 const tokenId = await generarTokenYape(celular, otp);
+                const montoPrueba = parseFloat(document.getElementById('test_monto').value) || 1;
 
                 const resp = await fetch(`<?php echo URL_ROOT; ?>/reservas/pagar-yape`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: tokenId, monto: 1.00 })
+                    body: JSON.stringify({ token: tokenId, monto: montoPrueba })
                 });
                 const data = await resp.json();
 

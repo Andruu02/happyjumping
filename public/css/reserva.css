@@ -909,6 +909,9 @@ body.body-exito { padding-bottom: 0; }
 .btn-test-yape:hover:not(:disabled) { background: #eee; border-color: #666; }
 .btn-test-yape:disabled { opacity: .7; cursor: wait; }
 
+.test-monto-wrap { margin-top: 10px; }
+.test-monto-wrap .form-label { font-size: .8rem; color: #666; }
+
 .test-yape-resultado {
     margin-top: 10px;
     padding: 10px 14px;
