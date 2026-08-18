@@ -216,7 +216,9 @@ REGLAS DE SALIDA (obligatorias):
 
     private function armarPayload($systemPrompt, $userContent, $jsonMode = false) {
         $data = [
-            "model" => "llama-3.3-70b-versatile",
+            // Groq apagó llama-3.3-70b-versatile el 16/08/2026; openai/gpt-oss-120b
+            // es el reemplazo recomendado por Groq (mismo estilo de uso, JSON mode incluido).
+            "model" => "openai/gpt-oss-120b",
             "messages" => [
                 ["role" => "system", "content" => $systemPrompt],
                 ["role" => "user", "content" => $userContent]

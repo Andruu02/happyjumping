@@ -193,10 +193,16 @@ class ReservasController extends Controller {
             $reserva_data = json_decode($_POST['reserva_data'], true);
             $ruta_captura_final = null;
             $error_subida = '';
-            
+
+            // Yape (vía Mercado Pago) cobra solo y no necesita evidencia; Plin
+            // es manual, así que la captura sí es obligatoria para poder
+            // verificar el pago después.
+            $metodo_pago_recibido_temprano = $reserva_data['metodo_pago'] ?? 'plin';
+            $captura_es_obligatoria = $metodo_pago_recibido_temprano !== 'yape_mp';
+
             // --- 1. CONFIGURACIÓN DE RUTA DE SUBIDA ---
             // Directorio donde se guardarán los archivos (ruta absoluta)
-            $directorio_destino = PUBLIC_ROOT . '/uploads/capturas/'; 
+            $directorio_destino = PUBLIC_ROOT . '/uploads/capturas/';
 
             // --- 2. PROCESAR SUBIDA DE ARCHIVO ---
             if (isset($_FILES['captura_pago']) && $_FILES['captura_pago']['error'] == UPLOAD_ERR_OK) {
@@ -237,9 +243,10 @@ class ReservasController extends Controller {
                         $error_subida = 'Error: Tipo de archivo no permitido (solo JPG, PNG, PDF).';
                     }
                 }
+            } elseif ($captura_es_obligatoria) {
+                $error_subida = 'Error: Debes subir la captura de pantalla del pago por Plin.';
             }
-            // Si no mandó archivo, no es error: la captura es opcional ahora
-            // que Yape (vía Mercado Pago) y Plin no la requieren para verificar.
+            // Con Yape (vía Mercado Pago) no hace falta captura: el cobro ya se verificó solo.
 
             // --- 3. VALIDAR Y GUARDAR ---
             if (!empty($error_subida)) {

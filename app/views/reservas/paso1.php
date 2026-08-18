@@ -247,25 +247,42 @@
 
                             <!-- Panel Yape (vía Mercado Pago: cobro automático) -->
                             <div class="metodo-panel" id="panel-yape" data-metodo="yape_mp">
-                                <h3><i class="bi bi-phone-fill"></i> Paga con Yape</h3>
-                                <p class="text-muted small">Ingresa tu celular Yape y el código OTP que te llega en la app. El cobro es automático: tu reserva queda <strong>Confirmada</strong> al toque si el pago se aprueba.</p>
-
-                                <div class="row g-3">
-                                    <div class="col-sm-6">
-                                        <label for="yape_celular" class="form-label"><i class="bi bi-telephone-fill"></i> Celular Yape</label>
-                                        <input type="tel" class="form-control" id="yape_celular" placeholder="987654321" maxlength="9" inputmode="numeric">
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <label for="yape_otp" class="form-label"><i class="bi bi-shield-lock-fill"></i> Código OTP</label>
-                                        <input type="text" class="form-control" id="yape_otp" placeholder="123456" maxlength="6" inputmode="numeric">
+                                <div class="pago-seguro-header">
+                                    <i class="bi bi-shield-lock-fill"></i>
+                                    <div>
+                                        <h3>Pago seguro con Yape</h3>
+                                        <p class="mb-0">Completa tus datos para cobrar al toque</p>
                                     </div>
                                 </div>
-                                <p class="form-text mt-2 mb-0">Abre tu app de Yape, genera el código y escríbelo acá.</p>
 
-                                <div id="yape-pago-error" class="pago-error hidden"></div>
+                                <div class="yape-mp-body">
+                                    <div class="yape-phone-mockup" aria-hidden="true">
+                                        <div class="yape-phone-notch"></div>
+                                        <div class="yape-phone-screen">
+                                            <div class="yape-phone-icon"><i class="bi bi-phone-vibrate-fill"></i></div>
+                                            <span class="yape-phone-label">Total a pagar</span>
+                                            <strong class="yape-phone-total" id="monto_pagar_phone">S/0.00</strong>
+                                            <div class="yape-phone-hint">Abre Yape, genera el OTP e ingresa tus datos al costado</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="yape-form-fields">
+                                        <div class="mb-3">
+                                            <label for="yape_celular" class="form-label"><i class="bi bi-telephone-fill"></i> Celular Yape</label>
+                                            <input type="tel" class="form-control" id="yape_celular" placeholder="987654321" maxlength="9" inputmode="numeric">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label for="yape_otp" class="form-label"><i class="bi bi-shield-lock-fill"></i> Código OTP</label>
+                                            <input type="text" class="form-control" id="yape_otp" placeholder="123456" maxlength="6" inputmode="numeric">
+                                        </div>
+                                        <p class="form-text mb-0">Abre tu app de Yape, genera el código y escríbelo acá.</p>
+
+                                        <div id="yape-pago-error" class="pago-error hidden"></div>
+                                    </div>
+                                </div>
                             </div>
 
-                            <!-- Panel Plin (manual: solo QR) -->
+                            <!-- Panel Plin (manual: QR + captura obligatoria) -->
                             <div class="metodo-panel hidden" id="panel-plin" data-metodo="plin">
                                 <div class="qr-code-wrapper qr-code-compacto">
                                     <img src="<?php echo URL_ROOT; ?>/img/plin_qr.webp" alt="Código QR de Plin">
@@ -298,7 +315,7 @@
                             <form action="<?php echo URL_ROOT; ?>/reservas/finalizar" method="POST" enctype="multipart/form-data" id="form-finalizar">
 
                                 <div class="upload-box">
-                                    <label for="captura_pago" class="form-label">Adjunta tu captura (opcional)</label>
+                                    <label for="captura_pago" class="form-label" id="label-captura-pago">Adjunta tu captura (opcional)</label>
                                     <input class="form-control" type="file" id="captura_pago" name="captura_pago" accept="image/png, image/jpeg, application/pdf">
                                 </div>
 
@@ -499,6 +516,7 @@
             document.getElementById('resumen_extras').textContent = extrasTexto;
 
             document.getElementById('monto_pagar').textContent = `S/${total.toFixed(2)}`;
+            document.getElementById('monto_pagar_phone').textContent = `S/${total.toFixed(2)}`;
         }
 
         const HORA_CIERRE_MINUTOS = 23 * 60; // 11:00 PM
@@ -685,6 +703,7 @@
         const yapePagoError = document.getElementById('yape-pago-error');
         const textoAyudaFinalizar = document.getElementById('texto-ayuda-finalizar');
         const btnFinalizar = document.getElementById('btnFinalizar');
+        const labelCapturaPago = document.getElementById('label-captura-pago');
 
         function mostrarErrorPago(mensaje) {
             yapePagoError.textContent = mensaje;
@@ -706,9 +725,11 @@
             if (metodo === 'yape_mp') {
                 btnFinalizar.textContent = 'Pagar con Yape y Finalizar';
                 textoAyudaFinalizar.textContent = 'Con Yape el cobro es automático: tu reserva queda "Confirmada" al toque si el pago se aprueba.';
+                labelCapturaPago.textContent = 'Adjunta tu captura (opcional)';
             } else {
                 btnFinalizar.textContent = 'Finalizar Reserva';
                 textoAyudaFinalizar.textContent = 'Escanea el QR de Plin y paga el monto exacto. Tu reserva queda "Pendiente" hasta que verifiquemos el pago.';
+                labelCapturaPago.textContent = 'Adjunta tu captura de pago (obligatorio)';
             }
         }
         metodoPagoTabs.forEach(btn => btn.addEventListener('click', () => seleccionarMetodoPago(btn.dataset.metodo)));
@@ -761,6 +782,8 @@
                 if (!/^\d{6}$/.test(yapeOtpInput.value.trim())) {
                     errores.push({ paso: 3, mensaje: 'Ingresa el código OTP de 6 dígitos de tu app Yape.', el: yapeOtpInput });
                 }
+            } else if (metodoPagoHidden.value === 'plin' && fileInput.files.length === 0) {
+                errores.push({ paso: 3, mensaje: 'Adjunta la captura de tu pago por Plin.', el: fileInput });
             }
 
             return errores;
