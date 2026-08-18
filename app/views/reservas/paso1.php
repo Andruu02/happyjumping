@@ -279,10 +279,13 @@
 
                                         <div id="yape-pago-error" class="pago-error hidden"></div>
 
+                                        <button type="button" class="btn-test-yape" id="btn-datos-prueba">
+                                            <i class="bi bi-magic"></i> Usar datos de prueba (aprobado)
+                                        </button>
                                         <button type="button" class="btn-test-yape" id="btn-test-yape">
                                             <i class="bi bi-bug-fill"></i> Probar cobro mínimo (S/ 1.00)
                                         </button>
-                                        <p class="form-text mb-0">Solo para pruebas: cobra S/1.00 vía Mercado Pago y muestra el resultado acá abajo, sin crear ninguna reserva.</p>
+                                        <p class="form-text mb-0">Solo para pruebas: en modo TEST, Mercado Pago no reconoce tu celular real ni un OTP inventado — usa el celular <strong>111111111</strong> con OTP <strong>123456</strong> para simular un pago aprobado (u otros números del 111111112 al 111111118 para simular distintos rechazos). Este botón cobra S/1.00 y muestra el resultado acá abajo, sin crear ninguna reserva.</p>
                                         <div id="test-yape-resultado" class="test-yape-resultado hidden"></div>
                                     </div>
                                 </div>
@@ -716,6 +719,11 @@
         const btnFinalizar = document.getElementById('btnFinalizar');
         const labelCapturaPago = document.getElementById('label-captura-pago');
 
+        // Celulares reales de Yape empiezan con 9 (9 dígitos); en modo TEST,
+        // Mercado Pago solo reconoce los números de prueba 111111111 a
+        // 111111118 (con OTP 123456) para simular cada resultado posible.
+        const CELULAR_YAPE_REGEX = /^(9\d{8}|11111111[1-8])$/;
+
         function mostrarErrorPago(mensaje) {
             yapePagoError.textContent = mensaje;
             yapePagoError.classList.remove('hidden');
@@ -764,7 +772,15 @@
 
         /* ---------- Botón de prueba: cobra S/1.00 y muestra el resultado, sin reservar nada ---------- */
         const btnTestYape = document.getElementById('btn-test-yape');
+        const btnDatosPrueba = document.getElementById('btn-datos-prueba');
         const testYapeResultado = document.getElementById('test-yape-resultado');
+
+        btnDatosPrueba.addEventListener('click', function () {
+            yapeCelularInput.value = '111111111';
+            yapeOtpInput.value = '123456';
+            yapeCelularInput.classList.remove('campo-invalido');
+            yapeOtpInput.classList.remove('campo-invalido');
+        });
 
         btnTestYape.addEventListener('click', async function () {
             const celular = yapeCelularInput.value.trim();
@@ -773,9 +789,9 @@
             testYapeResultado.classList.add('hidden');
             testYapeResultado.textContent = '';
 
-            if (!/^9\d{8}$/.test(celular)) {
+            if (!CELULAR_YAPE_REGEX.test(celular)) {
                 yapeCelularInput.classList.add('campo-invalido');
-                return mostrarResultadoTestYape('Ingresa un celular Yape válido (9 dígitos) para poder probar.', false);
+                return mostrarResultadoTestYape('Ingresa un celular Yape válido, o uno de prueba (111111111 a 111111118).', false);
             }
             if (!/^\d{6}$/.test(otp)) {
                 yapeOtpInput.classList.add('campo-invalido');
@@ -842,7 +858,7 @@
                 errores.push({ paso: 2, mensaje: 'Ingresa una edad válida.', el: edadInput });
             }
             if (metodoPagoHidden.value === 'yape_mp') {
-                if (!/^9\d{8}$/.test(yapeCelularInput.value.trim())) {
+                if (!CELULAR_YAPE_REGEX.test(yapeCelularInput.value.trim())) {
                     errores.push({ paso: 3, mensaje: 'Ingresa un celular Yape válido (9 dígitos).', el: yapeCelularInput });
                 }
                 if (!/^\d{6}$/.test(yapeOtpInput.value.trim())) {
