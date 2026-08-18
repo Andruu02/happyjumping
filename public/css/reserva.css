@@ -246,6 +246,7 @@ body {
     border-color: var(--rosa);
     box-shadow: 0 0 10px rgba(255, 60, 141, 0.3);
 }
+.step-card .form-control::placeholder { color: #bbb; opacity: 1; }
 
 /* Campo marcado como incompleto al intentar finalizar */
 .campo-invalido {
@@ -812,7 +813,6 @@ body.body-exito { padding-bottom: 0; }
 .pago-seguro-header h3 { color: #fff; margin: 0; font-size: 1.1rem; }
 .pago-seguro-header p { margin: 0; font-size: .82rem; opacity: .9; }
 
-/* Mockup del celular + formulario, lado a lado */
 .yape-mp-body {
     display: flex;
     gap: 24px;
@@ -820,65 +820,6 @@ body.body-exito { padding-bottom: 0; }
     flex-wrap: wrap;
 }
 .yape-form-fields { flex: 1; min-width: 220px; }
-
-.yape-phone-mockup {
-    flex-shrink: 0;
-    width: 150px;
-    background: #1c1a2e;
-    border-radius: 26px;
-    padding: 10px 7px;
-    box-shadow: 0 14px 30px rgba(75, 15, 204, .28);
-}
-.yape-phone-notch {
-    width: 36px;
-    height: 5px;
-    background: rgba(255,255,255,.35);
-    border-radius: 4px;
-    margin: 0 auto 8px;
-}
-.yape-phone-screen {
-    background: linear-gradient(165deg, #a24bff, var(--morado) 55%, #4b0fcc);
-    border-radius: 18px;
-    padding: 22px 12px;
-    min-height: 210px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    text-align: center;
-    color: #fff;
-}
-.yape-phone-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: rgba(255,255,255,.18);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    margin-bottom: 6px;
-}
-.yape-phone-label {
-    font-size: .62rem;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    opacity: .85;
-}
-.yape-phone-total { font-size: 1.25rem; font-weight: 800; }
-.yape-phone-hint {
-    margin-top: 10px;
-    font-size: .68rem;
-    line-height: 1.35;
-    background: rgba(255,255,255,.14);
-    border-radius: 10px;
-    padding: 8px 10px;
-}
-
-@media (max-width: 480px) {
-    .yape-phone-mockup { display: none; } /* en celular ya está viendo su propia app de Yape, no hace falta el mockup */
-}
 
 .pago-error {
     margin-top: 14px;

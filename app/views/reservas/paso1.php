@@ -256,16 +256,6 @@
                                 </div>
 
                                 <div class="yape-mp-body">
-                                    <div class="yape-phone-mockup" aria-hidden="true">
-                                        <div class="yape-phone-notch"></div>
-                                        <div class="yape-phone-screen">
-                                            <div class="yape-phone-icon"><i class="bi bi-phone-vibrate-fill"></i></div>
-                                            <span class="yape-phone-label">Total a pagar</span>
-                                            <strong class="yape-phone-total" id="monto_pagar_phone">S/0.00</strong>
-                                            <div class="yape-phone-hint">Abre Yape, genera el OTP e ingresa tus datos al costado</div>
-                                        </div>
-                                    </div>
-
                                     <div class="yape-form-fields">
                                         <div class="mb-3">
                                             <label for="yape_celular" class="form-label"><i class="bi bi-telephone-fill"></i> Celular Yape</label>
@@ -531,7 +521,6 @@
             document.getElementById('resumen_extras').textContent = extrasTexto;
 
             document.getElementById('monto_pagar').textContent = `S/${total.toFixed(2)}`;
-            document.getElementById('monto_pagar_phone').textContent = `S/${total.toFixed(2)}`;
         }
 
         const HORA_CIERRE_MINUTOS = 23 * 60; // 11:00 PM
