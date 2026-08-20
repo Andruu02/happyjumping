@@ -685,7 +685,7 @@ body.body-exito { padding-bottom: 0; }
 }
 
 /* --- Pago (Paso 3) --- */
-/* --- Playlist con Deezer (Paso 2, opcional) --- */
+/* --- Playlist con Spotify (Paso 2, opcional) --- */
 .musica-box {
     background: #f9f4ff;
     border: 2px solid #ecdcff;
@@ -718,7 +718,8 @@ body.body-exito { padding-bottom: 0; }
 }
 .musica-buscar-btn:hover { background: #8a1fd9; }
 
-.musica-resultados { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 220px; overflow-y: auto; }
+.musica-resultados { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 320px; overflow-y: auto; }
+.musica-resultado-wrap { display: flex; flex-direction: column; }
 .musica-resultado-item {
     display: flex;
     align-items: center;
@@ -743,6 +744,27 @@ body.body-exito { padding-bottom: 0; }
     transition: background .2s ease, color .2s ease;
 }
 .musica-agregar-btn:hover { background: #A238FF; color: #fff; }
+
+.musica-escuchar-btn {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: #f3e8ff;
+    color: #1DB954;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s ease, color .2s ease;
+}
+.musica-escuchar-btn:hover { background: #1DB954; color: #fff; }
+
+.musica-preview-player { max-height: 0; overflow: hidden; transition: max-height .25s ease; }
+.musica-preview-player.abierto { max-height: 90px; margin-top: 6px; }
+.musica-preview-player iframe { border-radius: 10px; display: block; }
+.musica-preview-vacio { padding: 8px 2px; }
 
 .musica-seleccion { border-top: 1px solid #ecdcff; padding-top: 14px; }
 .musica-seleccion h6 { color: #333; font-weight: 700; margin-bottom: 8px; }

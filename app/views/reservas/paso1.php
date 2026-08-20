@@ -599,7 +599,7 @@
         const edadInput = document.getElementById('edad_cumpleanero');
         const observacionesInput = document.getElementById('observaciones');
 
-        /* ================= PASO 2: Playlist con Deezer (opcional) ================= */
+        /* ================= PASO 2: Playlist con Spotify (opcional) ================= */
 
         let cancionesSeleccionadas = [];
         const MAX_CANCIONES = 15;
@@ -634,19 +634,54 @@
 
             musicaResultados.innerHTML = '';
             canciones.forEach((cancion) => {
-                const item = document.createElement('div');
-                item.className = 'musica-resultado-item';
-                item.innerHTML = `
-                    <img src="${cancion.imagen}" alt="">
-                    <div class="musica-resultado-info">
-                        <strong>${cancion.nombre}</strong>
-                        <span>${cancion.artista}</span>
+                const wrap = document.createElement('div');
+                wrap.className = 'musica-resultado-wrap';
+                wrap.innerHTML = `
+                    <div class="musica-resultado-item">
+                        <img src="${cancion.imagen}" alt="">
+                        <div class="musica-resultado-info">
+                            <strong>${cancion.nombre}</strong>
+                            <span>${cancion.artista}</span>
+                        </div>
+                        <button type="button" class="musica-escuchar-btn" aria-label="Escuchar antes de elegir"><i class="bi bi-play-circle-fill"></i></button>
+                        <button type="button" class="musica-agregar-btn" aria-label="Agregar a la playlist"><i class="bi bi-plus-lg"></i></button>
                     </div>
-                    <button type="button" class="musica-agregar-btn" aria-label="Agregar a la playlist"><i class="bi bi-plus-lg"></i></button>
+                    <div class="musica-preview-player"></div>
                 `;
-                item.querySelector('.musica-agregar-btn').addEventListener('click', () => agregarCancion(cancion));
-                musicaResultados.appendChild(item);
+                wrap.querySelector('.musica-agregar-btn').addEventListener('click', () => agregarCancion(cancion));
+                wrap.querySelector('.musica-escuchar-btn').addEventListener('click', () => togglePreviewMusica(cancion, wrap));
+                musicaResultados.appendChild(wrap);
             });
+        }
+
+        // Reproductor embebido de Spotify: da una vista previa de 30s sin
+        // que el cliente que reserva necesite cuenta ni loguearse. Se abre
+        // uno a la vez (si abrís otro, se cierra el anterior).
+        function togglePreviewMusica(cancion, wrap) {
+            const playerBox = wrap.querySelector('.musica-preview-player');
+            const yaAbierto = playerBox.classList.contains('abierto');
+
+            document.querySelectorAll('.musica-preview-player.abierto').forEach((p) => {
+                if (p !== playerBox) {
+                    p.classList.remove('abierto');
+                    p.innerHTML = '';
+                }
+            });
+
+            if (yaAbierto) {
+                playerBox.classList.remove('abierto');
+                playerBox.innerHTML = '';
+                return;
+            }
+
+            if (!cancion.spotify_id) {
+                playerBox.innerHTML = '<p class="text-muted small mb-0 musica-preview-vacio">Vista previa no disponible.</p>';
+                playerBox.classList.add('abierto');
+                return;
+            }
+
+            playerBox.innerHTML = `<iframe src="https://open.spotify.com/embed/track/${cancion.spotify_id}?utm_source=generator&theme=0" width="100%" height="80" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
+            playerBox.classList.add('abierto');
         }
 
         function agregarCancion(cancion) {

@@ -83,7 +83,7 @@ class ReservaModel extends Model {
             $this->execute();
 
             // 7.5. Insertar las canciones sugeridas para la playlist de la
-            // fiesta (buscadas en Deezer durante el Paso 2), si mandó alguna.
+            // fiesta (buscadas en Spotify durante el Paso 2), si mandó alguna.
             if (!empty($datos['canciones']) && is_array($datos['canciones'])) {
                 foreach ($datos['canciones'] as $cancion) {
                     $this->query("INSERT INTO reserva_canciones (id_reserva, nombre, artista, enlace)

@@ -13,13 +13,13 @@ class ReservasController extends Controller {
     private $paqueteModel;
     private $horarioModel;
     private $reservaModel;
-    private $deezerModel;
+    private $spotifyModel;
 
     public function __construct() {
         $this->paqueteModel = $this->model('PaqueteModel');
         $this->horarioModel = $this->model('HorarioModel');
         $this->reservaModel = $this->model('ReservaModel');
-        $this->deezerModel = $this->model('DeezerModel');
+        $this->spotifyModel = $this->model('SpotifyModel');
     }
 
     /*
@@ -92,7 +92,7 @@ class ReservasController extends Controller {
     }
     
     /**
-     * FUNCIÓN DE AJAX: busca canciones (Deezer) para la playlist de la
+     * FUNCIÓN DE AJAX: busca canciones (Spotify) para la playlist de la
      * fiesta (Paso 2). Requiere sesión iniciada, igual que el resto del
      * flujo de reservas.
      */
@@ -106,7 +106,7 @@ class ReservasController extends Controller {
             return;
         }
 
-        echo json_encode($this->deezerModel->buscarCanciones($texto));
+        echo json_encode($this->spotifyModel->buscarCanciones($texto));
     }
 
     /**
