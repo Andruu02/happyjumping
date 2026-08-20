@@ -214,6 +214,11 @@
                                 <h5><i class="bi bi-music-note-beamed"></i> Arma la playlist de tu fiesta</h5>
                                 <p class="musica-hint">Busca canciones y agrégalas - se las pasamos a nuestra anfitriona el día del evento. (Opcional)</p>
 
+                                <div class="musica-tipo-tabs">
+                                    <button type="button" class="musica-tipo-tab activo" data-tipo="track">Canciones</button>
+                                    <button type="button" class="musica-tipo-tab" data-tipo="playlist">Playlists</button>
+                                </div>
+
                                 <div class="musica-buscador">
                                     <label for="musica-buscar-input" class="visually-hidden">Buscar canción</label>
                                     <input type="text" id="musica-buscar-input" class="form-control" placeholder="Busca una canción o artista...">
@@ -222,8 +227,11 @@
 
                                 <div id="musica-resultados" class="musica-resultados"></div>
 
-                                <div class="musica-seleccion">
-                                    <h6>Tu playlist <span id="musica-contador">(0)</span></h6>
+                                <div class="musica-seleccion" id="musica-seleccion">
+                                    <div class="musica-seleccion-header" id="musica-seleccion-header">
+                                        <h6>Tu playlist <span id="musica-contador">(0)</span></h6>
+                                        <button type="button" class="musica-seleccion-toggle" id="musica-seleccion-toggle" aria-label="Mostrar/ocultar playlist"><i class="bi bi-chevron-down"></i></button>
+                                    </div>
                                     <p id="musica-vacio" class="text-muted small mb-0">Aún no has agregado canciones.</p>
                                     <ul id="musica-lista-elegidas" class="musica-lista-elegidas"></ul>
                                 </div>
@@ -610,6 +618,20 @@
         const musicaListaElegidas = document.getElementById('musica-lista-elegidas');
         const musicaContador = document.getElementById('musica-contador');
         const musicaVacio = document.getElementById('musica-vacio');
+        const musicaTipoTabs = document.querySelectorAll('.musica-tipo-tab');
+
+        let musicaTipoActual = 'track';
+        musicaTipoTabs.forEach((tab) => {
+            tab.addEventListener('click', () => {
+                if (tab.dataset.tipo === musicaTipoActual) return;
+                musicaTipoActual = tab.dataset.tipo;
+                musicaTipoTabs.forEach(t => t.classList.toggle('activo', t === tab));
+                musicaBuscarInput.placeholder = musicaTipoActual === 'playlist'
+                    ? 'Busca una playlist (ej: Fiesta Reggaetón)...'
+                    : 'Busca una canción o artista...';
+                if (musicaBuscarInput.value.trim() !== '') buscarCancionesMusica();
+            });
+        });
 
         async function buscarCancionesMusica() {
             const texto = musicaBuscarInput.value.trim();
@@ -618,7 +640,7 @@
             musicaResultados.innerHTML = '<p class="text-muted small mb-0">Buscando...</p>';
 
             try {
-                const respuesta = await fetch(`<?php echo URL_ROOT; ?>/reservas/buscarCanciones?q=${encodeURIComponent(texto)}`);
+                const respuesta = await fetch(`<?php echo URL_ROOT; ?>/reservas/buscarCanciones?q=${encodeURIComponent(texto)}&tipo=${musicaTipoActual}`);
                 const canciones = await respuesta.json();
                 renderResultadosMusica(canciones);
             } catch (error) {
@@ -656,7 +678,10 @@
 
         // Reproductor embebido de Spotify: da una vista previa de 30s sin
         // que el cliente que reserva necesite cuenta ni loguearse. Se abre
-        // uno a la vez (si abrís otro, se cierra el anterior).
+        // uno a la vez (si abrís otro, se cierra el anterior). "autoplay=1"
+        // + el permiso "autoplay" en el iframe hacen que arranque solo con
+        // este único click (cuenta como gesto del usuario), sin tener que
+        // apretar play una segunda vez adentro del reproductor embebido.
         function togglePreviewMusica(cancion, wrap) {
             const playerBox = wrap.querySelector('.musica-preview-player');
             const yaAbierto = playerBox.classList.contains('abierto');
@@ -680,7 +705,8 @@
                 return;
             }
 
-            playerBox.innerHTML = `<iframe src="https://open.spotify.com/embed/track/${cancion.spotify_id}?utm_source=generator&theme=0" width="100%" height="80" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
+            const tipoEmbed = cancion.tipo === 'playlist' ? 'playlist' : 'track';
+            playerBox.innerHTML = `<iframe src="https://open.spotify.com/embed/${tipoEmbed}/${cancion.spotify_id}?utm_source=generator&theme=0&autoplay=1" width="100%" height="80" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
             playerBox.classList.add('abierto');
         }
 
@@ -717,6 +743,16 @@
                 musicaListaElegidas.appendChild(li);
             });
         }
+
+        // La lista de elegidas se puede colapsar (apretando el encabezado)
+        // para que no siga empujando el resto de la tarjeta hacia abajo a
+        // medida que se agregan canciones; además ya tiene un scroll propio
+        // con un alto máximo (ver reserva.css) para el caso de que quede
+        // abierta con muchas canciones.
+        const musicaSeleccionBox = document.getElementById('musica-seleccion');
+        document.getElementById('musica-seleccion-header').addEventListener('click', () => {
+            musicaSeleccionBox.classList.toggle('colapsada');
+        });
 
         musicaBuscarBtn.addEventListener('click', buscarCancionesMusica);
         musicaBuscarInput.addEventListener('keydown', (e) => {

@@ -66,11 +66,14 @@ class SpotifyModel extends Model {
     }
 
     /**
-     * Busca canciones en el catálogo de Spotify (máx. 8 resultados).
-     * Devuelve un array de ['nombre','artista','enlace','imagen','spotify_id'],
-     * o un array vacío si la búsqueda o la autenticación fallan.
+     * Busca canciones o playlists en el catálogo de Spotify (máx. 8
+     * resultados). $tipo es 'track' o 'playlist'. Devuelve un array de
+     * ['nombre','artista','enlace','imagen','spotify_id','tipo'], o un
+     * array vacío si la búsqueda o la autenticación fallan.
      */
-    public function buscarCanciones($texto) {
+    public function buscarCanciones($texto, $tipo = 'track') {
+        $tipo = $tipo === 'playlist' ? 'playlist' : 'track';
+
         $token = $this->obtenerToken();
         if (!$token) {
             return [];
@@ -78,7 +81,7 @@ class SpotifyModel extends Model {
 
         $url = 'https://api.spotify.com/v1/search?' . http_build_query([
             'q'     => $texto,
-            'type'  => 'track',
+            'type'  => $tipo,
             'limit' => 8,
         ]);
 
@@ -97,9 +100,32 @@ class SpotifyModel extends Model {
         }
 
         $data  = json_decode($respuesta, true);
-        $items = $data['tracks']['items'] ?? [];
-
         $resultado = [];
+
+        if ($tipo === 'playlist') {
+            $items = $data['playlists']['items'] ?? [];
+            foreach ($items as $playlist) {
+                // La API a veces manda entradas null adentro de "items"
+                // (playlists borradas/privadas que igual matchean la
+                // búsqueda) - hay que saltarlas.
+                if (!$playlist) continue;
+
+                $imagenes = $playlist['images'] ?? [];
+                $imagen = $imagenes[0]['url'] ?? '';
+
+                $resultado[] = [
+                    'nombre'     => $playlist['name'] ?? '',
+                    'artista'    => 'Playlist de ' . ($playlist['owner']['display_name'] ?? 'Spotify'),
+                    'enlace'     => $playlist['external_urls']['spotify'] ?? '',
+                    'imagen'     => $imagen,
+                    'spotify_id' => $playlist['id'] ?? '',
+                    'tipo'       => 'playlist',
+                ];
+            }
+            return $resultado;
+        }
+
+        $items = $data['tracks']['items'] ?? [];
         foreach ($items as $track) {
             $imagenes = $track['album']['images'] ?? [];
             // Spotify manda las imágenes de más grande a más chica; la
@@ -112,6 +138,7 @@ class SpotifyModel extends Model {
                 'enlace'     => $track['external_urls']['spotify'] ?? '',
                 'imagen'     => $imagen,
                 'spotify_id' => $track['id'] ?? '',
+                'tipo'       => 'track',
             ];
         }
 

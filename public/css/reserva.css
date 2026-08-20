@@ -703,6 +703,19 @@ body.body-exito { padding-bottom: 0; }
 }
 .musica-hint { color: #777; font-size: .85rem; margin-bottom: 16px; }
 
+.musica-tipo-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+.musica-tipo-tab {
+    border: 2px solid #ecdcff;
+    background: #fff;
+    color: #888;
+    font-size: .8rem;
+    font-weight: 600;
+    border-radius: 20px;
+    padding: 5px 14px;
+    transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.musica-tipo-tab.activo { background: #A238FF; border-color: #A238FF; color: #fff; }
+
 .musica-buscador { display: flex; gap: 8px; margin-bottom: 14px; }
 .musica-buscador .form-control { border: 2px solid #ecdcff; border-radius: 10px; }
 .musica-buscador .form-control:focus { border-color: #A238FF; box-shadow: 0 0 10px rgba(162,56,255,.25); }
@@ -767,8 +780,37 @@ body.body-exito { padding-bottom: 0; }
 .musica-preview-vacio { padding: 8px 2px; }
 
 .musica-seleccion { border-top: 1px solid #ecdcff; padding-top: 14px; }
-.musica-seleccion h6 { color: #333; font-weight: 700; margin-bottom: 8px; }
-.musica-lista-elegidas { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; min-width: 0; }
+.musica-seleccion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+.musica-seleccion-header h6 { color: #333; font-weight: 700; margin-bottom: 0; }
+.musica-seleccion-toggle {
+    border: none;
+    background: none;
+    color: #A238FF;
+    font-size: 1.1rem;
+    line-height: 1;
+    transition: transform .2s ease;
+    flex-shrink: 0;
+}
+.musica-seleccion.colapsada .musica-seleccion-toggle { transform: rotate(-90deg); }
+.musica-seleccion.colapsada .musica-lista-elegidas { max-height: 0; margin-top: 0; }
+.musica-lista-elegidas {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0 4px 0 0;
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+    max-height: 190px;
+    overflow-y: auto;
+    transition: max-height .25s ease;
+}
 .musica-lista-elegidas li {
     display: flex;
     align-items: center;

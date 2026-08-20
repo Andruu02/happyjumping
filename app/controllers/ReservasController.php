@@ -106,7 +106,9 @@ class ReservasController extends Controller {
             return;
         }
 
-        echo json_encode($this->spotifyModel->buscarCanciones($texto));
+        $tipo = ($_GET['tipo'] ?? '') === 'playlist' ? 'playlist' : 'track';
+
+        echo json_encode($this->spotifyModel->buscarCanciones($texto, $tipo));
     }
 
     /**
