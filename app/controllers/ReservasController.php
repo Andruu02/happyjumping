@@ -180,12 +180,63 @@ class ReservasController extends Controller {
             return;
         }
 
+        // El botón "Cobrar" (verificación con monto chico) cobra plata real
+        // en Mercado Pago pero no pasa por finalizar() - sin esto, ese cobro
+        // quedaba sin ningún rastro en la BD. Se guarda como una reserva
+        // "pendiente" (nunca confirmada sola, aunque MP haya aprobado el
+        // cobro) para que el admin la revise/borre a mano. La reserva de
+        // verdad (botón "Pagar con Yape y Finalizar") NO manda es_prueba,
+        // así que este bloque no se duplica en el flujo real.
+        $idReservaPrueba = null;
+        if (!empty($input['es_prueba'])) {
+            $idReservaPrueba = $this->guardarReservaDePrueba($input, $monto, $resultado['id']);
+        }
+
         echo json_encode([
-            'ok'            => true,
-            'status'        => $resultado['status'],
-            'status_detail' => $resultado['status_detail'],
-            'mp_payment_id' => $resultado['id'],
+            'ok'                 => true,
+            'status'             => $resultado['status'],
+            'status_detail'      => $resultado['status_detail'],
+            'mp_payment_id'      => $resultado['id'],
+            'id_reserva_prueba'  => $idReservaPrueba,
         ]);
+    }
+
+    /**
+     * Guarda el cobro de verificación (botón "Cobrar") como una reserva
+     * "pendiente" más, usando lo que el usuario ya haya llenado en ese
+     * momento (paquete siempre está, viene de la URL desde el inicio) y
+     * rellenando con valores placeholder obviamente falsos lo que falte,
+     * para no ocupar una fecha/hora real del calendario por accidente.
+     */
+    private function guardarReservaDePrueba($input, $monto, $mpPaymentId) {
+        $idPaquete = isset($input['id_paquete']) ? (int) $input['id_paquete'] : 0;
+        if ($idPaquete <= 0) {
+            return null; // sin paquete no se puede crear la reserva (columna obligatoria)
+        }
+
+        $nombreIngresado = trim($input['nombre_cumpleanero'] ?? '');
+
+        $datos = [
+            'id_usuario'         => $_SESSION['id_usuario'],
+            'id_paquete'         => $idPaquete,
+            'cantidad'           => !empty($input['cantidad']) ? (int) $input['cantidad'] : 10,
+            'extra_pintura'      => false,
+            'extra_destruccion'  => false,
+            'total_calculado'    => $monto,
+            'fecha'              => !empty($input['fecha']) ? $input['fecha'] : '2099-12-31',
+            'hora_inicio'        => !empty($input['hora_inicio']) ? $input['hora_inicio'] : '23:00:00',
+            'duracion_minutos'   => !empty($input['duracion_minutos']) ? (int) $input['duracion_minutos'] : 60,
+            'nombre_cumpleanero' => '[PRUEBA] ' . ($nombreIngresado !== '' ? $nombreIngresado : 'Cobro de verificación'),
+            'edad_cumpleanero'   => !empty($input['edad_cumpleanero']) ? (int) $input['edad_cumpleanero'] : 1,
+            'observaciones'      => 'Cobro de prueba/verificación de Mercado Pago (botón "Cobrar"), no es un cliente real.',
+            'canciones'          => [],
+            'ruta_captura'       => null,
+            'metodo_pago'        => 'yape_mp',
+            'mp_payment_id'      => $mpPaymentId,
+            'estado_pago'        => 'pendiente',
+        ];
+
+        return $this->reservaModel->crearReservaCompleta($datos);
     }
 
     /**

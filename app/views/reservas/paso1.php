@@ -292,7 +292,7 @@
                                         <button type="button" class="btn-test-yape" id="btn-test-yape">
                                             <i class="bi bi-shield-check"></i> Cobrar
                                         </button>
-                                        <p class="form-text mb-0">Cobra el monto de arriba vía Mercado Pago con tu celular Yape real y muestra el resultado acá abajo, sin crear ninguna reserva.</p>
+                                        <p class="form-text mb-0">Cobra el monto de arriba vía Mercado Pago con tu celular Yape real y muestra el resultado acá abajo. Queda guardado como una reserva "Pendiente" en el panel de admin (no se confirma sola).</p>
                                         <div id="test-yape-resultado" class="test-yape-resultado hidden"></div>
                                     </div>
                                 </div>
@@ -894,7 +894,21 @@
                 const resp = await fetch(`<?php echo URL_ROOT; ?>/reservas/pagar-yape`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: tokenId, monto: montoPrueba })
+                    body: JSON.stringify({
+                        token: tokenId,
+                        monto: montoPrueba,
+                        es_prueba: true,
+                        // Lo que ya haya llenado hasta ahora (puede estar
+                        // vacío si todavía no llenó el Paso 1/2 - el backend
+                        // rellena lo que falte con valores de prueba).
+                        id_paquete: paqueteElegido.id,
+                        cantidad: parseInt(cantidadInput.value) || 10,
+                        duracion_minutos: paqueteElegido.duracion,
+                        fecha: selectedDate ? selectedDate.toISOString().split('T')[0] : null,
+                        hora_inicio: horaInicioSelect.value || null,
+                        nombre_cumpleanero: nombreInput.value.trim(),
+                        edad_cumpleanero: edadInput.value ? parseInt(edadInput.value) : null
+                    })
                 });
                 const data = await resp.json();
 
@@ -903,10 +917,9 @@
                     if (data.debug) msg += '\n\n' + data.debug;
                     mostrarResultadoTestYape(msg, false);
                 } else {
-                    mostrarResultadoTestYape(
-                        `Resultado: ${data.status}${data.status_detail ? ' (' + data.status_detail + ')' : ''} — id de pago: ${data.mp_payment_id}`,
-                        data.status === 'approved'
-                    );
+                    let msg = `Resultado: ${data.status}${data.status_detail ? ' (' + data.status_detail + ')' : ''} — id de pago: ${data.mp_payment_id}`;
+                    if (data.id_reserva_prueba) msg += ` — guardado como reserva pendiente #${data.id_reserva_prueba}`;
+                    mostrarResultadoTestYape(msg, data.status === 'approved');
                 }
             } catch (err) {
                 mostrarResultadoTestYape(err.message || 'No se pudo probar el cobro.', false);
