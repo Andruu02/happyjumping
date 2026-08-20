@@ -31,6 +31,33 @@ class SpotifyModel extends Model {
     }
 
     /**
+     * Escribe/actualiza una sola variable en el .env (se usa para guardar
+     * el refresh token que devuelve Spotify tras la autorización OAuth -
+     * ver urlAutorizacion()/procesarCallback() más abajo). Reemplaza la
+     * línea si ya existe, si no la agrega al final.
+     */
+    private function guardarEnv($nombre, $valor) {
+        $envPath = dirname(__DIR__, 2) . '/.env';
+        $lineaNueva = $nombre . '=' . $valor;
+
+        $lines = file_exists($envPath) ? file($envPath, FILE_IGNORE_NEW_LINES) : [];
+        $encontrada = false;
+        foreach ($lines as $i => $l) {
+            if (strpos(trim($l), $nombre . '=') === 0) {
+                $lines[$i] = $lineaNueva;
+                $encontrada = true;
+                break;
+            }
+        }
+        if (!$encontrada) {
+            $lines[] = $lineaNueva;
+        }
+
+        file_put_contents($envPath, implode(PHP_EOL, $lines) . PHP_EOL);
+        putenv($lineaNueva); // disponible también para el resto de este mismo request
+    }
+
+    /**
      * Pide un access token vía Client Credentials Flow. No hace falta
      * cachearlo entre requests: el buscador solo se llama cuando el
      * cliente aprieta buscar, no en cada tecla.
@@ -143,5 +170,212 @@ class SpotifyModel extends Model {
         }
 
         return $resultado;
+    }
+
+    /* ======================================================================
+     * A partir de acá: flujo OAuth "Authorization Code" con la cuenta
+     * Premium del negocio. La búsqueda de arriba usa Client Credentials
+     * (solo lectura, sin dueño); crear/editar playlists requiere que un
+     * usuario real autorice la app una vez con permiso de escritura -
+     * ese permiso se guarda como refresh token y de ahí en más se reusa
+     * sin volver a pedir login.
+     * ==================================================================== */
+
+    /** true si ya se hizo la autorización una vez (hay refresh token guardado). */
+    public function conectada() {
+        return $this->leerEnv('SPOTIFY_REFRESH_TOKEN') !== '';
+    }
+
+    /** URL de login/autorización de Spotify a la que hay que mandar al admin. */
+    public function urlAutorizacion() {
+        $clientId = $this->leerEnv('SPOTIFY_CLIENT_ID');
+        return 'https://accounts.spotify.com/authorize?' . http_build_query([
+            'client_id'     => $clientId,
+            'response_type' => 'code',
+            'redirect_uri'  => URL_ROOT . '/admin/spotify-callback',
+            'scope'         => 'playlist-modify-public playlist-modify-private',
+        ]);
+    }
+
+    /**
+     * Intercambia el "code" que Spotify manda de vuelta al callback por un
+     * refresh token permanente, y lo guarda en el .env. Devuelve true/false.
+     */
+    public function procesarCallback($code) {
+        $clientId     = $this->leerEnv('SPOTIFY_CLIENT_ID');
+        $clientSecret = $this->leerEnv('SPOTIFY_CLIENT_SECRET');
+
+        $ch = curl_init('https://accounts.spotify.com/api/token');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => http_build_query([
+                'grant_type'   => 'authorization_code',
+                'code'         => $code,
+                'redirect_uri' => URL_ROOT . '/admin/spotify-callback',
+            ]),
+            CURLOPT_HTTPHEADER     => [
+                'Authorization: Basic ' . base64_encode($clientId . ':' . $clientSecret),
+                'Content-Type: application/x-www-form-urlencoded',
+            ],
+            CURLOPT_TIMEOUT => 8,
+        ]);
+        $respuesta = curl_exec($ch);
+        $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200 || !$respuesta) {
+            return false;
+        }
+
+        $data = json_decode($respuesta, true);
+        if (empty($data['refresh_token'])) {
+            return false;
+        }
+
+        $this->guardarEnv('SPOTIFY_REFRESH_TOKEN', $data['refresh_token']);
+        return true;
+    }
+
+    /**
+     * Access token "de usuario" (con permiso de escritura), a partir del
+     * refresh token guardado. Distinto de obtenerToken(), que es de solo
+     * lectura y no sirve para crear/editar playlists.
+     */
+    private function obtenerTokenUsuario() {
+        $clientId     = $this->leerEnv('SPOTIFY_CLIENT_ID');
+        $clientSecret = $this->leerEnv('SPOTIFY_CLIENT_SECRET');
+        $refreshToken = $this->leerEnv('SPOTIFY_REFRESH_TOKEN');
+        if ($clientId === '' || $clientSecret === '' || $refreshToken === '') {
+            return null;
+        }
+
+        $ch = curl_init('https://accounts.spotify.com/api/token');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => http_build_query([
+                'grant_type'    => 'refresh_token',
+                'refresh_token' => $refreshToken,
+            ]),
+            CURLOPT_HTTPHEADER     => [
+                'Authorization: Basic ' . base64_encode($clientId . ':' . $clientSecret),
+                'Content-Type: application/x-www-form-urlencoded',
+            ],
+            CURLOPT_TIMEOUT => 8,
+        ]);
+        $respuesta = curl_exec($ch);
+        $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200 || !$respuesta) {
+            return null;
+        }
+
+        $data = json_decode($respuesta, true);
+
+        // Spotify a veces rota el refresh token al usarlo; si manda uno
+        // nuevo hay que guardarlo o el actual deja de servir.
+        if (!empty($data['refresh_token'])) {
+            $this->guardarEnv('SPOTIFY_REFRESH_TOKEN', $data['refresh_token']);
+        }
+
+        return $data['access_token'] ?? null;
+    }
+
+    /**
+     * Crea de verdad la playlist "Playlist de {nombre}" en la cuenta de
+     * Spotify del negocio y le mete las canciones elegidas. Se llama recién
+     * al finalizar la reserva (con el pago ya resuelto), no mientras el
+     * cliente todavía está armando la lista, para no dejar playlists
+     * huérfanas de reservas que nunca se completan.
+     *
+     * Devuelve la URL pública de la playlist, o null si algo falla (no
+     * bloquea la reserva - si Spotify falla, la reserva igual se guarda).
+     */
+    public function crearPlaylistDesdeReserva($nombreCumpleanero, $canciones) {
+        $token = $this->obtenerTokenUsuario();
+        if (!$token) {
+            return null;
+        }
+
+        // 1. ID de la cuenta dueña (la del negocio) - la API de creación
+        // de playlists lo pide en la URL.
+        $ch = curl_init('https://api.spotify.com/v1/me');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER     => ['Authorization: Bearer ' . $token],
+            CURLOPT_TIMEOUT        => 8,
+        ]);
+        $respuesta = curl_exec($ch);
+        $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($httpCode !== 200 || !$respuesta) {
+            return null;
+        }
+        $userId = json_decode($respuesta, true)['id'] ?? null;
+        if (!$userId) {
+            return null;
+        }
+
+        // 2. Crear la playlist vacía.
+        $ch = curl_init("https://api.spotify.com/v1/users/{$userId}/playlists");
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => json_encode([
+                'name'        => 'Playlist de ' . $nombreCumpleanero,
+                'public'      => false,
+                'description' => 'Armada por el cliente en happyjumpingperu.com',
+            ]),
+            CURLOPT_HTTPHEADER     => [
+                'Authorization: Bearer ' . $token,
+                'Content-Type: application/json',
+            ],
+            CURLOPT_TIMEOUT => 8,
+        ]);
+        $respuesta = curl_exec($ch);
+        $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($httpCode !== 201 || !$respuesta) {
+            return null;
+        }
+        $playlist    = json_decode($respuesta, true);
+        $playlistId  = $playlist['id'] ?? null;
+        $playlistUrl = $playlist['external_urls']['spotify'] ?? null;
+        if (!$playlistId) {
+            return null;
+        }
+
+        // 3. Agregarle las canciones. Los resultados de tipo "playlist"
+        // (la pestaña de búsqueda de playlists) no se pueden meter como
+        // canción suelta, así que se ignoran acá - igual quedan guardadas
+        // en reserva_canciones para que la anfitriona sepa que se pidieron.
+        $uris = [];
+        foreach ($canciones as $cancion) {
+            if (!empty($cancion['spotify_id']) && ($cancion['tipo'] ?? 'track') === 'track') {
+                $uris[] = 'spotify:track:' . $cancion['spotify_id'];
+            }
+        }
+
+        if (!empty($uris)) {
+            $ch = curl_init("https://api.spotify.com/v1/playlists/{$playlistId}/tracks");
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST           => true,
+                CURLOPT_POSTFIELDS     => json_encode(['uris' => $uris]),
+                CURLOPT_HTTPHEADER     => [
+                    'Authorization: Bearer ' . $token,
+                    'Content-Type: application/json',
+                ],
+                CURLOPT_TIMEOUT => 8,
+            ]);
+            curl_exec($ch);
+            curl_close($ch);
+            // No aborta si esto falla: la playlist ya existe y su link se
+            // guarda igual, peor caso queda vacía y se llena a mano.
+        }
+
+        return $playlistUrl;
     }
 }

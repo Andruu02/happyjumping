@@ -288,6 +288,20 @@ class ReservasController extends Controller {
                 // Si la consulta falla, queda 'pendiente' (el admin lo revisa a mano).
             }
 
+            // --- 3.5. CREAR LA PLAYLIST REAL EN SPOTIFY (si mandó canciones) ---
+            // Se hace acá (recién al finalizar, con el pago ya resuelto) y
+            // no mientras arma la lista en el Paso 2, para no dejar
+            // playlists huérfanas de reservas que nunca se completan. Si
+            // Spotify falla no se bloquea la reserva - queda sin link.
+            $canciones = $reserva_data['canciones'] ?? [];
+            $spotify_playlist_url = null;
+            if (!empty($canciones) && $this->spotifyModel->conectada()) {
+                $spotify_playlist_url = $this->spotifyModel->crearPlaylistDesdeReserva(
+                    $reserva_data['nombre_cumpleanero'],
+                    $canciones
+                );
+            }
+
             // Si llegamos aquí, la subida fue exitosa y $ruta_captura_final está definida
             $datos_completos = [
                 'id_usuario' => $_SESSION['id_usuario'],
@@ -302,7 +316,8 @@ class ReservasController extends Controller {
                 'nombre_cumpleanero' => $reserva_data['nombre_cumpleanero'],
                 'edad_cumpleanero' => $reserva_data['edad_cumpleanero'],
                 'observaciones' => $reserva_data['observaciones'],
-                'canciones' => $reserva_data['canciones'] ?? [],
+                'canciones' => $canciones,
+                'spotify_playlist_url' => $spotify_playlist_url,
                 'ruta_captura' => $ruta_captura_final, // Nombre del archivo guardado (opcional)
                 'metodo_pago' => $metodo_pago,
                 'mp_payment_id' => $mp_payment_id_final,

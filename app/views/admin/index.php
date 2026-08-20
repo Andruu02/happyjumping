@@ -23,6 +23,28 @@
     <h1 class="titulo-admin"><i class="bi bi-speedometer2"></i> Panel de Control</h1>
     <p class="subtitulo-admin">Bienvenido de nuevo, <?php echo htmlspecialchars($_SESSION['usuario_nombre']); ?>.</p>
 
+    <?php if (($_GET['spotify'] ?? '') === 'ok'): ?>
+        <div class="alert alert-success" style="border-radius:12px;"><i class="bi bi-check-circle-fill me-1"></i> Cuenta de Spotify conectada. Las playlists de las próximas reservas ya se crean solas.</div>
+    <?php elseif (($_GET['spotify'] ?? '') === 'error'): ?>
+        <div class="alert alert-danger" style="border-radius:12px;"><i class="bi bi-exclamation-triangle-fill me-1"></i> No se pudo conectar la cuenta de Spotify. Intenta de nuevo.</div>
+    <?php endif; ?>
+
+    <!-- Conexión con Spotify (playlists automáticas) -->
+    <div class="alert-admin-spotify <?php echo $spotifyConectado ? 'conectado' : ''; ?>">
+        <i class="bi bi-spotify"></i>
+        <div>
+            <strong><?php echo $spotifyConectado ? 'Spotify conectado' : 'Playlists de Spotify no conectadas'; ?></strong>
+            <p class="mb-0">
+                <?php echo $spotifyConectado
+                    ? 'Cada reserva con canciones elegidas crea automáticamente su propia playlist en la cuenta del negocio.'
+                    : 'Conecta la cuenta Premium del negocio una sola vez para que las playlists de las reservas se creen automáticamente en Spotify.'; ?>
+            </p>
+        </div>
+        <?php if (!$spotifyConectado): ?>
+            <a href="<?php echo URL_ROOT; ?>/admin/spotify-conectar" class="btn-admin-primario">Conectar Spotify</a>
+        <?php endif; ?>
+    </div>
+
     <!-- Tarjetas estadísticas -->
     <div class="row g-4 mt-2">
         <div class="col-lg-4 col-md-6">

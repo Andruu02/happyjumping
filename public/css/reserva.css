@@ -701,6 +701,7 @@ body.body-exito { padding-bottom: 0; }
     gap: 8px;
     margin-bottom: 6px;
 }
+.musica-logo-spotify { height: 22px; width: auto; margin-left: auto; }
 .musica-hint { color: #777; font-size: .85rem; margin-bottom: 16px; }
 
 .musica-tipo-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
@@ -732,7 +733,6 @@ body.body-exito { padding-bottom: 0; }
 .musica-buscar-btn:hover { background: #8a1fd9; }
 
 .musica-resultados { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 320px; overflow-y: auto; }
-.musica-resultado-wrap { display: flex; flex-direction: column; }
 .musica-resultado-item {
     display: flex;
     align-items: center;
@@ -773,11 +773,25 @@ body.body-exito { padding-bottom: 0; }
     transition: background .2s ease, color .2s ease;
 }
 .musica-escuchar-btn:hover { background: #1DB954; color: #fff; }
+.musica-escuchar-btn.sonando { background: #1DB954; color: #fff; animation: musica-pulso 1.2s ease-in-out infinite; }
+@keyframes musica-pulso { 0%, 100% { box-shadow: 0 0 0 0 rgba(29,185,84,.35); } 50% { box-shadow: 0 0 0 6px rgba(29,185,84,0); } }
 
-.musica-preview-player { max-height: 0; overflow: hidden; transition: max-height .25s ease; }
-.musica-preview-player.abierto { max-height: 90px; margin-top: 6px; }
-.musica-preview-player iframe { border-radius: 10px; display: block; }
-.musica-preview-vacio { padding: 8px 2px; }
+.musica-player-box {
+    background: #fff;
+    border: 2px dashed #ecdcff;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+}
+.musica-player-box #musica-player-vacio { color: #aaa; }
+.musica-player-box #musica-player-embed { display: none; width: 100%; }
+.musica-player-box #musica-player-embed iframe { border-radius: 10px; display: block; }
+.musica-player-box.activo { border-style: solid; border-color: #1DB954; padding: 0; overflow: hidden; }
+.musica-player-box.activo #musica-player-vacio { display: none; }
+.musica-player-box.activo #musica-player-embed { display: block; }
 
 .musica-seleccion { border-top: 1px solid #ecdcff; padding-top: 14px; }
 .musica-seleccion-header {

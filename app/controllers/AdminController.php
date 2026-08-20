@@ -23,6 +23,7 @@ class AdminController extends Controller {
             $chartLabels[] = date('d/m', strtotime($dia->dia));
             $chartData[]   = $dia->total_dia;
         }
+        $spotify = $this->model('SpotifyModel');
         $datos = [
             'titulo'             => 'Dashboard - Admin',
             'totalClientes'      => $this->adminModel->contarTotalClientes(),
@@ -30,9 +31,37 @@ class AdminController extends Controller {
             'reservasPendientes' => $this->adminModel->contarReservasPendientes(),
             'proximasReservas'   => $this->adminModel->getProximasReservas(),
             'chartLabels'        => json_encode($chartLabels),
-            'chartData'          => json_encode($chartData)
+            'chartData'          => json_encode($chartData),
+            'spotifyConectado'   => $spotify->conectada(),
         ];
         $this->view('admin/index', $datos);
+    }
+
+    /**
+     * Manda al admin a loguearse con la cuenta Premium del negocio en
+     * Spotify y autorizar permiso de "crear/editar playlists" (una sola
+     * vez - el refresh token que devuelve Spotify queda guardado en el
+     * .env y de ahí en más ya no hace falta volver a loguearse).
+     */
+    public function spotifyConectar() {
+        $spotify = $this->model('SpotifyModel');
+        header('Location: ' . $spotify->urlAutorizacion());
+        exit();
+    }
+
+    /**
+     * Callback al que Spotify redirige después del login/autorización.
+     */
+    public function spotifyCallback() {
+        $spotify = $this->model('SpotifyModel');
+        $ok = false;
+
+        if (!empty($_GET['code'])) {
+            $ok = $spotify->procesarCallback($_GET['code']);
+        }
+
+        header('Location: ' . URL_ROOT . '/admin?spotify=' . ($ok ? 'ok' : 'error'));
+        exit();
     }
 
     public function reservas() {

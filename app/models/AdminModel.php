@@ -112,7 +112,8 @@ class AdminModel extends Model {
                     pg.ruta_captura,
                     pg.id_pago,
                     COALESCE(NULLIF(pg.metodo_pago, ''), 'yape') AS metodo_pago,
-                    pg.mp_payment_id
+                    pg.mp_payment_id,
+                    r.spotify_playlist_url
                 FROM reservas r
                 INNER JOIN usuarios u             ON r.id_usuario  = u.id_usuario
                 INNER JOIN paquetes p             ON r.id_paquete  = p.id_paquete

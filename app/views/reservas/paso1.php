@@ -211,7 +211,7 @@
 
                         <div class="col-lg-5">
                             <div class="musica-box">
-                                <h5><i class="bi bi-music-note-beamed"></i> Arma la playlist de tu fiesta</h5>
+                                <h5><i class="bi bi-music-note-beamed"></i> Arma la playlist de tu fiesta <img src="<?php echo URL_ROOT; ?>/img/spotify_logo.webp" alt="Spotify" class="musica-logo-spotify"></h5>
                                 <p class="musica-hint">Busca canciones y agrégalas - se las pasamos a nuestra anfitriona el día del evento. (Opcional)</p>
 
                                 <div class="musica-tipo-tabs">
@@ -223,6 +223,14 @@
                                     <label for="musica-buscar-input" class="visually-hidden">Buscar canción</label>
                                     <input type="text" id="musica-buscar-input" class="form-control" placeholder="Busca una canción o artista...">
                                     <button type="button" id="musica-buscar-btn" class="musica-buscar-btn" aria-label="Buscar"><i class="bi bi-search"></i></button>
+                                </div>
+
+                                <!-- Reproductor único de Spotify: uno solo para todos los
+                                     resultados, en vez de uno por fila - tocar ▶ en cualquier
+                                     resultado carga esa canción acá y la reproduce al toque. -->
+                                <div class="musica-player-box" id="musica-player-box">
+                                    <p class="text-muted small mb-0" id="musica-player-vacio">Toca <i class="bi bi-play-circle-fill"></i> en un resultado para escucharlo acá.</p>
+                                    <div id="musica-player-embed"></div>
                                 </div>
 
                                 <div id="musica-resultados" class="musica-resultados"></div>
@@ -353,6 +361,7 @@
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/MotionPathPlugin.min.js"></script>
     <script src="https://sdk.mercadopago.com/js/v2"></script>
+    <script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
 
     <script>
         // El paquete ya viene elegido desde el inicio (?paquete=ID); acá solo
@@ -656,58 +665,80 @@
 
             musicaResultados.innerHTML = '';
             canciones.forEach((cancion) => {
-                const wrap = document.createElement('div');
-                wrap.className = 'musica-resultado-wrap';
-                wrap.innerHTML = `
-                    <div class="musica-resultado-item">
-                        <img src="${cancion.imagen}" alt="">
-                        <div class="musica-resultado-info">
-                            <strong>${cancion.nombre}</strong>
-                            <span>${cancion.artista}</span>
-                        </div>
-                        <button type="button" class="musica-escuchar-btn" aria-label="Escuchar antes de elegir"><i class="bi bi-play-circle-fill"></i></button>
-                        <button type="button" class="musica-agregar-btn" aria-label="Agregar a la playlist"><i class="bi bi-plus-lg"></i></button>
+                const item = document.createElement('div');
+                item.className = 'musica-resultado-item';
+                item.innerHTML = `
+                    <img src="${cancion.imagen}" alt="">
+                    <div class="musica-resultado-info">
+                        <strong>${cancion.nombre}</strong>
+                        <span>${cancion.artista}</span>
                     </div>
-                    <div class="musica-preview-player"></div>
+                    <button type="button" class="musica-escuchar-btn" aria-label="Escuchar"><i class="bi bi-play-circle-fill"></i></button>
+                    <button type="button" class="musica-agregar-btn" aria-label="Agregar a la playlist"><i class="bi bi-plus-lg"></i></button>
                 `;
-                wrap.querySelector('.musica-agregar-btn').addEventListener('click', () => agregarCancion(cancion));
-                wrap.querySelector('.musica-escuchar-btn').addEventListener('click', () => togglePreviewMusica(cancion, wrap));
-                musicaResultados.appendChild(wrap);
+                item.querySelector('.musica-agregar-btn').addEventListener('click', () => agregarCancion(cancion));
+                const btnEscuchar = item.querySelector('.musica-escuchar-btn');
+                btnEscuchar.addEventListener('click', () => reproducirEnPlayer(cancion, btnEscuchar));
+                musicaResultados.appendChild(item);
             });
         }
 
-        // Reproductor embebido de Spotify: da una vista previa de 30s sin
-        // que el cliente que reserva necesite cuenta ni loguearse. Se abre
-        // uno a la vez (si abrís otro, se cierra el anterior). "autoplay=1"
-        // + el permiso "autoplay" en el iframe hacen que arranque solo con
-        // este único click (cuenta como gesto del usuario), sin tener que
-        // apretar play una segunda vez adentro del reproductor embebido.
-        function togglePreviewMusica(cancion, wrap) {
-            const playerBox = wrap.querySelector('.musica-preview-player');
-            const yaAbierto = playerBox.classList.contains('abierto');
+        /* ---------- Reproductor único de Spotify (IFrame API oficial) ----------
+         * En vez de un mini-reproductor por cada resultado (que iba abriendo y
+         * cerrando cajitas y corriendo el layout), hay un solo reproductor fijo
+         * arriba de los resultados: tocar ▶ en cualquier fila carga esa canción
+         * ahí mismo y la reproduce al toque, sin tener que buscarla de nuevo
+         * "directo en Spotify". */
+        const musicaPlayerBox = document.getElementById('musica-player-box');
+        const musicaPlayerVacio = document.getElementById('musica-player-vacio');
+        let spotifyIFrameAPI = null;
+        let spotifyEmbedController = null;
+        let spotifyUriPendiente = null;
+        let btnEscuchandoActivo = null;
 
-            document.querySelectorAll('.musica-preview-player.abierto').forEach((p) => {
-                if (p !== playerBox) {
-                    p.classList.remove('abierto');
-                    p.innerHTML = '';
-                }
-            });
-
-            if (yaAbierto) {
-                playerBox.classList.remove('abierto');
-                playerBox.innerHTML = '';
-                return;
+        // El script del IFrame API se carga con "async" en el <head>, así
+        // que puede no estar listo todavía cuando el usuario aprieta play
+        // por primera vez - por eso el controller recién se crea (con la
+        // canción que sea) la primera vez que hace falta, no antes.
+        window.onSpotifyIframeApiReady = (IFrameAPI) => {
+            spotifyIFrameAPI = IFrameAPI;
+            if (spotifyUriPendiente) {
+                crearControladorSpotify(spotifyUriPendiente);
+                spotifyUriPendiente = null;
             }
+        };
+
+        function crearControladorSpotify(uri) {
+            spotifyIFrameAPI.createController(document.getElementById('musica-player-embed'), { uri }, (EmbedController) => {
+                spotifyEmbedController = EmbedController;
+                EmbedController.play();
+            });
+        }
+
+        function reproducirEnPlayer(cancion, btn) {
+            if (btnEscuchandoActivo) {
+                btnEscuchandoActivo.classList.remove('sonando');
+            }
+            btnEscuchandoActivo = btn;
+            btn.classList.add('sonando');
 
             if (!cancion.spotify_id) {
-                playerBox.innerHTML = '<p class="text-muted small mb-0 musica-preview-vacio">Vista previa no disponible.</p>';
-                playerBox.classList.add('abierto');
+                musicaPlayerVacio.textContent = 'Vista previa no disponible para esta canción.';
+                musicaPlayerBox.classList.remove('activo');
                 return;
             }
 
-            const tipoEmbed = cancion.tipo === 'playlist' ? 'playlist' : 'track';
-            playerBox.innerHTML = `<iframe src="https://open.spotify.com/embed/${tipoEmbed}/${cancion.spotify_id}?utm_source=generator&theme=0&autoplay=1" width="100%" height="80" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
-            playerBox.classList.add('abierto');
+            musicaPlayerBox.classList.add('activo');
+            const uri = `spotify:${cancion.tipo === 'playlist' ? 'playlist' : 'track'}:${cancion.spotify_id}`;
+
+            if (spotifyEmbedController) {
+                spotifyEmbedController.loadUri(uri);
+                spotifyEmbedController.play();
+            } else if (spotifyIFrameAPI) {
+                crearControladorSpotify(uri);
+            } else {
+                spotifyUriPendiente = uri;
+            }
         }
 
         function agregarCancion(cancion) {

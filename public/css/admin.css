@@ -167,6 +167,37 @@ body {
 .btn-admin-primario:hover { color: #fff; transform: translateY(-2px); box-shadow: 0 14px 26px -8px rgba(123,47,247,.55); }
 .btn-admin-primario:disabled { opacity: .55; cursor: not-allowed; transform: none; box-shadow: none; }
 
+/* ---------- Banner de conexión con Spotify (dashboard) ---------- */
+.alert-admin-spotify {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #fff;
+    border: 2px solid #ffd9ec;
+    border-radius: 16px;
+    padding: 16px 22px;
+    margin: 18px 0 0;
+    box-shadow: 0 10px 24px rgba(30,10,60,.06);
+}
+.alert-admin-spotify.conectado { border-color: #c7f2d8; }
+.alert-admin-spotify > i {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    background: #fdeaf4;
+    color: #ff3c8d;
+}
+.alert-admin-spotify.conectado > i { background: #e4f9ec; color: #1DB954; }
+.alert-admin-spotify > div { flex: 1; min-width: 0; }
+.alert-admin-spotify strong { color: #2D2D2D; }
+.alert-admin-spotify p { color: #777; font-size: .88rem; }
+.alert-admin-spotify .btn-admin-primario { flex-shrink: 0; padding: 10px 20px; font-size: .85rem; }
+
 /* ---------- Filtros ---------- */
 .filtros-card {
     background: #fff;

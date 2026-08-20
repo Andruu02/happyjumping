@@ -43,9 +43,9 @@ class ReservaModel extends Model {
             // reportes de ingresos filtran por reservas.estado = 'confirmada',
             // así que tiene que quedar en sync desde la creación.
             $this->query("INSERT INTO reservas (id_usuario, id_paquete, id_horario, cantidad_personas,
-                                            extra_pintura, extra_destruccion, nombre_cumpleanero, edad_cumpleanero, observaciones, estado)
+                                            extra_pintura, extra_destruccion, nombre_cumpleanero, edad_cumpleanero, observaciones, estado, spotify_playlist_url)
                           VALUES (:id_usuario, :id_paquete, :id_horario, :cantidad,
-                                  :extra_pintura, :extra_destruccion, :nombre_cumple, :edad_cumple, :observaciones, :estado)");
+                                  :extra_pintura, :extra_destruccion, :nombre_cumple, :edad_cumple, :observaciones, :estado, :spotify_playlist_url)");
 
             /*
              * ======================================================
@@ -62,6 +62,7 @@ class ReservaModel extends Model {
             $this->bind(':edad_cumple', $datos['edad_cumpleanero']);
             $this->bind(':observaciones', $datos['observaciones']);
             $this->bind(':estado', $datos['estado_pago'] ?? 'pendiente');
+            $this->bind(':spotify_playlist_url', $datos['spotify_playlist_url'] ?? null);
 
             $this->execute();
 

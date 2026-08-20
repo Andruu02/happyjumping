@@ -214,7 +214,10 @@ document.querySelectorAll('[data-reserva]').forEach(function(btn) {
                 (r.mp_payment_id ? ' — id de pago: ' + r.mp_payment_id : '') + '</p>' +
             '<p><strong>Observaciones:</strong> ' + (r.observaciones || 'Ninguna') + '</p>' +
             '<p><strong>Estado:</strong> <span class="status-badge status-' + r.estado_pago + '">' + r.estado_pago.toUpperCase() + '</span></p>' +
-            '<p><strong>🎵 Playlist sugerida:</strong></p>' +
+            (r.spotify_playlist_url
+                ? '<p><strong>🎵 Playlist en Spotify:</strong> <a href="' + r.spotify_playlist_url + '" target="_blank" rel="noopener">Abrir en Spotify</a></p>'
+                : '') +
+            '<p><strong>Canciones pedidas:</strong></p>' +
             '<div id="d_playlist"><span class="text-muted">Cargando...</span></div>';
 
         fetch(window.HJ_URL_ROOT + '/admin/cancionesReserva/' + r.id_reserva)
