@@ -787,9 +787,9 @@ body.body-exito { padding-bottom: 0; }
     align-items: center;
 }
 .musica-player-box #musica-player-vacio { color: #aaa; }
-.musica-player-box #musica-player-embed { display: none; width: 100%; }
-.musica-player-box #musica-player-embed iframe { border-radius: 10px; display: block; }
-.musica-player-box.activo { border-style: solid; border-color: #1DB954; padding: 0; overflow: hidden; }
+.musica-player-box #musica-player-embed { display: none; width: 100%; max-height: 80px; overflow: hidden; }
+.musica-player-box #musica-player-embed iframe { border-radius: 10px; display: block; width: 100%; height: 80px !important; max-height: 80px !important; }
+.musica-player-box.activo { border-style: solid; border-color: #1DB954; padding: 0; overflow: hidden; max-height: 80px; }
 .musica-player-box.activo #musica-player-vacio { display: none; }
 .musica-player-box.activo #musica-player-embed { display: block; }
 

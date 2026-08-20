@@ -189,7 +189,7 @@
 
                     <div class="row g-4">
 
-                        <div class="col-lg-7">
+                        <div class="col-lg-6">
                             <h3>Completa los datos</h3>
 
                             <div class="mb-3">
@@ -209,7 +209,7 @@
 
                         </div>
 
-                        <div class="col-lg-5">
+                        <div class="col-lg-6">
                             <div class="musica-box">
                                 <h5><i class="bi bi-music-note-beamed"></i> Arma la playlist de tu fiesta <img src="<?php echo URL_ROOT; ?>/img/spotify_logo.webp" alt="Spotify" class="musica-logo-spotify"></h5>
                                 <p class="musica-hint">Busca canciones y agrégalas - se las pasamos a nuestra anfitriona el día del evento. (Opcional)</p>
@@ -709,7 +709,10 @@
         };
 
         function crearControladorSpotify(uri) {
-            spotifyIFrameAPI.createController(document.getElementById('musica-player-embed'), { uri }, (EmbedController) => {
+            // height:80 fuerza el modo compacto (una fila, sin la carátula
+            // gigante) - si no se especifica, el widget arranca en su modo
+            // grande por defecto.
+            spotifyIFrameAPI.createController(document.getElementById('musica-player-embed'), { uri, width: '100%', height: '80' }, (EmbedController) => {
                 spotifyEmbedController = EmbedController;
                 EmbedController.play();
             });
