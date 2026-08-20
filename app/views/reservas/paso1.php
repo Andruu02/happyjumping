@@ -235,7 +235,7 @@
 
                                 <div id="musica-resultados" class="musica-resultados"></div>
 
-                                <div class="musica-seleccion" id="musica-seleccion">
+                                <div class="musica-seleccion colapsada" id="musica-seleccion">
                                     <div class="musica-seleccion-header" id="musica-seleccion-header">
                                         <h6>Tu playlist <span id="musica-contador">(0)</span></h6>
                                         <button type="button" class="musica-seleccion-toggle" id="musica-seleccion-toggle" aria-label="Mostrar/ocultar playlist"><i class="bi bi-chevron-down"></i></button>
