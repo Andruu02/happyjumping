@@ -284,3 +284,59 @@ footer a:hover i {
     .navbar-brand img { height: 60px; }
     .hero h1 { font-size: 3.5rem; }
 }
+
+/* ---------- Aviso flotante "Activar notificaciones" (ver public/js/push.js) ---------- */
+.hj-push-prompt {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    border-radius: 999px;
+    box-shadow: 0 10px 30px rgba(30, 10, 60, .25);
+    padding: 6px 8px 6px 6px;
+    opacity: 0;
+    transform: translateY(16px);
+    pointer-events: none;
+    transition: opacity .35s ease, transform .35s ease;
+}
+.hj-push-prompt.hidden { display: none; }
+.hj-push-prompt.mostrar { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.hj-push-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--morado), var(--rosa));
+    color: #fff;
+    font-weight: 700;
+    font-size: .85rem;
+    border: none;
+    border-radius: 999px;
+    padding: 10px 18px;
+    white-space: nowrap;
+    transition: filter .2s ease;
+}
+.hj-push-btn:hover { filter: brightness(1.08); }
+.hj-push-btn:disabled { opacity: .6; cursor: default; }
+.hj-push-cerrar {
+    flex-shrink: 0;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: none;
+    background: #f1f1f1;
+    color: #888;
+    font-size: .7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s ease, color .2s ease;
+}
+.hj-push-cerrar:hover { background: #e2e2e2; color: #444; }
+
+@media (max-width: 480px) {
+    .hj-push-prompt { left: 10px; right: 10px; bottom: 12px; }
+    .hj-push-btn { flex: 1; justify-content: center; }
+}
