@@ -51,29 +51,28 @@ require_once APP_ROOT . '/views/includes/header.php';
         </div>
         <div class="row g-4 justify-content-center">
             <?php
-            // Cada amenidad tiene 3 fotos (amenidades/<clave>-1.webp, -2.webp, -3.webp)
-            // que se muestran en un slider infinito dentro de la tarjeta expandida.
+            // Cada amenidad tiene una foto real (public/img/<archivo>.webp),
+            // que se muestra tanto de miniatura en la tarjeta como de fondo
+            // en la tarjeta expandida.
             $amenidades = [
-                ['clave' => 'anfitrionas',       'icono' => '🤸‍♀️', 'texto' => 'Anfitrionas',              'desc' => 'Dinámicas y juegos para toda la fiesta.'],
-                ['clave' => 'trampolines',       'icono' => '🤾', 'texto' => 'Trampolines',                'desc' => 'Diversión y salto sin límites.'],
-                ['clave' => 'helados',           'icono' => '🍧', 'texto' => 'Helados y granizados',       'desc' => 'Para refrescarte entre salto y salto.'],
-                ['clave' => 'brazos-giratorios', 'icono' => '🌀', 'texto' => 'Brazos giratorios',          'desc' => 'Adrenalina en cada vuelta.'],
-                ['clave' => 'glitter-neon',      'icono' => '✨', 'texto' => 'Glitter y maquillaje neón',   'desc' => 'Brilla en cada celebración.'],
-                ['clave' => 'zona-fiestas',      'icono' => '🎉', 'texto' => 'Zona de fiestas',            'desc' => 'Espacios decorados para tu evento.'],
+                ['archivo' => 'anfitrionas',  'icono' => '🤸‍♀️', 'texto' => 'Anfitrionas',              'desc' => 'Dinámicas y juegos para toda la fiesta.'],
+                ['archivo' => 'trampolines',  'icono' => '🤾', 'texto' => 'Trampolines',                'desc' => 'Diversión y salto sin límites.'],
+                ['archivo' => 'helados',      'icono' => '🍧', 'texto' => 'Helados y granizados',       'desc' => 'Para refrescarte entre salto y salto.'],
+                ['archivo' => 'brazo',        'icono' => '🌀', 'texto' => 'Brazos giratorios',          'desc' => 'Adrenalina en cada vuelta.'],
+                ['archivo' => 'glitter',      'icono' => '✨', 'texto' => 'Glitter y maquillaje neón',   'desc' => 'Brilla en cada celebración.'],
+                ['archivo' => 'fiestas',      'icono' => '🎉', 'texto' => 'Zona de fiestas',            'desc' => 'Espacios decorados para tu evento.'],
             ];
             foreach ($amenidades as $i => $a):
-                $imagenes = [
-                    URL_ROOT . '/img/amenidades/' . $a['clave'] . '-1.webp',
-                    URL_ROOT . '/img/amenidades/' . $a['clave'] . '-2.webp',
-                    URL_ROOT . '/img/amenidades/' . $a['clave'] . '-3.webp',
-                ];
+                $foto = URL_ROOT . '/img/' . $a['archivo'] . '.webp';
             ?>
             <div class="col-6 col-md-4">
                 <div class="amenidad-card" tabindex="0" role="button"
                      data-titulo="<?php echo htmlspecialchars($a['texto']); ?>"
                      data-desc="<?php echo htmlspecialchars($a['desc']); ?>"
-                     data-imgs="<?php echo htmlspecialchars(json_encode($imagenes), ENT_QUOTES); ?>">
-                    <div class="icono color-<?php echo ($i % 6) + 1; ?>"><span><?php echo $a['icono']; ?></span></div>
+                     data-imgs="<?php echo htmlspecialchars(json_encode([$foto]), ENT_QUOTES); ?>">
+                    <div class="amenidad-foto" style="background-image:url('<?php echo $foto; ?>');">
+                        <span class="icono color-<?php echo ($i % 6) + 1; ?>"><?php echo $a['icono']; ?></span>
+                    </div>
                     <p class="amenidad-titulo"><?php echo $a['texto']; ?></p>
                     <p class="amenidad-desc"><?php echo $a['desc']; ?></p>
                 </div>
