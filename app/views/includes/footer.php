@@ -5,7 +5,6 @@
                 <h5>Síguenos en redes</h5>
                 <div class="d-flex justify-content-center justify-content-md-start gap-3 mt-3">
                     <a href="https://www.instagram.com/happyjumping.peru/?hl=es" target="_blank" class="text-white fs-4"><i class="bi bi-instagram"></i></a>
-                    <a href="https://www.tiktok.com/@happyjumping.peru" target="_blank" class="text-white fs-4"><i class="bi bi-tiktok"></i></a>
                 </div>
             </div>
             <div class="col-md-4">
