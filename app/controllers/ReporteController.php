@@ -89,6 +89,7 @@ class ReporteController extends Controller {
         // verde/rojo de estado, y una fila clara/oscura alternada.
         $S = [
             'titulo'  => 'background:#7B2FF7;color:#fff;font-weight:bold;font-size:15pt;text-align:center;padding:12px;',
+            'periodo' => 'background:#4A148C;color:#fff;font-weight:bold;font-size:12pt;text-align:center;padding:7px;',
             'sub'     => 'background:#F3E5FF;color:#4A148C;font-size:9pt;text-align:center;padding:6px;',
             'kpi_lbl' => 'background:#2D2D2D;color:#fff;font-weight:bold;font-size:8pt;text-align:center;padding:5px;border:1px solid #444;',
             'kpi_val' => 'background:#F8F5FF;color:#7B2FF7;font-weight:bold;font-size:14pt;text-align:center;padding:8px;border:1px solid #7B2FF7;',
@@ -128,7 +129,8 @@ class ReporteController extends Controller {
         // ════════════════════════════
         $W = 6;
         echo '<table style="border-collapse:collapse;font-family:Arial,sans-serif;" x:str>';
-        echo $tr($td('HAPPY JUMPING — REPORTE DE ' . mb_strtoupper($periodo), 'titulo', $W));
+        echo $tr($td('HAPPY JUMPING — REPORTE DE RESERVAS', 'titulo', $W));
+        echo $tr($td('Periodo: ' . $periodo, 'periodo', $W));
         echo $tr($td('Estado: ' . ($estado === 'all' ? 'Todos' : ucfirst($estado)) . '   ·   Generado el ' . date('d/m/Y \a \l\a\s H:i'), 'sub', $W));
         echo $vr($W);
 
@@ -172,7 +174,8 @@ class ReporteController extends Controller {
         // HOJA 2: DETALLE DE RESERVAS
         // ════════════════════════════
         echo '<table style="border-collapse:collapse;font-family:Arial,sans-serif;page-break-before:always">';
-        echo $tr($td('DETALLE DE RESERVAS — ' . mb_strtoupper($periodo), 'titulo', 9));
+        echo $tr($td('DETALLE DE RESERVAS', 'titulo', 9));
+        echo $tr($td('Periodo: ' . $periodo, 'periodo', 9));
         echo $vr(9);
         echo $tr(
             $td('ID', 'cab') . $td('Fecha', 'cab') . $td('Hora', 'cab') .
@@ -236,7 +239,7 @@ class ReporteController extends Controller {
         require_once APP_ROOT . '/../vendor/fpdf/ReportePDF.php';
 
         $pdf = new ReportePDF('L', 'mm', 'A4');
-        $pdf->filtroLabel = $periodo . '   ·   Estado: ' . ($estado === 'all' ? 'Todos' : ucfirst($estado));
+        $pdf->filtroLabel = 'Periodo: ' . $periodo . '   ·   Estado: ' . ($estado === 'all' ? 'Todos' : ucfirst($estado));
         $pdf->AliasNbPages();
         $pdf->SetMargins(10, 30, 10);
         $pdf->SetAutoPageBreak(true, 18);
@@ -244,8 +247,13 @@ class ReporteController extends Controller {
         // ── Página 1: resumen del periodo ──────────────────────────────
         $pdf->AddPage();
 
+        $this->titulo($pdf, 'RESUMEN DE RESERVAS');
+        $pdf->SetFont('Arial', 'B', 12); $pdf->SetFillColor(74, 20, 140); $pdf->SetTextColor(255, 255, 255);
+        $pdf->Cell(self::PW, 8, 'Periodo: ' . $periodo, 1, 1, 'C', true);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->Ln(3);
+
         $cw = [69, 70, 69, 69];
-        $this->titulo($pdf, 'RESUMEN — ' . mb_strtoupper($periodo));
         $pdf->SetFont('Arial', 'B', 9); $pdf->SetFillColor(45, 45, 45); $pdf->SetTextColor(255, 255, 255);
         $this->fila($pdf, $cw, ['Reservas', 'Confirmadas (S/)', 'Pendientes (S/)', 'Canceladas'], 6, 'B');
         $pdf->SetFont('Arial', 'B', 14); $pdf->SetFillColor(248, 245, 255); $pdf->SetTextColor(123, 47, 247);
