@@ -64,6 +64,31 @@ class AdminController extends Controller {
         exit();
     }
 
+    /**
+     * AJAX de verificación: crea una playlist de prueba real (con una sola
+     * canción bien conocida) para ver en el momento, sin andar buscando en
+     * el log de errores, si la conexión con Spotify funciona de punta a
+     * punta o en qué paso exacto falla.
+     */
+    public function spotifyProbarPlaylist() {
+        header('Content-Type: application/json');
+        $spotify = $this->model('SpotifyModel');
+
+        if (!$spotify->conectada()) {
+            echo json_encode(['ok' => false, 'resultado' => 'error: Spotify no está conectado todavía.']);
+            return;
+        }
+
+        // "Cut To The Feeling" de Carly Rae Jepsen - el track de ejemplo
+        // oficial de la documentación de Spotify, siempre disponible.
+        $resultado = $spotify->crearPlaylistDesdeReserva('Prueba de conexión', [
+            ['spotify_id' => '11dFghVXANMlKmJXsNCbNl', 'tipo' => 'track'],
+        ]);
+
+        $ok = is_string($resultado) && strpos($resultado, 'error:') !== 0;
+        echo json_encode(['ok' => $ok, 'resultado' => $resultado]);
+    }
+
     public function reservas() {
         $mensaje = null;
 

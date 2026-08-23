@@ -42,8 +42,13 @@
         </div>
         <?php if (!$spotifyConectado): ?>
             <a href="<?php echo URL_ROOT; ?>/admin/spotify-conectar" class="btn-admin-primario">Conectar Spotify</a>
+        <?php else: ?>
+            <button type="button" id="btn-probar-spotify" class="btn-admin-primario">Probar creación de playlist</button>
         <?php endif; ?>
     </div>
+    <?php if ($spotifyConectado): ?>
+        <div id="spotify-prueba-resultado" class="alert-spotify-prueba hidden"></div>
+    <?php endif; ?>
 
     <!-- Tarjetas estadísticas -->
     <div class="row g-4 mt-2">
@@ -391,6 +396,41 @@
     render();
 })();
 </script>
+
+<?php if ($spotifyConectado): ?>
+<!-- ══ PROBAR CREACIÓN DE PLAYLIST (diagnóstico) ══ -->
+<script>
+document.getElementById('btn-probar-spotify').addEventListener('click', async function () {
+    const btn = this;
+    const caja = document.getElementById('spotify-prueba-resultado');
+    const textoOriginal = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Probando...';
+    caja.className = 'alert-spotify-prueba hidden';
+
+    try {
+        const resp = await fetch('<?php echo URL_ROOT; ?>/admin/spotify-probar-playlist', { method: 'POST' });
+        const data = await resp.json();
+
+        caja.classList.remove('hidden');
+        if (data.ok) {
+            caja.classList.add('exito');
+            caja.innerHTML = '✅ Funciona. Se creó una playlist de prueba: <a href="' + data.resultado + '" target="_blank" rel="noopener">abrir en Spotify</a> (bórrala cuando quieras, era solo para probar).';
+        } else {
+            caja.classList.add('error');
+            caja.textContent = '❌ ' + data.resultado;
+        }
+    } catch (err) {
+        caja.classList.remove('hidden');
+        caja.classList.add('error');
+        caja.textContent = '❌ No se pudo hacer la prueba: ' + err.message;
+    }
+
+    btn.disabled = false;
+    btn.textContent = textoOriginal;
+});
+</script>
+<?php endif; ?>
 
 <!-- ══ CHATBOT ADMIN — HappyBot ══ -->
 <script>

@@ -198,6 +198,17 @@ body {
 .alert-admin-spotify p { color: #777; font-size: .88rem; }
 .alert-admin-spotify .btn-admin-primario { flex-shrink: 0; padding: 10px 20px; font-size: .85rem; }
 
+.alert-spotify-prueba {
+    margin: 10px 0 0;
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-size: .88rem;
+    word-break: break-word;
+}
+.alert-spotify-prueba.hidden { display: none; }
+.alert-spotify-prueba.exito { background: #e4f9ec; color: #1B5E20; border: 1px solid #c7f2d8; }
+.alert-spotify-prueba.error { background: #fdeaea; color: #B71C1C; border: 1px solid #f7c9c9; }
+
 /* ---------- Filtros ---------- */
 .filtros-card {
     background: #fff;
