@@ -27,6 +27,9 @@
 
     <div class="mb-3 d-flex justify-content-between align-items-center">
         <h4 class="mb-0">Reservas encontradas: <strong><?php echo $totalReservas; ?></strong></h4>
+        <button type="button" id="btn-refrescar-reservas" class="btn btn-outline-primary btn-sm" title="Refrescar">
+            <i class="bi bi-arrow-clockwise"></i> Refrescar
+        </button>
     </div>
 
     <div class="filtros-card">
@@ -264,6 +267,15 @@ function confirmarCambio(form) {
     const id = form.querySelector('input[name="id_reserva"]').value;
     return confirm('¿Confirmar cambio de estado de la Reserva #' + id + ' a "' + estadoNuevo + '"?');
 }
+</script>
+<script>
+// Recarga la tabla manteniendo los filtros ya aplicados (van en la URL vía
+// GET) - no hace falta AJAX, la página entera es server-rendered.
+document.getElementById('btn-refrescar-reservas').addEventListener('click', function () {
+    this.disabled = true;
+    this.querySelector('i').classList.add('girando');
+    window.location.reload();
+});
 </script>
 <script>
 window.HJ_URL_ROOT = "<?php echo URL_ROOT; ?>";

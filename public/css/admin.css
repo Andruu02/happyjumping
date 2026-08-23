@@ -347,6 +347,10 @@ body {
 #preview-box .titulo-preview { font-weight: 700; font-size: .92rem; }
 #preview-box .msg-preview { font-size: .85rem; margin-top: 2px; line-height: 1.4; color: #333; }
 
+/* Ícono girando en el botón "Refrescar" de /admin/reservas mientras recarga */
+.girando { animation: admin-girar .6s linear infinite; }
+@keyframes admin-girar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
 /* =========================================
    RESPONSIVE - PANEL DE ADMIN
    (el panel está pensado para escritorio; en pantallas chicas el sidebar
