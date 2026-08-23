@@ -242,11 +242,12 @@ class SpotifyModel extends Model {
      * refresh token guardado. Distinto de obtenerToken(), que es de solo
      * lectura y no sirve para crear/editar playlists.
      */
-    private function obtenerTokenUsuario() {
+    private function obtenerTokenUsuario(&$error = null) {
         $clientId     = $this->leerEnv('SPOTIFY_CLIENT_ID');
         $clientSecret = $this->leerEnv('SPOTIFY_CLIENT_SECRET');
         $refreshToken = $this->leerEnv('SPOTIFY_REFRESH_TOKEN');
         if ($clientId === '' || $clientSecret === '' || $refreshToken === '') {
+            $error = 'no conectado (falta autorizar Spotify desde el Dashboard del admin)';
             return null;
         }
 
@@ -268,11 +269,12 @@ class SpotifyModel extends Model {
         $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
+        $data = json_decode($respuesta, true);
+
         if ($httpCode !== 200 || !$respuesta) {
+            $error = 'no se pudo renovar el token (HTTP ' . $httpCode . ($data['error_description'] ?? $data['error'] ?? '' ? ': ' . ($data['error_description'] ?? $data['error']) : '') . ')';
             return null;
         }
-
-        $data = json_decode($respuesta, true);
 
         // Spotify a veces rota el refresh token al usarlo; si manda uno
         // nuevo hay que guardarlo o el actual deja de servir.
@@ -280,7 +282,12 @@ class SpotifyModel extends Model {
             $this->guardarEnv('SPOTIFY_REFRESH_TOKEN', $data['refresh_token']);
         }
 
-        return $data['access_token'] ?? null;
+        if (empty($data['access_token'])) {
+            $error = 'respuesta sin access_token';
+            return null;
+        }
+
+        return $data['access_token'];
     }
 
     /**
@@ -290,13 +297,15 @@ class SpotifyModel extends Model {
      * cliente todavía está armando la lista, para no dejar playlists
      * huérfanas de reservas que nunca se completan.
      *
-     * Devuelve la URL pública de la playlist, o null si algo falla (no
-     * bloquea la reserva - si Spotify falla, la reserva igual se guarda).
+     * Devuelve la URL pública de la playlist si funcionó, o un string
+     * 'error: ...' con el motivo si algo falló (nunca bloquea la reserva -
+     * el llamador decide qué hacer con el error, pero al menos ya no
+     * desaparece en silencio como antes).
      */
     public function crearPlaylistDesdeReserva($nombreCumpleanero, $canciones) {
-        $token = $this->obtenerTokenUsuario();
+        $token = $this->obtenerTokenUsuario($errorToken);
         if (!$token) {
-            return null;
+            return 'error: ' . $errorToken;
         }
 
         // 1. ID de la cuenta dueña (la del negocio) - la API de creación
@@ -311,11 +320,11 @@ class SpotifyModel extends Model {
         $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         if ($httpCode !== 200 || !$respuesta) {
-            return null;
+            return 'error: no se pudo leer la cuenta de Spotify (HTTP ' . $httpCode . ')';
         }
         $userId = json_decode($respuesta, true)['id'] ?? null;
         if (!$userId) {
-            return null;
+            return 'error: la cuenta de Spotify no devolvió un ID de usuario';
         }
 
         // 2. Crear la playlist vacía.
@@ -338,13 +347,15 @@ class SpotifyModel extends Model {
         $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         if ($httpCode !== 201 || !$respuesta) {
-            return null;
+            $data = json_decode($respuesta, true);
+            $detalle = $data['error']['message'] ?? ('HTTP ' . $httpCode);
+            return 'error: no se pudo crear la playlist (' . $detalle . ')';
         }
         $playlist    = json_decode($respuesta, true);
         $playlistId  = $playlist['id'] ?? null;
         $playlistUrl = $playlist['external_urls']['spotify'] ?? null;
         if (!$playlistId) {
-            return null;
+            return 'error: la respuesta de Spotify no trajo un ID de playlist';
         }
 
         // 3. Agregarle las canciones. Los resultados de tipo "playlist"

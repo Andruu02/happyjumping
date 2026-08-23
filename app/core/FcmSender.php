@@ -11,14 +11,23 @@ class FcmSender {
     /**
      * Envía una notificación a un token FCM.
      * Devuelve true si FCM la aceptó, 'expirada' si el token ya no está
-     * registrado (para borrarlo de la BD), o false si falló por otro motivo.
+     * registrado (para borrarlo de la BD), o un string 'error: ...' con el
+     * detalle si falló por otro motivo (credenciales, permisos, proyecto
+     * equivocado, etc.) - antes devolvía `false` sin más detalle, y eso
+     * hacía que el admin viera el mismo aviso genérico de "no hay
+     * dispositivos" aunque sí hubiera uno, solo que el envío fallaba en
+     * silencio.
      */
     public static function enviar($token, $titulo, $cuerpo, $url) {
         $credenciales = self::credenciales();
-        if (!$credenciales) return false;
+        if (!$credenciales) {
+            return 'error: falta el archivo de credenciales de Firebase en el servidor (firebase_credentials.json)';
+        }
 
-        $accessToken = self::obtenerAccessToken($credenciales);
-        if (!$accessToken) return false;
+        $accessToken = self::obtenerAccessToken($credenciales, $errorToken);
+        if (!$accessToken) {
+            return 'error: no se pudo autenticar con Firebase' . ($errorToken ? " ({$errorToken})" : '');
+        }
 
         $mensaje = [
             'message' => [
@@ -43,13 +52,17 @@ class FcmSender {
         $codigo    = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
+        $cuerpoResp = json_decode($respuesta, true);
+
         if ($codigo === 404 || $codigo === 400) {
-            $cuerpoResp = json_decode($respuesta, true);
             $estado = $cuerpoResp['error']['status'] ?? '';
             if (in_array($estado, ['NOT_FOUND', 'UNREGISTERED', 'INVALID_ARGUMENT'])) return 'expirada';
         }
 
-        return $codigo >= 200 && $codigo < 300;
+        if ($codigo >= 200 && $codigo < 300) return true;
+
+        $detalle = $cuerpoResp['error']['message'] ?? ('HTTP ' . $codigo);
+        return 'error: ' . $detalle;
     }
 
     private static function credenciales() {
@@ -57,7 +70,7 @@ class FcmSender {
         return json_decode(file_get_contents(FIREBASE_CREDENTIALS), true);
     }
 
-    private static function obtenerAccessToken($credenciales) {
+    private static function obtenerAccessToken($credenciales, &$error = null) {
         $ahora   = time();
         $header  = self::b64url(json_encode(['alg' => 'RS256', 'typ' => 'JWT']));
         $payload = self::b64url(json_encode([
@@ -82,10 +95,16 @@ class FcmSender {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT        => 15,
         ]);
-        $respuesta = json_decode(curl_exec($ch), true);
+        $crudo = curl_exec($ch);
         curl_close($ch);
+        $respuesta = json_decode($crudo, true);
 
-        return $respuesta['access_token'] ?? false;
+        if (!isset($respuesta['access_token'])) {
+            $error = $respuesta['error_description'] ?? $respuesta['error'] ?? 'respuesta inesperada de Google';
+            return false;
+        }
+
+        return $respuesta['access_token'];
     }
 
     private static function b64url($data) {

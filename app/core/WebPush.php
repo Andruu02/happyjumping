@@ -49,12 +49,18 @@ class WebPush {
                 'Authorization: vapid t=' . $jwt . ', k=' . $vapidPublicKey,
             ],
         ]);
-        curl_exec($ch);
-        $codigo = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $respuesta = curl_exec($ch);
+        $codigo    = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $errorCurl = curl_error($ch);
         curl_close($ch);
 
         if ($codigo === 404 || $codigo === 410) return 'expirada';
-        return $codigo >= 200 && $codigo < 300;
+        if ($codigo >= 200 && $codigo < 300) return true;
+
+        // Falla real (VAPID mal firmado, push service caído, etc.) - se
+        // devuelve el detalle para que el admin vea la causa real en vez de
+        // un genérico "no hay dispositivos suscritos".
+        return 'error: HTTP ' . ($codigo ?: 0) . ($errorCurl ? " ({$errorCurl})" : '') . (is_string($respuesta) && $respuesta !== '' ? ' - ' . substr($respuesta, 0, 150) : '');
     }
 
     // ── Cifrado del payload (RFC 8291 / content-encoding aes128gcm) ──────────

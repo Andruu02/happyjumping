@@ -21,9 +21,12 @@
         <span class="badge rounded-pill" style="background:var(--morado-claro);color:var(--morado);" title="<?php echo $totalWebPush; ?> navegador(es) + <?php echo $totalFcm; ?> app(s) móvil(es)"><i class="bi bi-phone-fill me-1"></i><?php echo $totalSuscritos; ?> dispositivo(s) suscrito(s)</span>
     </p>
 
+    <?php
+        $iconosResultado = ['success' => 'check-circle-fill', 'danger' => 'x-circle-fill', 'warning' => 'exclamation-triangle-fill'];
+    ?>
     <?php if (isset($resultado)): ?>
         <div class="alert alert-<?php echo $resultado['tipo']; ?> alert-dismissible fade show">
-            <i class="bi bi-<?php echo $resultado['tipo'] === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill'; ?> me-2"></i>
+            <i class="bi bi-<?php echo $iconosResultado[$resultado['tipo']] ?? 'exclamation-triangle-fill'; ?> me-2"></i>
             <?php echo $resultado['texto']; ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>

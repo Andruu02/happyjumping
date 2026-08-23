@@ -244,8 +244,12 @@ class AdminController extends Controller {
                     'url'   => URL_ROOT,
                 ]);
 
-                $enviados = 0;
+                $enviados     = 0;
+                $intentados   = 0;
+                $erroresEnvio = [];
+
                 foreach ($pushModel->obtenerSuscripciones() as $sub) {
+                    $intentados++;
                     $r = WebPush::enviar(
                         ['endpoint' => $sub->endpoint, 'p256dh' => $sub->p256dh, 'auth' => $sub->auth],
                         $payload,
@@ -257,15 +261,20 @@ class AdminController extends Controller {
                         $pushModel->eliminarSuscripcion($sub->endpoint);
                     } elseif ($r === true) {
                         $enviados++;
+                    } else {
+                        $erroresEnvio[] = $r;
                     }
                 }
 
                 foreach ($pushModel->obtenerTokensFcm() as $t) {
+                    $intentados++;
                     $r = FcmSender::enviar($t->token, 'Happy Jumping Peru 🎈', $mensaje, URL_ROOT);
                     if ($r === 'expirada') {
                         $pushModel->eliminarTokenFcm($t->token);
                     } elseif ($r === true) {
                         $enviados++;
+                    } else {
+                        $erroresEnvio[] = $r;
                     }
                 }
 
@@ -273,6 +282,14 @@ class AdminController extends Controller {
 
                 if ($enviados > 0) {
                     $resultado = ['tipo' => 'success', 'texto' => "✅ Notificación enviada a <strong>{$enviados}</strong> dispositivo(s)."];
+                } elseif ($intentados > 0) {
+                    // Había dispositivos registrados pero el envío falló de
+                    // verdad (credenciales de Firebase faltantes, VAPID mal
+                    // configurado, etc.) - antes esto se mostraba igual que
+                    // "no hay dispositivos", lo cual ocultaba el error real.
+                    $mensajeAnterior = $mensaje;
+                    $detalle = htmlspecialchars(implode(' · ', array_unique($erroresEnvio)), ENT_QUOTES);
+                    $resultado = ['tipo' => 'danger', 'texto' => "❌ Había <strong>{$intentados}</strong> dispositivo(s) registrado(s) pero el envío falló: {$detalle}"];
                 } else {
                     $mensajeAnterior = $mensaje;
                     $resultado = ['tipo' => 'warning', 'texto' => '⚠️ No hay dispositivos suscritos a las notificaciones todavía.'];

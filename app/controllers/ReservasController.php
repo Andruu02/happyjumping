@@ -343,14 +343,25 @@ class ReservasController extends Controller {
             // Se hace acá (recién al finalizar, con el pago ya resuelto) y
             // no mientras arma la lista en el Paso 2, para no dejar
             // playlists huérfanas de reservas que nunca se completan. Si
-            // Spotify falla no se bloquea la reserva - queda sin link.
+            // Spotify falla no se bloquea la reserva - queda sin link, pero
+            // el motivo real queda en el log de errores de PHP (antes
+            // desaparecía en silencio, sin dejar rastro de por qué).
             $canciones = $reserva_data['canciones'] ?? [];
             $spotify_playlist_url = null;
-            if (!empty($canciones) && $this->spotifyModel->conectada()) {
-                $spotify_playlist_url = $this->spotifyModel->crearPlaylistDesdeReserva(
-                    $reserva_data['nombre_cumpleanero'],
-                    $canciones
-                );
+            if (!empty($canciones)) {
+                if (!$this->spotifyModel->conectada()) {
+                    error_log('[Spotify] Playlist no creada: no conectado (falta autorizar desde /admin).');
+                } else {
+                    $resultadoPlaylist = $this->spotifyModel->crearPlaylistDesdeReserva(
+                        $reserva_data['nombre_cumpleanero'],
+                        $canciones
+                    );
+                    if (is_string($resultadoPlaylist) && strpos($resultadoPlaylist, 'error:') === 0) {
+                        error_log('[Spotify] Playlist no creada: ' . $resultadoPlaylist);
+                    } else {
+                        $spotify_playlist_url = $resultadoPlaylist;
+                    }
+                }
             }
 
             // Si llegamos aquí, la subida fue exitosa y $ruta_captura_final está definida
