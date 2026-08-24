@@ -186,6 +186,14 @@ class SpotifyModel extends Model {
         return $this->leerEnv('SPOTIFY_REFRESH_TOKEN') !== '';
     }
 
+    /**
+     * Borra el refresh token guardado para forzar una reconexión desde cero
+     * (útil cuando el token quedó con permisos/scopes viejos).
+     */
+    public function desconectar() {
+        $this->guardarEnv('SPOTIFY_REFRESH_TOKEN', '');
+    }
+
     /** URL de login/autorización de Spotify a la que hay que mandar al admin. */
     public function urlAutorizacion() {
         $clientId = $this->leerEnv('SPOTIFY_CLIENT_ID');

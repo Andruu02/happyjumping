@@ -197,6 +197,8 @@ body {
 .alert-admin-spotify strong { color: #2D2D2D; }
 .alert-admin-spotify p { color: #777; font-size: .88rem; }
 .alert-admin-spotify .btn-admin-primario { flex-shrink: 0; padding: 10px 20px; font-size: .85rem; }
+.link-spotify-desconectar { font-size: .78rem; color: #999; text-align: center; text-decoration: underline; }
+.link-spotify-desconectar:hover { color: #e04b4b; }
 
 .alert-spotify-prueba {
     margin: 10px 0 0;

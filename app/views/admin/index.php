@@ -43,7 +43,10 @@
         <?php if (!$spotifyConectado): ?>
             <a href="<?php echo URL_ROOT; ?>/admin/spotify-conectar" class="btn-admin-primario">Conectar Spotify</a>
         <?php else: ?>
-            <button type="button" id="btn-probar-spotify" class="btn-admin-primario">Probar creación de playlist</button>
+            <div class="d-flex flex-column align-items-stretch gap-2">
+                <button type="button" id="btn-probar-spotify" class="btn-admin-primario">Probar creación de playlist</button>
+                <a href="<?php echo URL_ROOT; ?>/admin/spotify-desconectar" class="link-spotify-desconectar" onclick="return confirm('¿Desconectar Spotify? Vas a tener que volver a loguearte y autorizar permisos.');">Desconectar y reconectar</a>
+            </div>
         <?php endif; ?>
     </div>
     <?php if ($spotifyConectado): ?>

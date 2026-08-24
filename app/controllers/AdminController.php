@@ -50,6 +50,17 @@ class AdminController extends Controller {
     }
 
     /**
+     * Borra el token guardado para poder reconectar desde cero (por ejemplo
+     * si el token quedó con permisos/scopes viejos y hay que reautorizar).
+     */
+    public function spotifyDesconectar() {
+        $spotify = $this->model('SpotifyModel');
+        $spotify->desconectar();
+        header('Location: ' . URL_ROOT . '/admin');
+        exit();
+    }
+
+    /**
      * Callback al que Spotify redirige después del login/autorización.
      */
     public function spotifyCallback() {
