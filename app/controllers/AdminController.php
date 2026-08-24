@@ -538,6 +538,14 @@ class AdminController extends Controller {
                 $fallidos   = 0;
                 $asunto_log = '';
 
+                // Un envío a muchos clientes puede tardar más que el límite
+                // por defecto de PHP en hosting compartido.
+                set_time_limit(120);
+
+                // Reutiliza una sola conexión SMTP para toda la tanda en vez
+                // de reconectar por cada correo (ver Mailer::abrirEnvioMasivo).
+                Mailer::abrirEnvioMasivo();
+
                 foreach ($clientes as $cliente) {
                     try {
                         $ok = false;
@@ -583,6 +591,8 @@ class AdminController extends Controller {
                         $fallidos++;
                     }
                 }
+
+                Mailer::cerrarEnvioMasivo();
 
                 if ($resultado === null) {
                     if ($enviados > 0 && !empty($asunto_log)) {

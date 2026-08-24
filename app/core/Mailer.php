@@ -6,7 +6,17 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 class Mailer {
 
+    // Instancia compartida para envíos masivos (ver abrirEnvioMasivo() abajo).
+    private static $compartida = null;
+
     private static function instancia() {
+        if (self::$compartida !== null) {
+            // Modo envío masivo: mismo objeto/conexión para todos los
+            // correos de la tanda, solo se limpia el destinatario anterior.
+            self::$compartida->clearAddresses();
+            return self::$compartida;
+        }
+
         $m = new PHPMailer();
         $m->isSMTP();
         $m->Host       = MAIL_HOST;
@@ -20,6 +30,30 @@ class Mailer {
         $m->CharSet    = 'UTF-8';
         $m->isHTML(true);
         return $m;
+    }
+
+    /**
+     * Activa el modo de envío masivo: todos los correos que se manden hasta
+     * llamar cerrarEnvioMasivo() reutilizan LA MISMA conexión SMTP, en vez
+     * de conectar + STARTTLS + AUTH LOGIN desde cero por cada uno (que era
+     * la razón real de que un envío a varios clientes se sintiera lentísimo).
+     * Usar así:
+     *   Mailer::abrirEnvioMasivo();
+     *   foreach ($clientes as $c) { Mailer::enviarXxx(...); }
+     *   Mailer::cerrarEnvioMasivo();
+     */
+    public static function abrirEnvioMasivo() {
+        $m = self::instancia();
+        $m->SMTPKeepAlive = true;
+        self::$compartida = $m;
+    }
+
+    /** Cierra la conexión abierta por abrirEnvioMasivo(). Llamar siempre al terminar la tanda. */
+    public static function cerrarEnvioMasivo() {
+        if (self::$compartida !== null) {
+            self::$compartida->smtpClose();
+            self::$compartida = null;
+        }
     }
 
     // ── Código de verificación de cuenta nueva ────────────────────────────────

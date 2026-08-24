@@ -336,7 +336,14 @@
         const n = todos ? 'TODOS los clientes' : sel + ' cliente' + (sel !== 1 ? 's' : '');
         if (!confirm('¿Confirmas el envío de correos a ' + n + '?')) {
             e.preventDefault();
+            return;
         }
+        // Feedback inmediato: la página sigue viva mientras se procesa el
+        // envío, en vez de quedarse "congelada" sin ninguna señal.
+        const btn = document.getElementById('btn-enviar');
+        btn.disabled = true;
+        document.getElementById('btn-texto').innerHTML =
+            '<span class="spinner-border spinner-border-sm me-2"></span>Enviando correos, un momento...';
     });
 </script>
 <script>
