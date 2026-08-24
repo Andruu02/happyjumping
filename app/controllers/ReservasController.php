@@ -300,35 +300,43 @@ class ReservasController extends Controller {
                 $fileSize = $file['size'];
                 
                 $fileExt = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-                $allowed = ['jpg', 'jpeg', 'png', 'pdf'];
-                
+                $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+
                 // Aseguramos que el directorio de subida exista
                 if (!is_dir($directorio_destino)) {
                     if (!@mkdir($directorio_destino, 0777, true)) {
                         $error_subida = 'Error: No se pudo crear el directorio de subida. Verifica permisos.';
                     }
                 }
-                
+
                 if (empty($error_subida)) {
                     if (in_array($fileExt, $allowed)) {
                         if ($fileSize < 5000000) { // Max 5MB
-                            
-                            // *** CORRECCIÓN CLAVE: GENERAMOS EL NOMBRE Y LA RUTA COMPLETA AQUÍ ***
-                            $fileNameNew = "captura_" . $_SESSION['id_usuario'] . "_" . uniqid('', true) . "." . $fileExt;
-                            $ruta_completa_destino = $directorio_destino . $fileNameNew;
 
-                            if (move_uploaded_file($fileTmpName, $ruta_completa_destino)) {
-                                // Guardamos solo el nombre del archivo para la DB
-                                $ruta_captura_final = $fileNameNew; 
+                            // No basta con confiar en la extensión del nombre del
+                            // archivo (se puede renombrar cualquier cosa a .jpg):
+                            // getimagesize() abre el archivo de verdad y solo
+                            // reconoce contenido de imagen real.
+                            if (@getimagesize($fileTmpName) === false) {
+                                $error_subida = 'Error: El archivo no es una imagen válida. Sube una foto o captura de pantalla (JPG, PNG o WEBP).';
                             } else {
-                                $error_subida = 'Error: No se pudo mover el archivo. Verifica los permisos de la carpeta /public/uploads/capturas/';
+                                // *** CORRECCIÓN CLAVE: GENERAMOS EL NOMBRE Y LA RUTA COMPLETA AQUÍ ***
+                                $fileNameNew = "captura_" . $_SESSION['id_usuario'] . "_" . uniqid('', true) . "." . $fileExt;
+                                $ruta_completa_destino = $directorio_destino . $fileNameNew;
+
+                                if (move_uploaded_file($fileTmpName, $ruta_completa_destino)) {
+                                    // Guardamos solo el nombre del archivo para la DB
+                                    $ruta_captura_final = $fileNameNew;
+                                } else {
+                                    $error_subida = 'Error: No se pudo mover el archivo. Verifica los permisos de la carpeta /public/uploads/capturas/';
+                                }
                             }
-                            
+
                         } else {
                             $error_subida = 'Error: El archivo es muy grande (máx 5MB).';
                         }
                     } else {
-                        $error_subida = 'Error: Tipo de archivo no permitido (solo JPG, PNG, PDF).';
+                        $error_subida = 'Error: Tipo de archivo no permitido. Solo se aceptan imágenes (JPG, PNG o WEBP).';
                     }
                 }
             } elseif ($captura_es_obligatoria) {

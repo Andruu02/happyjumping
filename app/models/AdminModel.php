@@ -479,19 +479,23 @@ class AdminModel extends Model {
      * Si $buscar no está vacío, filtra por nombre o correo.
      */
     public function getClientesParaCorreo($buscar = '') {
+        // Los totales van en subconsultas correlacionadas (no JOIN directo)
+        // a propósito: unir "reservas" y "partidas" en la misma consulta
+        // multiplica las filas (cada combinación reserva×partida cuenta
+        // aparte), así que SUM(puntaje) salía inflado - un cliente con 700
+        // puntos reales y varias reservas terminaba mostrando miles de
+        // puntos de más en el correo.
         $sql = "SELECT u.id_usuario, u.nombre, u.correo,
-                       COUNT(DISTINCT r.id_reserva) AS total_reservas,
-                       COALESCE(SUM(pa.puntaje), 0) AS puntos
+                       (SELECT COUNT(*) FROM reservas r WHERE r.id_usuario = u.id_usuario) AS total_reservas,
+                       COALESCE((SELECT SUM(pa.puntaje) FROM partidas pa WHERE pa.id_usuario = u.id_usuario), 0) AS puntos
                 FROM usuarios u
-                LEFT JOIN reservas r ON r.id_usuario = u.id_usuario
-                LEFT JOIN partidas pa ON pa.id_usuario = u.id_usuario
                 WHERE u.rol = 'cliente'";
 
         if ($buscar !== '') {
             $sql .= " AND (u.nombre LIKE :buscar OR u.correo LIKE :buscar)";
         }
 
-        $sql .= " GROUP BY u.id_usuario, u.nombre, u.correo ORDER BY u.nombre ASC";
+        $sql .= " ORDER BY u.nombre ASC";
 
         $this->query($sql);
         if ($buscar !== '') {

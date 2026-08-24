@@ -79,21 +79,9 @@ $esInicio = isset($active_page) && $active_page === 'inicio';
 </nav>
 
 
-<!-- Aviso flotante para activar notificaciones (ver public/js/push.js) -->
-<div class="hj-push-prompt hidden" id="hj-push-prompt">
-    <button type="button" class="hj-push-btn" id="hj-push-activar">
-        <i class="bi bi-bell-fill"></i> Activar notificaciones
-    </button>
-    <button type="button" class="hj-push-cerrar" id="hj-push-cerrar" aria-label="Cerrar">
-        <i class="bi bi-x-lg"></i>
-    </button>
-</div>
-
 <script>
     window.HJ_URL_ROOT = "<?php echo URL_ROOT; ?>";
-    window.HJ_VAPID_PUBLIC_KEY = "<?php echo VAPID_PUBLIC_KEY; ?>";
 </script>
-<script src="<?php echo URL_ROOT; ?>/js/push.js"></script>
 <script src="<?php echo URL_ROOT; ?>/js/scroll-suave.js"></script>
 
 <main class="main-container">

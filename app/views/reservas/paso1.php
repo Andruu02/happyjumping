@@ -332,7 +332,7 @@
 
                                 <div class="upload-box">
                                     <label for="captura_pago" class="form-label" id="label-captura-pago">Adjunta tu captura (opcional)</label>
-                                    <input class="form-control" type="file" id="captura_pago" name="captura_pago" accept="image/png, image/jpeg, application/pdf">
+                                    <input class="form-control" type="file" id="captura_pago" name="captura_pago" accept="image/png, image/jpeg, image/webp">
                                 </div>
 
                                 <input type="hidden" name="reserva_data" id="reserva_data_input">
@@ -967,6 +967,10 @@
                 }
             } else if (metodoPagoHidden.value === 'plin' && fileInput.files.length === 0) {
                 errores.push({ paso: 3, mensaje: 'Adjunta la captura de tu pago por Plin.', el: fileInput });
+            }
+
+            if (fileInput.files.length > 0 && !fileInput.files[0].type.startsWith('image/')) {
+                errores.push({ paso: 3, mensaje: 'La captura de pago debe ser una imagen (JPG, PNG o WEBP), no otro tipo de archivo.', el: fileInput });
             }
 
             return errores;
