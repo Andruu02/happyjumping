@@ -28,6 +28,14 @@
 
     <form method="POST" action="<?php echo URL_ROOT; ?>/admin/correos" id="form-correos">
 
+        <!-- Botón enviar -->
+        <div class="d-grid mb-4">
+            <button type="submit" id="btn-enviar" class="btn-admin-primario justify-content-center py-3" disabled style="font-size:1.05rem;">
+                <i class="bi bi-send-fill"></i>
+                <span id="btn-texto">Selecciona una plantilla y destinatarios</span>
+            </button>
+        </div>
+
         <div class="row g-4">
 
             <!-- COLUMNA IZQUIERDA: Plantillas + Extras -->
@@ -156,11 +164,12 @@
                                     <th style="width:36px;"></th>
                                     <th>Cliente</th>
                                     <th class="text-center">Reservas</th>
+                                    <th class="text-center">Puntos</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if (empty($clientes)): ?>
-                                <tr><td colspan="3" class="text-center text-muted py-3">No hay clientes registrados.</td></tr>
+                                <tr><td colspan="4" class="text-center text-muted py-3">No hay clientes registrados.</td></tr>
                                 <?php else: ?>
                                 <?php foreach ($clientes as $c): ?>
                                 <tr class="cliente-row" data-recordatorio="<?php echo in_array($c->id_usuario, $ids_recordatorio) ? '1' : '0'; ?>">
@@ -176,6 +185,9 @@
                                     </td>
                                     <td class="text-center">
                                         <span class="badge-reservas"><?php echo $c->total_reservas; ?></span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge-puntos"><?php echo $c->puntos; ?></span>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -209,14 +221,6 @@
                 </div>
 
             </div>
-        </div>
-
-        <!-- Botón enviar -->
-        <div class="d-grid mt-2">
-            <button type="submit" id="btn-enviar" class="btn-admin-primario justify-content-center py-3" disabled style="font-size:1.05rem;">
-                <i class="bi bi-send-fill"></i>
-                <span id="btn-texto">Selecciona una plantilla y destinatarios</span>
-            </button>
         </div>
 
     </form>

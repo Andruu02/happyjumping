@@ -368,6 +368,7 @@ body {
 
 .cliente-row td { vertical-align: middle; font-size: .9rem; }
 .badge-reservas { background: var(--morado-claro); color: var(--morado); border-radius: 20px; padding: 2px 10px; font-size: .8rem; }
+.badge-puntos { background: var(--naranja-wash); color: var(--naranja-texto); border-radius: 20px; padding: 2px 10px; font-size: .8rem; font-weight: 700; }
 
 /* La columna "Reservas" no aporta nada en la plantilla de recordatorio
    (ya se filtra a solo quienes tienen reserva próxima), así que se oculta. */
