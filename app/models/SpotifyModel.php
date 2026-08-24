@@ -194,6 +194,7 @@ class SpotifyModel extends Model {
             'response_type' => 'code',
             'redirect_uri'  => URL_ROOT . '/admin/spotify-callback',
             'scope'         => 'playlist-modify-public playlist-modify-private',
+            'show_dialog'   => 'true',
         ]);
     }
 
