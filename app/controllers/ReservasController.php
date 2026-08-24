@@ -147,6 +147,37 @@ class ReservasController extends Controller {
     }
 
     /**
+     * Versión del calendario informativo del INICIO (sección "Entradas y
+     * Disponibilidad"): solo marca en rojo los días con una reserva de pago
+     * CONFIRMADO. El calendario del Paso 1 real de reservas sigue usando
+     * getFechasOcupadas() sin filtrar (ver nota en HorarioModel).
+     */
+    public function getFechasOcupadasConfirmadas($ano = 0, $mes = 0) {
+        header('Content-Type: application/json');
+        if ($ano == 0 || $mes == 0) {
+            echo json_encode(['error' => 'Fecha inválida']);
+            return;
+        }
+        $fechas = $this->horarioModel->getFechasOcupadasConfirmadas($ano, $mes);
+        echo json_encode($fechas);
+    }
+
+    /** Versión confirmada-solamente de getHorariosOcupados(), para el mismo calendario del inicio. */
+    public function getHorariosOcupadosConfirmados($fecha = '') {
+        header('Content-Type: application/json');
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha)) {
+            echo json_encode(['error' => 'Fecha inválida']);
+            return;
+        }
+        $horarios = $this->horarioModel->getHorariosConfirmadosPorFecha($fecha);
+        $resultado = [];
+        foreach ($horarios as $h) {
+            $resultado[] = ['hora_inicio' => $h->hora_inicio, 'hora_fin' => $h->hora_fin];
+        }
+        echo json_encode($resultado);
+    }
+
+    /**
      * AJAX del Paso 3: cobra un pago de Yape a través de Mercado Pago.
      * Recibe el token que el navegador ya generó (celular + OTP) con la
      * Public Key, y usa el Access Token (secreto) para crear el pago.

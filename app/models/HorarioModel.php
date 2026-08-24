@@ -48,5 +48,50 @@ class HorarioModel extends Model {
 
         return $this->resultSet();
     }
+
+    /**
+     * Igual que getFechasOcupadas() pero solo cuenta las reservas con pago
+     * CONFIRMADO. La usa el calendario informativo del inicio ("Entradas y
+     * Disponibilidad") - ahí no tiene sentido mostrar en rojo un día que
+     * todavía tiene el pago pendiente y podría caerse.
+     *
+     * OJO: el flujo real de reservas (Paso 1) sigue usando
+     * getFechasOcupadas() sin filtrar, porque ahí sí hay que bloquear
+     * también los días con una reserva pendiente - si no, dos clientes
+     * podrían terminar reservando el mismo horario físico.
+     */
+    public function getFechasOcupadasConfirmadas($ano, $mes) {
+        $this->query("SELECT DISTINCT h.fecha
+                      FROM horarios_disponibles h
+                      INNER JOIN reservas r ON r.id_horario = h.id_horario
+                      INNER JOIN pagos pg    ON pg.id_reserva = r.id_reserva
+                      WHERE YEAR(h.fecha) = :ano AND MONTH(h.fecha) = :mes
+                        AND pg.estado = 'confirmada'");
+
+        $this->bind(':ano', $ano);
+        $this->bind(':mes', $mes);
+
+        $resultados = $this->resultSet();
+
+        $fechas = [];
+        foreach ($resultados as $row) {
+            $fechas[] = $row->fecha;
+        }
+        return $fechas;
+    }
+
+    /** Igual que getHorariosPorFecha() pero solo con pago confirmado (ver nota arriba). */
+    public function getHorariosConfirmadosPorFecha($fecha) {
+        $this->query("SELECT h.hora_inicio, h.hora_fin
+                      FROM horarios_disponibles h
+                      INNER JOIN reservas r ON r.id_horario = h.id_horario
+                      INNER JOIN pagos pg    ON pg.id_reserva = r.id_reserva
+                      WHERE h.fecha = :fecha AND pg.estado = 'confirmada'
+                      ORDER BY h.hora_inicio ASC");
+
+        $this->bind(':fecha', $fecha);
+
+        return $this->resultSet();
+    }
 }
 ?>

@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function fetchFechasOcupadas(ano, mes) {
         try {
-            const res = await fetch(window.HJ_URL_ROOT + '/reservas/getFechasOcupadas/' + ano + '/' + mes);
+            const res = await fetch(window.HJ_URL_ROOT + '/reservas/getFechasOcupadasConfirmadas/' + ano + '/' + mes);
             const datos = await res.json();
             fechasOcupadas = Array.isArray(datos) ? datos : [];
         } catch (e) {
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const pendientes = fechas.filter(function (f) { return !(f in horariosCache); });
         await Promise.all(pendientes.map(async function (fecha) {
             try {
-                const res = await fetch(window.HJ_URL_ROOT + '/reservas/getHorariosOcupados/' + fecha);
+                const res = await fetch(window.HJ_URL_ROOT + '/reservas/getHorariosOcupadosConfirmados/' + fecha);
                 const datos = await res.json();
                 horariosCache[fecha] = Array.isArray(datos) ? datos : [];
             } catch (e) {

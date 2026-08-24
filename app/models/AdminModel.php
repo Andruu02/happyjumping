@@ -125,23 +125,6 @@ class AdminModel extends Model {
         return (object) ['total_semana' => $totalSemana, 'proximo' => $proximo ?: null];
     }
 
-    // Ticket promedio de reservas confirmadas + tasa de conversión
-    // (confirmadas / total de reservas que llegaron a pagos).
-    public function getTicketPromedioYConversion() {
-        $this->query("SELECT AVG(monto) as ticket FROM pagos WHERE estado = 'confirmada'");
-        $ticket = $this->single()->ticket ?? 0;
-
-        $this->query("SELECT COUNT(*) as total FROM pagos");
-        $total = (int) $this->single()->total;
-
-        $this->query("SELECT COUNT(*) as total FROM pagos WHERE estado = 'confirmada'");
-        $confirmadas = (int) $this->single()->total;
-
-        $tasa = $total > 0 ? round(($confirmadas / $total) * 100) : 0;
-
-        return (object) ['ticket' => (float) $ticket, 'tasa_conversion' => $tasa];
-    }
-
     // Reservas (de cualquier estado, menos canceladas) con evento dentro de
     // los próximos N días - es el timeline operativo de "qué hay que
     // montar" del dashboard. Incluye pendientes porque el horario ya está

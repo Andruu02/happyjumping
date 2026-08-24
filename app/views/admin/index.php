@@ -116,17 +116,6 @@
             <div class="kpi-foot"><?php echo $proximoEventoTexto ? htmlspecialchars($proximoEventoTexto) : 'No hay eventos confirmados próximos'; ?></div>
         </div>
 
-        <div class="kpi-card">
-            <div class="kpi-top">
-                <div class="kpi-icon ico-morado"><i class="bi bi-graph-up-arrow"></i></div>
-            </div>
-            <div>
-                <div class="kpi-label">Ticket promedio</div>
-                <div class="kpi-value">S/ <?php echo number_format($ticketPromedio, 2); ?></div>
-            </div>
-            <div class="kpi-foot"><?php echo $tasaConversion; ?>% de reservas iniciadas terminan pagando</div>
-        </div>
-
     </div>
 
     <!-- ============ BENTO ============ -->

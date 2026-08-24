@@ -249,6 +249,7 @@
         document.getElementById('label-todos').textContent = modoRecordatorio
             ? 'Enviar a todos los clientes con reserva confirmada'
             : 'Enviar a todos los clientes';
+        document.getElementById('tabla-clientes').classList.toggle('oculta-col-reservas', modoRecordatorio);
 
         aplicarFiltroRecordatorio();
         actualizarContador();

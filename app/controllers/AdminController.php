@@ -48,9 +48,6 @@ class AdminController extends Controller {
             $proximoEventoTexto  = 'Próximo: ' . $this->etiquetaFechaCorta($p->fecha) . ' ' . $hora . ' — ' . $p->nombre_cumpleanero;
         }
 
-        // ---- Ticket promedio + tasa de conversión ----
-        $ticketConversion = $this->adminModel->getTicketPromedioYConversion();
-
         // ---- Reservas pendientes con evento próximo (urgentes) ----
         $pendientesUrgentes = $this->adminModel->getReservasPendientesUrgentes();
 
@@ -102,8 +99,6 @@ class AdminController extends Controller {
             'eventosSemana'        => $resumenEventos->total_semana,
             'proximoEventoTexto'   => $proximoEventoTexto,
 
-            'ticketPromedio'       => $ticketConversion->ticket,
-            'tasaConversion'       => $ticketConversion->tasa_conversion,
 
             'eventosAgrupados'     => $eventosAgrupados,
             'paquetesMasVendidos'  => $paquetesMasVendidos,
