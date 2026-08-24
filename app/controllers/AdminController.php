@@ -16,25 +16,161 @@ class AdminController extends Controller {
     }
 
     public function index() {
-        $ingresosChart = $this->adminModel->getIngresosUltimos7Dias();
-        $chartLabels = [];
-        $chartData   = [];
-        foreach ($ingresosChart as $dia) {
-            $chartLabels[] = date('d/m', strtotime($dia->dia));
-            $chartData[]   = $dia->total_dia;
+        $spotify         = $this->model('SpotifyModel');
+        $comentarioModel = $this->model('ComentarioModel');
+
+        // ---- Ingresos: serie de 30 días, rellenando con 0 los días sin ventas ----
+        $dias      = 30;
+        $porFecha  = [];
+        foreach ($this->adminModel->getIngresosPorDia($dias) as $fila) {
+            $porFecha[$fila->dia] = (float) $fila->total_dia;
         }
-        $spotify = $this->model('SpotifyModel');
+        $valoresChart = [];
+        for ($i = $dias - 1; $i >= 0; $i--) {
+            $fecha          = date('Y-m-d', strtotime("-$i days"));
+            $valoresChart[] = $porFecha[$fecha] ?? 0;
+        }
+        $grafica = $this->construirGraficaSvg($valoresChart);
+
+        // ---- Ingresos del mes + variación vs. mes anterior ----
+        $comparativo   = $this->adminModel->getComparativoIngresosMensual();
+        $deltaIngresos = null;
+        if ($comparativo->mes_anterior > 0) {
+            $deltaIngresos = round((($comparativo->mes_actual - $comparativo->mes_anterior) / $comparativo->mes_anterior) * 100);
+        }
+
+        // ---- Eventos de la semana + el más próximo ----
+        $resumenEventos     = $this->adminModel->getResumenEventosProximos();
+        $proximoEventoTexto = null;
+        if ($resumenEventos->proximo) {
+            $p                   = $resumenEventos->proximo;
+            $hora                = strtolower(date('g:ia', strtotime($p->hora_inicio)));
+            $proximoEventoTexto  = 'Próximo: ' . $this->etiquetaFechaCorta($p->fecha) . ' ' . $hora . ' — ' . $p->nombre_cumpleanero;
+        }
+
+        // ---- Ticket promedio + tasa de conversión ----
+        $ticketConversion = $this->adminModel->getTicketPromedioYConversion();
+
+        // ---- Reservas pendientes con evento próximo (urgentes) ----
+        $pendientesUrgentes = $this->adminModel->getReservasPendientesUrgentes();
+
+        // ---- Próximos eventos operativos, agrupados por día ----
+        $eventosAgrupados = [];
+        foreach ($this->adminModel->getProximosEventosOperativos() as $ev) {
+            if (!isset($eventosAgrupados[$ev->fecha])) {
+                $eventosAgrupados[$ev->fecha] = [
+                    'label'   => $this->etiquetaDiaLargo($ev->fecha),
+                    'eventos' => [],
+                ];
+            }
+            $eventosAgrupados[$ev->fecha]['eventos'][] = $ev;
+        }
+
+        // ---- Paquetes más vendidos (% relativo al más vendido, para las barras) ----
+        $paquetesMasVendidos = $this->adminModel->getPaquetesMasVendidos();
+        $maxPaquete = 0;
+        foreach ($paquetesMasVendidos as $pq) {
+            $maxPaquete = max($maxPaquete, (int) $pq->total);
+        }
+        foreach ($paquetesMasVendidos as $pq) {
+            $pq->porcentaje = $maxPaquete > 0 ? round(($pq->total / $maxPaquete) * 100) : 0;
+        }
+
+        // ---- Métodos de pago (% del total, para la barra apilada) ----
+        $metodosPago  = $this->adminModel->getMetodosPago();
+        $totalMetodos = 0;
+        foreach ($metodosPago as $m) {
+            $totalMetodos += (int) $m->total;
+        }
+        foreach ($metodosPago as $m) {
+            $m->porcentaje = $totalMetodos > 0 ? round(($m->total / $totalMetodos) * 100) : 0;
+        }
+
         $datos = [
-            'titulo'             => 'Dashboard - Admin',
-            'totalClientes'      => $this->adminModel->contarTotalClientes(),
-            'ingresosTotales'    => $this->adminModel->sumarIngresosTotales(),
-            'reservasPendientes' => $this->adminModel->contarReservasPendientes(),
-            'pendientesRecientes' => $this->adminModel->getReservasPendientesRecientes(),
-            'chartLabels'        => json_encode($chartLabels),
-            'chartData'          => json_encode($chartData),
-            'spotifyConectado'   => $spotify->conectada(),
+            'titulo'               => 'Dashboard - Admin',
+            'fechaHoyTexto'        => $this->fechaHoyTexto(),
+            'totalClientes'        => $this->adminModel->contarTotalClientes(),
+            'reservasPendientes'   => $this->adminModel->contarReservasPendientes(),
+            'pendientesRecientes'  => $this->adminModel->getReservasPendientesRecientes(),
+            'pendientesUrgentes'   => $pendientesUrgentes,
+            'spotifyConectado'     => $spotify->conectada(),
+
+            'ingresosMesActual'    => $comparativo->mes_actual,
+            'deltaIngresos'        => $deltaIngresos,
+            'grafica'              => $grafica,
+
+            'eventosSemana'        => $resumenEventos->total_semana,
+            'proximoEventoTexto'   => $proximoEventoTexto,
+
+            'ticketPromedio'       => $ticketConversion->ticket,
+            'tasaConversion'       => $ticketConversion->tasa_conversion,
+
+            'eventosAgrupados'     => $eventosAgrupados,
+            'paquetesMasVendidos'  => $paquetesMasVendidos,
+            'metodosPago'          => $metodosPago,
+            'comentariosRecientes' => $comentarioModel->obtenerComentarios(3),
         ];
         $this->view('admin/index', $datos);
+    }
+
+    /**
+     * Convierte una serie de valores diarios en los puntos SVG (línea +
+     * área rellena) de la gráfica de ingresos del dashboard. Se calcula acá
+     * a mano para no depender de ninguna librería de gráficas externa.
+     */
+    private function construirGraficaSvg($valores, $ancho = 600, $alto = 190, $margenSup = 16, $margenInf = 14) {
+        $n = count($valores);
+        if ($n < 2) {
+            return ['linea' => '', 'area' => '', 'ultimoX' => 0, 'ultimoY' => 0];
+        }
+        $max      = max($valores) ?: 1;
+        $paso     = $ancho / ($n - 1);
+        $altoUtil = $alto - $margenSup - $margenInf;
+
+        $puntos = [];
+        foreach ($valores as $i => $v) {
+            $x        = round($i * $paso, 1);
+            $y        = round($margenSup + $altoUtil - ($v / $max) * $altoUtil, 1);
+            $puntos[] = "$x,$y";
+        }
+        [$ultimoX, $ultimoY] = explode(',', end($puntos));
+
+        return [
+            'linea'   => 'M' . implode(' L', $puntos),
+            'area'    => 'M' . implode(' L', $puntos) . " L{$ancho},{$alto} L0,{$alto} Z",
+            'ultimoX' => $ultimoX,
+            'ultimoY' => $ultimoY,
+        ];
+    }
+
+    /** "24 de agosto de 2026" - fecha de hoy en español, para el encabezado del dashboard. */
+    private function fechaHoyTexto() {
+        $meses = [
+            1 => 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+            'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+        ];
+        return date('j') . ' de ' . $meses[(int) date('n')] . ' de ' . date('Y');
+    }
+
+    /** "hoy" / "mañana" / "23/08" - para textos cortos tipo "Próximo: hoy 4:00pm". */
+    private function etiquetaFechaCorta($fecha) {
+        if ($fecha === date('Y-m-d')) return 'hoy';
+        if ($fecha === date('Y-m-d', strtotime('+1 day'))) return 'mañana';
+        return date('d/m', strtotime($fecha));
+    }
+
+    /** "Hoy · Domingo 23" / "Mañana · Lunes 24" / "Martes 25" - encabezado de cada grupo del timeline. */
+    private function etiquetaDiaLargo($fecha) {
+        $dias = [
+            'Sunday' => 'Domingo', 'Monday' => 'Lunes', 'Tuesday' => 'Martes', 'Wednesday' => 'Miércoles',
+            'Thursday' => 'Jueves', 'Friday' => 'Viernes', 'Saturday' => 'Sábado',
+        ];
+        $diaSemana = $dias[date('l', strtotime($fecha))];
+        $numero    = date('j', strtotime($fecha));
+
+        if ($fecha === date('Y-m-d')) return "Hoy · {$diaSemana} {$numero}";
+        if ($fecha === date('Y-m-d', strtotime('+1 day'))) return "Mañana · {$diaSemana} {$numero}";
+        return "{$diaSemana} {$numero}";
     }
 
     /**

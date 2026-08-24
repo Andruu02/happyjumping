@@ -14,6 +14,16 @@
     --morado: #7b2ff7;
     --verde: #00d084;
     --morado-claro: #f5e7ff;
+    --rojo: #e6484f;
+
+    --verde-texto: #00a884;
+    --naranja-texto: #e8890c;
+    --celeste-texto: #0090c9;
+    --verde-wash: #e6f8f2;
+    --naranja-wash: #fdf1e0;
+    --celeste-wash: #e3f4fb;
+    --morado-wash: #f4ecff;
+    --rojo-wash: #fbe9ea;
 }
 
 * { box-sizing: border-box; }
@@ -391,6 +401,137 @@ body {
 @keyframes admin-girar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 /* =========================================
+   DASHBOARD (rediseño) - Panel de Control
+   ========================================= */
+.topline-admin { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+.topline-admin .titulo-admin { margin-bottom: 2px; }
+.fecha-chip-admin {
+    font-size: .8rem; font-weight: 700; color: #888;
+    background: #fff; border: 1px solid var(--morado-claro); padding: 9px 16px; border-radius: 999px;
+    display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
+}
+
+/* ---------- KPIs ---------- */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 18px; }
+.kpi-card {
+    background: #fff; border-radius: 18px; padding: 18px 20px;
+    box-shadow: 0 10px 28px rgba(30,10,60,.08);
+    display: flex; flex-direction: column; gap: 10px; min-height: 132px;
+}
+.kpi-top { display: flex; align-items: center; justify-content: space-between; }
+.kpi-icon { width: 36px; height: 36px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+.kpi-icon.ico-verde   { background: var(--verde-wash);   color: var(--verde-texto); }
+.kpi-icon.ico-naranja { background: var(--naranja-wash); color: var(--naranja-texto); }
+.kpi-icon.ico-celeste { background: var(--celeste-wash); color: var(--celeste-texto); }
+.kpi-icon.ico-morado  { background: var(--morado-wash);  color: var(--morado); }
+.kpi-delta { font-size: .72rem; font-weight: 800; padding: 3px 9px; border-radius: 999px; display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+.kpi-delta.up   { color: var(--verde-texto);   background: var(--verde-wash); }
+.kpi-delta.down { color: var(--rojo);          background: var(--rojo-wash); }
+.kpi-delta.warn { color: var(--naranja-texto); background: var(--naranja-wash); }
+.kpi-label { font-size: .78rem; color: #888; font-weight: 700; }
+.kpi-value { font-family: 'Baloo 2', sans-serif; font-size: 1.5rem; font-weight: 700; color: #2b2440; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.kpi-foot { font-size: .74rem; color: #a79dc0; margin-top: auto; }
+.kpi-card .spark { width: 100%; height: 26px; display: block; }
+
+/* ---------- Bento (gráfica / eventos / pendientes / alertas / acciones) ---------- */
+.bento-admin { display: grid; grid-template-columns: 1.7fr 1fr; gap: 16px; align-items: start; margin-bottom: 16px; }
+.stack-admin { display: flex; flex-direction: column; gap: 16px; }
+.bottom-row-admin { display: grid; grid-template-columns: 1fr 1fr 1.15fr; gap: 16px; }
+
+.panel-admin { background: #fff; border-radius: 18px; padding: 20px 22px; box-shadow: 0 10px 28px rgba(30,10,60,.08); }
+.panel-admin-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.panel-admin-head h2 { margin: 0; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 1.02rem; color: var(--morado); }
+.panel-admin-sub { font-size: .76rem; color: #a79dc0; font-weight: 700; margin-top: 2px; }
+.panel-admin-link { font-size: .78rem; font-weight: 800; color: var(--morado); text-decoration: none; display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+.panel-admin-link:hover { text-decoration: underline; }
+.panel-admin-link i { font-size: .7rem; }
+
+/* ---------- Gráfica de ingresos (SVG a mano, sin librería) ---------- */
+.chart-wrap-admin { position: relative; }
+.chart-end-label-admin {
+    position: absolute; top: -4px; right: 0;
+    font-family: 'Fredoka', sans-serif; font-size: .78rem; font-weight: 600;
+    background: var(--morado); color: #fff; padding: 3px 10px; border-radius: 8px 8px 8px 2px;
+    box-shadow: 0 6px 14px -4px rgba(123,47,247,.5);
+}
+
+/* ---------- Próximos eventos (timeline operativo) ---------- */
+.day-group-admin + .day-group-admin { margin-top: 14px; padding-top: 14px; border-top: 1px dashed #eee5fc; }
+.day-label-admin { font-size: .74rem; font-weight: 800; color: #a79dc0; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 10px; }
+.event-row-admin { display: flex; align-items: flex-start; gap: 12px; padding: 9px 0; }
+.event-time-admin { font-family: 'Fredoka', sans-serif; font-size: .82rem; font-weight: 600; color: var(--morado); width: 54px; flex-shrink: 0; padding-top: 2px; }
+.event-main-admin { flex: 1; min-width: 0; }
+.event-title-admin { font-weight: 800; font-size: .9rem; color: #2b2440; }
+.event-title-admin .age-admin { font-weight: 600; color: #a79dc0; font-size: .8rem; }
+.event-meta-admin { font-size: .78rem; color: #888; margin-top: 2px; }
+.chips-admin { display: flex; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
+.chip-admin { font-size: .68rem; font-weight: 800; padding: 3px 9px; border-radius: 999px; text-decoration: none; }
+.chip-admin.extra { background: var(--morado-wash); color: var(--morado); }
+.chip-admin.pay-ok { background: var(--verde-wash); color: var(--verde-texto); }
+.chip-admin.pay-cash { background: var(--naranja-wash); color: var(--naranja-texto); }
+.chip-admin.playlist { background: #f4f0fb; color: #7c7392; display: inline-flex; align-items: center; gap: 4px; }
+.chip-admin.playlist:hover { background: var(--morado-wash); color: var(--morado); }
+
+/* ---------- Pendientes por revisar ---------- */
+.pending-row-admin { display: flex; align-items: center; gap: 12px; padding: 11px 4px; border-radius: 11px; text-decoration: none; color: inherit; transition: background .15s ease; }
+.pending-row-admin:hover { background: #faf7ff; }
+.pending-row-admin + .pending-row-admin { border-top: 1px solid #f2eefc; }
+.pending-avatar-admin { width: 36px; height: 36px; border-radius: 10px; background: var(--naranja-wash); color: var(--naranja-texto); display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: .85rem; flex-shrink: 0; }
+.pending-name-admin { font-weight: 800; font-size: .87rem; color: #2b2440; }
+.pending-sub-admin { font-size: .74rem; color: #a79dc0; margin-top: 1px; }
+.pending-amt-admin { font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: .9rem; color: #2b2440; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pending-chevron-admin { font-size: .78rem; color: #a79dc0; flex-shrink: 0; }
+
+/* ---------- Alertas ---------- */
+.alert-item-admin { display: flex; gap: 10px; padding: 11px 12px; border-radius: 11px; align-items: flex-start; }
+.alert-item-admin + .alert-item-admin { margin-top: 8px; }
+.alert-item-admin.critical { background: var(--rojo-wash); }
+.alert-item-admin.warning { background: var(--naranja-wash); }
+.alert-ico-admin { font-size: .85rem; margin-top: 2px; flex-shrink: 0; }
+.alert-item-admin.critical .alert-ico-admin { color: var(--rojo); }
+.alert-item-admin.warning .alert-ico-admin { color: var(--naranja-texto); }
+.alert-text-admin { font-size: .8rem; font-weight: 700; line-height: 1.35; color: #2b2440; }
+.alert-text-admin span { display: block; font-size: .72rem; font-weight: 600; color: #a79dc0; margin-top: 2px; }
+
+/* ---------- Acciones rápidas ---------- */
+.qa-grid-admin { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.qa-btn-admin {
+    display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
+    padding: 14px; border-radius: 12px; border: 1px solid #eee5fc; background: #faf7ff;
+    text-decoration: none; color: inherit; cursor: pointer; font-family: inherit;
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+.qa-btn-admin:hover { transform: translateY(-2px); box-shadow: 0 10px 22px -8px rgba(123,47,247,.3); border-color: var(--morado); }
+.qa-btn-admin i { font-size: 1.1rem; color: var(--morado); }
+.qa-btn-admin b { font-size: .8rem; color: #2b2440; }
+
+/* ---------- Fila inferior: paquetes / métodos de pago / comentarios ---------- */
+.bar-row-admin { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; }
+.bar-row-admin:last-child { margin-bottom: 0; }
+.bar-label-admin { font-size: .78rem; font-weight: 800; width: 40%; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #2b2440; }
+.bar-track-admin { flex: 1; height: 9px; border-radius: 999px; background: #f4f0fb; overflow: hidden; }
+.bar-fill-admin { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--morado), var(--rosa)); }
+.bar-pct-admin { font-family: 'Fredoka', sans-serif; font-size: .78rem; font-weight: 600; width: 26px; text-align: right; flex-shrink: 0; color: #2b2440; }
+
+.pm-track-admin { display: flex; height: 14px; border-radius: 999px; overflow: hidden; margin-bottom: 14px; }
+.pm-seg-admin.pm-morado { background: var(--morado); }
+.pm-seg-admin.pm-celeste { background: var(--celeste-texto); }
+.pm-seg-admin.pm-faint { background: #ded4f2; }
+.pm-legend-admin { display: flex; flex-direction: column; gap: 9px; }
+.pm-legend-row-admin { display: flex; align-items: center; gap: 8px; font-size: .82rem; color: #2b2440; }
+.pm-dot-admin { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
+.pm-dot-admin.pm-morado { background: var(--morado); }
+.pm-dot-admin.pm-celeste { background: var(--celeste-texto); }
+.pm-dot-admin.pm-faint { background: #ded4f2; }
+.pm-legend-row-admin b { margin-left: auto; font-family: 'Fredoka', sans-serif; font-weight: 600; }
+
+.review-admin { display: flex; gap: 10px; }
+.review-admin + .review-admin { margin-top: 14px; padding-top: 14px; border-top: 1px solid #f2eefc; }
+.review-avatar-admin { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; background: var(--morado-wash); color: var(--morado); display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: .78rem; }
+.review-name-admin { font-weight: 800; font-size: .82rem; color: #2b2440; }
+.review-text-admin { font-size: .79rem; color: #888; line-height: 1.4; margin-top: 2px; }
+
+/* =========================================
    RESPONSIVE - PANEL DE ADMIN
    (el panel está pensado para escritorio; en pantallas chicas el sidebar
    se reduce a solo íconos para no romper el layout)
@@ -403,4 +544,12 @@ body {
     .sidebar .btn-logout { width: calc(100% - 20px); margin: 14px 10px 0; padding: 12px 0; }
     .sidebar .btn-logout span { display: none; }
     .content { margin-left: 76px; padding: 22px; }
+
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .bento-admin { grid-template-columns: 1fr; }
+    .bottom-row-admin { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    .qa-grid-admin { grid-template-columns: 1fr; }
 }

@@ -53,7 +53,7 @@ class AdminModel extends Model {
 
     // Ingresos agrupados por día (últimos 7 días) para la gráfica
     public function getIngresosUltimos7Dias() {
-        $this->query("SELECT 
+        $this->query("SELECT
                         DATE_FORMAT(h.fecha, '%d/%m') as dia,
                         SUM(p.monto) as total_dia
                       FROM pagos p
@@ -62,6 +62,147 @@ class AdminModel extends Model {
                       WHERE p.estado = 'confirmada'
                       GROUP BY DATE_FORMAT(h.fecha, '%Y-%m-%d')
                       ORDER BY h.fecha ASC");
+        return $this->resultSet();
+    }
+
+    // Ingresos agrupados por día (rango de N días) para la gráfica del dashboard.
+    // Solo trae los días que sí tuvieron ingresos - el controlador rellena
+    // con 0 los días sin ventas para que la gráfica no quede con huecos.
+    public function getIngresosPorDia($dias = 30) {
+        $this->query("SELECT
+                        DATE(h.fecha) as dia,
+                        SUM(p.monto) as total_dia
+                      FROM pagos p
+                      INNER JOIN reservas r ON p.id_reserva = r.id_reserva
+                      INNER JOIN horarios_disponibles h ON r.id_horario = h.id_horario
+                      WHERE p.estado = 'confirmada'
+                        AND h.fecha >= DATE_SUB(CURDATE(), INTERVAL :dias DAY)
+                      GROUP BY DATE(h.fecha)
+                      ORDER BY h.fecha ASC");
+        $this->bind(':dias', $dias, PDO::PARAM_INT);
+        return $this->resultSet();
+    }
+
+    // Ingresos confirmados del mes actual vs. el mes anterior (para el
+    // indicador de variación % en la tarjeta de "Ingresos" del dashboard).
+    public function getComparativoIngresosMensual() {
+        $inicioMes    = date('Y-m-01');
+        $inicioMesAnt = date('Y-m-01', strtotime('-1 month'));
+
+        $this->query("SELECT
+                        COALESCE(SUM(CASE WHEN h.fecha >= :inicio_mes THEN p.monto ELSE 0 END), 0) AS mes_actual,
+                        COALESCE(SUM(CASE WHEN h.fecha >= :inicio_mes_ant AND h.fecha < :inicio_mes2 THEN p.monto ELSE 0 END), 0) AS mes_anterior
+                      FROM pagos p
+                      INNER JOIN reservas r ON p.id_reserva = r.id_reserva
+                      INNER JOIN horarios_disponibles h ON r.id_horario = h.id_horario
+                      WHERE p.estado = 'confirmada'");
+        $this->bind(':inicio_mes', $inicioMes);
+        $this->bind(':inicio_mes2', $inicioMes);
+        $this->bind(':inicio_mes_ant', $inicioMesAnt);
+        return $this->single();
+    }
+
+    // Cuántos eventos confirmados hay en los próximos 7 días + cuál es el
+    // más próximo (para la tarjeta "Eventos esta semana").
+    public function getResumenEventosProximos() {
+        $this->query("SELECT COUNT(*) as total
+                      FROM reservas r
+                      INNER JOIN pagos pg ON r.id_reserva = pg.id_reserva
+                      INNER JOIN horarios_disponibles h ON r.id_horario = h.id_horario
+                      WHERE pg.estado = 'confirmada'
+                        AND h.fecha BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 6 DAY)");
+        $totalSemana = $this->single()->total;
+
+        $this->query("SELECT r.nombre_cumpleanero, h.fecha, h.hora_inicio
+                      FROM reservas r
+                      INNER JOIN pagos pg ON r.id_reserva = pg.id_reserva
+                      INNER JOIN horarios_disponibles h ON r.id_horario = h.id_horario
+                      WHERE pg.estado = 'confirmada' AND h.fecha >= CURDATE()
+                      ORDER BY h.fecha ASC, h.hora_inicio ASC
+                      LIMIT 1");
+        $proximo = $this->single();
+
+        return (object) ['total_semana' => $totalSemana, 'proximo' => $proximo ?: null];
+    }
+
+    // Ticket promedio de reservas confirmadas + tasa de conversión
+    // (confirmadas / total de reservas que llegaron a pagos).
+    public function getTicketPromedioYConversion() {
+        $this->query("SELECT AVG(monto) as ticket FROM pagos WHERE estado = 'confirmada'");
+        $ticket = $this->single()->ticket ?? 0;
+
+        $this->query("SELECT COUNT(*) as total FROM pagos");
+        $total = (int) $this->single()->total;
+
+        $this->query("SELECT COUNT(*) as total FROM pagos WHERE estado = 'confirmada'");
+        $confirmadas = (int) $this->single()->total;
+
+        $tasa = $total > 0 ? round(($confirmadas / $total) * 100) : 0;
+
+        return (object) ['ticket' => (float) $ticket, 'tasa_conversion' => $tasa];
+    }
+
+    // Reservas (de cualquier estado, menos canceladas) con evento dentro de
+    // los próximos N días - es el timeline operativo de "qué hay que
+    // montar" del dashboard. Incluye pendientes porque el horario ya está
+    // ocupado desde que se reservó, sin importar si el pago se confirmó.
+    public function getProximosEventosOperativos($dias = 7) {
+        $this->query("SELECT r.id_reserva, r.nombre_cumpleanero, r.edad_cumpleanero, r.cantidad_personas,
+                             r.extra_pintura, r.extra_destruccion, r.spotify_playlist_url,
+                             h.fecha, h.hora_inicio,
+                             p.nombre AS nombre_paquete,
+                             COALESCE(NULLIF(pg.estado,''), 'pendiente') AS estado_pago,
+                             COALESCE(NULLIF(pg.metodo_pago,''), 'yape') AS metodo_pago
+                      FROM reservas r
+                      INNER JOIN pagos pg ON r.id_reserva = pg.id_reserva
+                      INNER JOIN horarios_disponibles h ON r.id_horario = h.id_horario
+                      INNER JOIN paquetes p ON r.id_paquete = p.id_paquete
+                      WHERE COALESCE(NULLIF(pg.estado,''), 'pendiente') != 'cancelada'
+                        AND h.fecha BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL :dias DAY)
+                      ORDER BY h.fecha ASC, h.hora_inicio ASC");
+        $this->bind(':dias', $dias, PDO::PARAM_INT);
+        return $this->resultSet();
+    }
+
+    // Reservas pendientes cuyo evento cae dentro de los próximos N días -
+    // son las urgentes: si no se revisan pronto, el evento llega sin pago
+    // confirmado. Se usa tanto para las Alertas como para el aviso en la
+    // tarjeta de "Reservas pendientes".
+    public function getReservasPendientesUrgentes($dias = 5, $limit = 4) {
+        $this->query("SELECT r.id_reserva, r.nombre_cumpleanero, h.fecha, pg.monto
+                      FROM reservas r
+                      INNER JOIN pagos pg ON r.id_reserva = pg.id_reserva
+                      INNER JOIN horarios_disponibles h ON r.id_horario = h.id_horario
+                      WHERE COALESCE(NULLIF(pg.estado,''), 'pendiente') = 'pendiente'
+                        AND h.fecha BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL :dias DAY)
+                      ORDER BY h.fecha ASC
+                      LIMIT :limit");
+        $this->bind(':dias', $dias, PDO::PARAM_INT);
+        $this->bind(':limit', $limit, PDO::PARAM_INT);
+        return $this->resultSet();
+    }
+
+    // Paquetes más reservados (todo el historial, sin contar canceladas).
+    public function getPaquetesMasVendidos($limit = 5) {
+        $this->query("SELECT p.nombre AS paquete, COUNT(r.id_reserva) AS total
+                      FROM reservas r
+                      INNER JOIN paquetes p ON r.id_paquete = p.id_paquete
+                      INNER JOIN pagos pg ON r.id_reserva = pg.id_reserva
+                      WHERE COALESCE(NULLIF(pg.estado,''), 'pendiente') != 'cancelada'
+                      GROUP BY p.id_paquete, p.nombre
+                      ORDER BY total DESC
+                      LIMIT :limit");
+        $this->bind(':limit', $limit, PDO::PARAM_INT);
+        return $this->resultSet();
+    }
+
+    // Reparto de métodos de pago elegidos (Yape/MP, Plin, Yape manual).
+    public function getMetodosPago() {
+        $this->query("SELECT COALESCE(NULLIF(metodo_pago,''), 'yape') AS metodo, COUNT(*) AS total
+                      FROM pagos
+                      WHERE COALESCE(NULLIF(estado,''), 'pendiente') != 'cancelada'
+                      GROUP BY metodo
+                      ORDER BY total DESC");
         return $this->resultSet();
     }
 

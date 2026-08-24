@@ -20,8 +20,13 @@
 
 <!-- ══ CONTENIDO ══ -->
 <div class="content">
-    <h1 class="titulo-admin"><i class="bi bi-speedometer2"></i> Panel de Control</h1>
-    <p class="subtitulo-admin">Bienvenido de nuevo, <?php echo htmlspecialchars($_SESSION['usuario_nombre']); ?>.</p>
+    <div class="topline-admin">
+        <div>
+            <h1 class="titulo-admin"><i class="bi bi-speedometer2"></i> Panel de Control</h1>
+            <p class="subtitulo-admin">Esto es lo que necesita tu atención hoy, <?php echo htmlspecialchars($_SESSION['usuario_nombre']); ?>.</p>
+        </div>
+        <span class="fecha-chip-admin"><i class="bi bi-calendar3"></i> <?php echo htmlspecialchars($fechaHoyTexto); ?></span>
+    </div>
 
     <?php if (($_GET['spotify'] ?? '') === 'ok'): ?>
         <div class="alert alert-success" style="border-radius:12px;"><i class="bi bi-check-circle-fill me-1"></i> Cuenta de Spotify conectada. Las playlists de las próximas reservas ya se crean solas.</div>
@@ -56,42 +61,289 @@
         <div id="spotify-prueba-resultado" class="alert-spotify-prueba hidden"></div>
     <?php endif; ?>
 
-    <!-- Tarjetas estadísticas -->
-    <div class="row g-4 mt-2">
-        <div class="col-lg-4 col-md-6">
-            <div class="stat-card">
-                <div class="stat-card-icon icon-ingresos"><i class="bi bi-cash-coin"></i></div>
-                <div class="stat-card-info">
-                    <h5>Ingresos Totales</h5>
-                    <span class="stat-number">S/ <?php echo number_format($ingresosTotales, 2); ?></span>
-                </div>
+    <!-- ============ KPIs ============ -->
+    <div class="kpi-grid">
+
+        <div class="kpi-card">
+            <div class="kpi-top">
+                <div class="kpi-icon ico-verde"><i class="bi bi-cash-coin"></i></div>
+                <?php if ($deltaIngresos !== null): ?>
+                    <span class="kpi-delta <?php echo $deltaIngresos >= 0 ? 'up' : 'down'; ?>">
+                        <i class="bi bi-caret-<?php echo $deltaIngresos >= 0 ? 'up' : 'down'; ?>-fill"></i>
+                        <?php echo abs($deltaIngresos); ?>%
+                    </span>
+                <?php endif; ?>
+            </div>
+            <div>
+                <div class="kpi-label">Ingresos del mes</div>
+                <div class="kpi-value">S/ <?php echo number_format($ingresosMesActual, 2); ?></div>
+            </div>
+            <?php if (!empty($grafica['linea'])): ?>
+                <svg class="spark" viewBox="0 0 600 190" preserveAspectRatio="none">
+                    <polyline points="<?php echo str_replace(['M', ' L'], ['', ' '], $grafica['linea']); ?>" fill="none" stroke="#00a884" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            <?php endif; ?>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-top">
+                <div class="kpi-icon ico-naranja"><i class="bi bi-clock-history"></i></div>
+                <?php if (!empty($pendientesUrgentes)): ?>
+                    <span class="kpi-delta warn">requieren acción</span>
+                <?php endif; ?>
+            </div>
+            <div>
+                <div class="kpi-label">Reservas pendientes</div>
+                <div class="kpi-value"><?php echo $reservasPendientes; ?></div>
+            </div>
+            <div class="kpi-foot">
+                <?php if (!empty($pendientesUrgentes)): ?>
+                    <?php echo count($pendientesUrgentes); ?> con evento en menos de 5 días
+                <?php else: ?>
+                    Ninguna con evento próximo urgente
+                <?php endif; ?>
             </div>
         </div>
-        <div class="col-lg-4 col-md-6">
-            <div class="stat-card">
-                <div class="stat-card-icon icon-clientes"><i class="bi bi-people-fill"></i></div>
-                <div class="stat-card-info">
-                    <h5>Total Clientes</h5>
-                    <span class="stat-number"><?php echo $totalClientes; ?></span>
-                </div>
+
+        <div class="kpi-card">
+            <div class="kpi-top">
+                <div class="kpi-icon ico-celeste"><i class="bi bi-calendar-week-fill"></i></div>
             </div>
+            <div>
+                <div class="kpi-label">Eventos esta semana</div>
+                <div class="kpi-value"><?php echo $eventosSemana; ?></div>
+            </div>
+            <div class="kpi-foot"><?php echo $proximoEventoTexto ? htmlspecialchars($proximoEventoTexto) : 'No hay eventos confirmados próximos'; ?></div>
         </div>
-        <div class="col-lg-4 col-md-6">
-            <div class="stat-card">
-                <div class="stat-card-icon icon-pendientes"><i class="bi bi-clock-history"></i></div>
-                <div class="stat-card-info">
-                    <h5>Reservas Pendientes</h5>
-                    <span class="stat-number"><?php echo $reservasPendientes; ?></span>
+
+        <div class="kpi-card">
+            <div class="kpi-top">
+                <div class="kpi-icon ico-morado"><i class="bi bi-graph-up-arrow"></i></div>
+            </div>
+            <div>
+                <div class="kpi-label">Ticket promedio</div>
+                <div class="kpi-value">S/ <?php echo number_format($ticketPromedio, 2); ?></div>
+            </div>
+            <div class="kpi-foot"><?php echo $tasaConversion; ?>% de reservas iniciadas terminan pagando</div>
+        </div>
+
+    </div>
+
+    <!-- ============ BENTO ============ -->
+    <div class="bento-admin">
+
+        <!-- LEFT -->
+        <div class="stack-admin">
+
+            <div class="panel-admin">
+                <div class="panel-admin-head">
+                    <div>
+                        <h2>Ingresos</h2>
+                        <div class="panel-admin-sub">Últimos 30 días, reservas confirmadas</div>
+                    </div>
+                </div>
+
+                <?php if (!empty($grafica['linea'])): ?>
+                    <div class="chart-wrap-admin">
+                        <svg viewBox="0 0 600 190" width="100%" height="190" preserveAspectRatio="none" role="img" aria-label="Gráfica de ingresos de los últimos 30 días">
+                            <defs>
+                                <linearGradient id="fillGradAdmin" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="var(--morado)" stop-opacity="0.28"/>
+                                    <stop offset="100%" stop-color="var(--morado)" stop-opacity="0"/>
+                                </linearGradient>
+                            </defs>
+                            <g stroke="#eee5fc" stroke-width="1">
+                                <line x1="0" y1="16" x2="600" y2="16"/>
+                                <line x1="0" y1="60" x2="600" y2="60"/>
+                                <line x1="0" y1="104" x2="600" y2="104"/>
+                                <line x1="0" y1="148" x2="600" y2="148"/>
+                            </g>
+                            <path d="<?php echo $grafica['area']; ?>" fill="url(#fillGradAdmin)"/>
+                            <path d="<?php echo $grafica['linea']; ?>" fill="none" stroke="var(--morado)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="<?php echo $grafica['ultimoX']; ?>" cy="<?php echo $grafica['ultimoY']; ?>" r="5" fill="var(--morado)" stroke="#fff" stroke-width="2.5"/>
+                        </svg>
+                        <span class="chart-end-label-admin">S/ <?php echo number_format($ingresosMesActual, 0); ?></span>
+                    </div>
+                <?php else: ?>
+                    <p class="text-muted mt-3">Todavía no hay suficientes datos para graficar.</p>
+                <?php endif; ?>
+            </div>
+
+            <div class="panel-admin">
+                <div class="panel-admin-head">
+                    <div>
+                        <h2>Próximos eventos</h2>
+                        <div class="panel-admin-sub">Lo que el equipo va a montar los próximos 7 días</div>
+                    </div>
+                    <a class="panel-admin-link" href="<?php echo URL_ROOT; ?>/admin/reservas">Ver todas<i class="bi bi-chevron-right"></i></a>
+                </div>
+
+                <?php if (empty($eventosAgrupados)): ?>
+                    <p class="text-muted mt-3">No hay eventos programados en los próximos 7 días.</p>
+                <?php else: ?>
+                    <?php $metodoLabels = ['yape_mp' => 'Yape · MP', 'plin' => 'Plin', 'yape' => 'Yape']; ?>
+                    <?php foreach ($eventosAgrupados as $grupo): ?>
+                        <div class="day-group-admin">
+                            <div class="day-label-admin"><?php echo htmlspecialchars($grupo['label']); ?></div>
+                            <?php foreach ($grupo['eventos'] as $ev): ?>
+                                <div class="event-row-admin">
+                                    <div class="event-time-admin"><?php echo strtolower(date('g:ia', strtotime($ev->hora_inicio))); ?></div>
+                                    <div class="event-main-admin">
+                                        <div class="event-title-admin">
+                                            Cumpleaños de <?php echo htmlspecialchars($ev->nombre_cumpleanero); ?>
+                                            <span class="age-admin">· <?php echo (int) $ev->edad_cumpleanero; ?> años</span>
+                                        </div>
+                                        <div class="event-meta-admin"><?php echo htmlspecialchars($ev->nombre_paquete); ?> · <?php echo (int) $ev->cantidad_personas; ?> niños</div>
+                                        <div class="chips-admin">
+                                            <?php if ($ev->extra_pintura): ?><span class="chip-admin extra">🎨 Pintura</span><?php endif; ?>
+                                            <?php if ($ev->extra_destruccion): ?><span class="chip-admin extra">💥 Destrucción</span><?php endif; ?>
+                                            <?php if ($ev->estado_pago === 'confirmada'): ?>
+                                                <span class="chip-admin pay-ok">Pagado</span>
+                                            <?php else: ?>
+                                                <span class="chip-admin pay-cash"><?php echo $metodoLabels[$ev->metodo_pago] ?? ucfirst($ev->metodo_pago); ?> por confirmar</span>
+                                            <?php endif; ?>
+                                            <?php if (!empty($ev->spotify_playlist_url)): ?>
+                                                <a href="<?php echo htmlspecialchars($ev->spotify_playlist_url); ?>" target="_blank" rel="noopener" class="chip-admin playlist"><i class="bi bi-music-note-beamed"></i> Playlist lista</a>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+
+        </div>
+
+        <!-- RIGHT -->
+        <div class="stack-admin">
+
+            <div class="panel-admin">
+                <div class="panel-admin-head">
+                    <h2>Pendientes por revisar</h2>
+                    <a class="panel-admin-link" href="<?php echo URL_ROOT; ?>/admin/reservas?estado=pendiente">Ver todas<i class="bi bi-chevron-right"></i></a>
+                </div>
+                <?php if (empty($pendientesRecientes)): ?>
+                    <p class="text-muted mt-3">No hay reservas pendientes. 🎉</p>
+                <?php else: ?>
+                    <?php foreach ($pendientesRecientes as $reserva): ?>
+                        <a class="pending-row-admin" href="<?php echo URL_ROOT; ?>/admin/reservas?estado=pendiente">
+                            <div class="pending-avatar-admin"><?php echo strtoupper(mb_substr($reserva->nombre_cumpleanero, 0, 1)); ?></div>
+                            <div style="flex:1;min-width:0;">
+                                <div class="pending-name-admin"><?php echo htmlspecialchars($reserva->nombre_cumpleanero); ?></div>
+                                <div class="pending-sub-admin">Evento: <?php echo date('d/m/Y', strtotime($reserva->fecha)); ?></div>
+                            </div>
+                            <div class="pending-amt-admin">S/ <?php echo number_format($reserva->monto, 2); ?></div>
+                            <i class="bi bi-chevron-right pending-chevron-admin"></i>
+                        </a>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+
+            <div class="panel-admin">
+                <div class="panel-admin-head"><h2>Alertas</h2></div>
+                <?php if (empty($pendientesUrgentes)): ?>
+                    <p class="text-muted mt-3">Sin alertas urgentes por ahora. 🎉</p>
+                <?php else: ?>
+                    <?php foreach ($pendientesUrgentes as $u): ?>
+                        <?php $diasFaltan = (strtotime($u->fecha) - strtotime(date('Y-m-d'))) / 86400; ?>
+                        <div class="alert-item-admin <?php echo $diasFaltan <= 2 ? 'critical' : 'warning'; ?>">
+                            <i class="bi bi-exclamation-triangle-fill alert-ico-admin"></i>
+                            <div class="alert-text-admin">
+                                <?php echo htmlspecialchars($u->nombre_cumpleanero); ?> — pago pendiente
+                                <span>Evento el <?php echo date('d/m/Y', strtotime($u->fecha)); ?> · S/ <?php echo number_format($u->monto, 2); ?></span>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+
+            <div class="panel-admin">
+                <div class="panel-admin-head"><h2>Acciones rápidas</h2></div>
+                <div class="qa-grid-admin">
+                    <button type="button" class="qa-btn-admin" data-bs-toggle="modal" data-bs-target="#modalReporte">
+                        <i class="bi bi-file-earmark-bar-graph-fill"></i><b>Generar reporte</b>
+                    </button>
+                    <a href="<?php echo URL_ROOT; ?>/admin/codigos" class="qa-btn-admin">
+                        <i class="bi bi-ticket-perforated-fill"></i><b>Códigos promo</b>
+                    </a>
+                    <a href="<?php echo URL_ROOT; ?>/admin/notificaciones" class="qa-btn-admin">
+                        <i class="bi bi-bell-fill"></i><b>Enviar aviso</b>
+                    </a>
+                    <a href="<?php echo URL_ROOT; ?>/admin/reservas?estado=pendiente" class="qa-btn-admin">
+                        <i class="bi bi-hourglass-split"></i><b>Ver pendientes</b>
+                    </a>
                 </div>
             </div>
+
         </div>
     </div>
 
-    <!-- Botón Generar Reporte -->
-    <div class="d-flex justify-content-end mt-3 mb-1">
-        <button class="btn-admin-primario" data-bs-toggle="modal" data-bs-target="#modalReporte">
-            <i class="bi bi-file-earmark-bar-graph-fill"></i> Generar Reporte
-        </button>
+    <!-- ============ FILA INFERIOR ============ -->
+    <div class="bottom-row-admin">
+
+        <div class="panel-admin">
+            <div class="panel-admin-head"><h2>Paquetes más vendidos</h2></div>
+            <?php if (empty($paquetesMasVendidos)): ?>
+                <p class="text-muted mt-3">Todavía no hay reservas para comparar.</p>
+            <?php else: ?>
+                <?php foreach ($paquetesMasVendidos as $pq): ?>
+                    <div class="bar-row-admin">
+                        <span class="bar-label-admin"><?php echo htmlspecialchars($pq->paquete); ?></span>
+                        <div class="bar-track-admin"><div class="bar-fill-admin" style="width:<?php echo $pq->porcentaje; ?>%"></div></div>
+                        <span class="bar-pct-admin"><?php echo $pq->total; ?></span>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+
+        <div class="panel-admin">
+            <div class="panel-admin-head"><h2>Métodos de pago</h2></div>
+            <?php if (empty($metodosPago)): ?>
+                <p class="text-muted mt-3">Todavía no hay pagos registrados.</p>
+            <?php else: ?>
+                <?php
+                    $metodoLabelsLargo = ['yape_mp' => 'Yape (Mercado Pago)', 'plin' => 'Plin', 'yape' => 'Yape (manual)'];
+                    $coloresMetodo = ['yape_mp' => 'morado', 'plin' => 'celeste', 'yape' => 'faint'];
+                ?>
+                <div class="pm-track-admin">
+                    <?php foreach ($metodosPago as $m): ?>
+                        <div class="pm-seg-admin pm-<?php echo $coloresMetodo[$m->metodo] ?? 'faint'; ?>" style="width:<?php echo $m->porcentaje; ?>%"></div>
+                    <?php endforeach; ?>
+                </div>
+                <div class="pm-legend-admin">
+                    <?php foreach ($metodosPago as $m): ?>
+                        <div class="pm-legend-row-admin">
+                            <span class="pm-dot-admin pm-<?php echo $coloresMetodo[$m->metodo] ?? 'faint'; ?>"></span>
+                            <?php echo $metodoLabelsLargo[$m->metodo] ?? ucfirst($m->metodo); ?>
+                            <b><?php echo $m->porcentaje; ?>%</b>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <div class="panel-admin">
+            <div class="panel-admin-head">
+                <h2>Comentarios recientes</h2>
+                <a class="panel-admin-link" href="<?php echo URL_ROOT; ?>">Ver inicio<i class="bi bi-chevron-right"></i></a>
+            </div>
+            <?php if (empty($comentariosRecientes)): ?>
+                <p class="text-muted mt-3">Todavía no hay comentarios de clientes.</p>
+            <?php else: ?>
+                <?php foreach ($comentariosRecientes as $c): ?>
+                    <div class="review-admin">
+                        <div class="review-avatar-admin"><?php echo strtoupper(mb_substr($c->nombre, 0, 1)); ?></div>
+                        <div>
+                            <div class="review-name-admin"><?php echo htmlspecialchars($c->nombre); ?></div>
+                            <div class="review-text-admin"><?php echo htmlspecialchars($c->comentario); ?></div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+
     </div>
 
     <!-- ══ MODAL REPORTE ══ -->
@@ -162,78 +414,9 @@
         </div>
     </div>
 
-    <!-- Gráfica + Próximas reservas -->
-    <div class="row g-4 mt-3">
-        <div class="col-lg-8">
-            <div class="card-section">
-                <h5>Ingresos (Últimos 7 días)</h5>
-                <canvas id="ingresosChart"></canvas>
-            </div>
-        </div>
-        <div class="col-lg-4">
-            <div class="card-section">
-                <h5>Reservas Pendientes por Revisar</h5>
-                <ul class="reservas-list reservas-list-pendientes">
-                    <?php if (empty($pendientesRecientes)): ?>
-                        <p class="text-muted mt-3">No hay reservas pendientes. 🎉</p>
-                    <?php else: ?>
-                        <?php foreach($pendientesRecientes as $reserva): ?>
-                            <li>
-                                <a href="<?php echo URL_ROOT; ?>/admin/reservas?estado=pendiente" class="pendiente-item">
-                                    <span class="nombre"><?php echo htmlspecialchars($reserva->nombre_cumpleanero); ?></span>
-                                    <span class="fecha"><?php echo date('d/m/Y', strtotime($reserva->fecha)); ?></span>
-                                    <span class="monto">S/ <?php echo number_format($reserva->monto, 2); ?></span>
-                                </a>
-                            </li>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </ul>
-                <?php if (!empty($pendientesRecientes)): ?>
-                    <a href="<?php echo URL_ROOT; ?>/admin/reservas?estado=pendiente" class="ver-todas-pendientes">Ver todas las pendientes →</a>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-
 </div><!-- /content -->
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- ══ GRÁFICA ══ -->
-<script>
-    const labels     = <?php echo $chartLabels; ?>;
-    const dataValues = <?php echo $chartData; ?>;
-    const ctx = document.getElementById('ingresosChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Ingresos (S/)',
-                data: dataValues,
-                borderColor: '#7b2ff7',
-                backgroundColor: 'rgba(123,47,247,0.08)',
-                borderWidth: 2,
-                pointBackgroundColor: '#7b2ff7',
-                pointRadius: 4,
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: true } },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { callback: v => 'S/ ' + v }
-                }
-            }
-        }
-    });
-</script>
 
 <!-- ══ SELECTOR DE MESES + VALIDACIONES ══ -->
 <script>
