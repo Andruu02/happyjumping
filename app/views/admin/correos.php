@@ -114,8 +114,7 @@
                     <div class="extras-panel" id="extras-puntos">
                         <div class="alert alert-warning mb-0">
                             <i class="bi bi-star-fill me-2"></i>
-                            El correo mostrará los puntos acumulados de cada cliente.
-                            Si la tabla <code>usuarios</code> no tiene columna <code>puntos</code> aún, mostrará 0.
+                            El correo se adapta a los puntos reales de cada cliente: si tiene <strong>menos de 200</strong> lo anima a seguir jugando en la app para llegar al mínimo; si tiene <strong>200 o más</strong>, lo invita a canjearlos en la app.
                         </div>
                     </div>
                 </div>

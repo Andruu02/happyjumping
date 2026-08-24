@@ -42,6 +42,13 @@
             <img src="<?php echo URL_ROOT; ?>/img/logo_happy_contorno.webp" class="top-logo" alt="Happy&Jumping Logo">
             <p class="title">Iniciar sesión</p>
 
+            <?php if (($_GET['reset'] ?? '') === '1'): ?>
+                <div class="alert alert-success py-2 mb-3" style="border-radius:10px;font-size:.9rem;">
+                    <i class="bi bi-check-circle-fill me-1"></i>
+                    Contraseña actualizada. Ya puedes iniciar sesión con tu nueva contraseña.
+                </div>
+            <?php endif; ?>
+
             <form action="<?php echo URL_ROOT; ?>/usuarios/login" method="POST">
                 <input type="hidden" name="redirect" value="<?php echo htmlspecialchars($datos['redirect'] ?? ''); ?>">
 
@@ -66,13 +73,16 @@
                         </button>
                     </div>
                     <span class="invalid-feedback"><?php echo $datos['password_error']; ?></span>
+                    <div class="text-end mt-2">
+                        <a href="<?php echo URL_ROOT; ?>/usuarios/recover" style="font-size:.85rem;">¿Olvidaste tu contraseña?</a>
+                    </div>
                 </div>
-                
+
                 <button type="submit" class="btn-purple mt-3">Ingresar</button>
             </form>
 
             <p class="links mt-4">
-                
+
                 ¿No tienes cuenta? <a href="<?php echo URL_ROOT; ?>/usuarios/register">Crear cuenta</a>
             </p>
         </div>

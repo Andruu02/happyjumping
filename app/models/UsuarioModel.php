@@ -62,4 +62,38 @@ class UsuarioModel extends Model {
         $this->single();
         return $this->rowCount() > 0;
     }
+
+    // ── Recuperación de contraseña ──────────────────────────────────────────
+
+    /** Guarda el código de recuperación y su expiración (15 min desde ahora). */
+    public function guardarCodigoReset($correo, $codigo) {
+        $this->query("UPDATE usuarios
+                      SET codigo_reset = :codigo, codigo_reset_expira = DATE_ADD(NOW(), INTERVAL 15 MINUTE)
+                      WHERE correo = :correo");
+        $this->bind(':codigo', $codigo);
+        $this->bind(':correo', $correo);
+        return $this->execute();
+    }
+
+    /** true si el código es correcto y todavía no expiró. */
+    public function codigoResetValido($correo, $codigo) {
+        $this->query("SELECT id_usuario FROM usuarios
+                      WHERE correo = :correo AND codigo_reset = :codigo
+                        AND codigo_reset_expira IS NOT NULL AND codigo_reset_expira >= NOW()
+                      LIMIT 1");
+        $this->bind(':correo', $correo);
+        $this->bind(':codigo', $codigo);
+        $this->single();
+        return $this->rowCount() > 0;
+    }
+
+    /** Cambia la contraseña y limpia el código (ya usado, que no sirva dos veces). */
+    public function actualizarPassword($correo, $passwordHash) {
+        $this->query("UPDATE usuarios
+                      SET password = :password, codigo_reset = NULL, codigo_reset_expira = NULL
+                      WHERE correo = :correo");
+        $this->bind(':password', $passwordHash);
+        $this->bind(':correo', $correo);
+        return $this->execute();
+    }
 }

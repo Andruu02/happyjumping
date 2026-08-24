@@ -205,9 +205,86 @@ class UsuariosController extends Controller {
     }
 
     // ── RECOVER ───────────────────────────────────────────────────────────────
+
+    /**
+     * Paso 1: pide el correo. Por seguridad, la respuesta es la misma exista
+     * o no ese correo en la BD (si no se hiciera así, cualquiera podría usar
+     * este formulario para averiguar qué correos están registrados). El
+     * código solo se genera y se manda de verdad cuando el correo sí existe.
+     */
     public function recover() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $correo = trim($_POST['correo'] ?? '');
+
+            if (!empty($correo) && filter_var($correo, FILTER_VALIDATE_EMAIL) && $this->usuarioModel->findUserByEmail($correo)) {
+                $codigo = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+                $this->usuarioModel->guardarCodigoReset($correo, $codigo);
+
+                require_once APP_ROOT . '/core/Mailer.php';
+                Mailer::enviarCodigoRecuperacion($correo, '', $codigo);
+            }
+
+            $_SESSION['correo_reset'] = $correo;
+            header('Location: ' . URL_ROOT . '/usuarios/recover-codigo');
+            exit();
+        }
+
         $datos = ['titulo' => 'Recuperar Contraseña - Happy&Jumping'];
         $this->view('usuarios/recover', $datos);
+    }
+
+    /** Paso 2: ingresar el código de 6 dígitos + la nueva contraseña. */
+    public function recoverCodigo() {
+        if (!isset($_SESSION['correo_reset'])) {
+            header('Location: ' . URL_ROOT . '/usuarios/recover');
+            exit();
+        }
+
+        $correo = $_SESSION['correo_reset'];
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+            // Reenviar código
+            if (isset($_POST['reenviar'])) {
+                if ($this->usuarioModel->findUserByEmail($correo)) {
+                    $codigo = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+                    $this->usuarioModel->guardarCodigoReset($correo, $codigo);
+                    require_once APP_ROOT . '/core/Mailer.php';
+                    Mailer::enviarCodigoRecuperacion($correo, '', $codigo);
+                }
+                $datos = ['titulo' => 'Recuperar Contraseña', 'correo' => $correo, 'error' => '', 'exito' => 'Código reenviado. Revisa tu bandeja.'];
+                $this->view('usuarios/recover_codigo', $datos);
+                return;
+            }
+
+            $codigo           = trim($_POST['codigo'] ?? '');
+            $password         = trim($_POST['password'] ?? '');
+            $confirm_password = trim($_POST['confirm_password'] ?? '');
+            $error            = '';
+
+            if (empty($codigo) || strlen($codigo) !== 6) {
+                $error = 'Ingresa el código de 6 dígitos que te enviamos.';
+            } elseif (empty($password) || strlen($password) < 8) {
+                $error = 'La nueva contraseña debe tener al menos 8 caracteres.';
+            } elseif ($password !== $confirm_password) {
+                $error = 'Las contraseñas no coinciden.';
+            } elseif (!$this->usuarioModel->codigoResetValido($correo, $codigo)) {
+                $error = 'Código incorrecto o vencido. Solicita uno nuevo.';
+            }
+
+            if ($error === '') {
+                $this->usuarioModel->actualizarPassword($correo, password_hash($password, PASSWORD_DEFAULT));
+                unset($_SESSION['correo_reset']);
+                header('Location: ' . URL_ROOT . '/usuarios/login?reset=1');
+                exit();
+            }
+
+            $datos = ['titulo' => 'Recuperar Contraseña', 'correo' => $correo, 'error' => $error, 'exito' => ''];
+            $this->view('usuarios/recover_codigo', $datos);
+        } else {
+            $datos = ['titulo' => 'Recuperar Contraseña', 'correo' => $correo, 'error' => '', 'exito' => ''];
+            $this->view('usuarios/recover_codigo', $datos);
+        }
     }
 
     // ── SESSION ───────────────────────────────────────────────────────────────
