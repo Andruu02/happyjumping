@@ -29,27 +29,30 @@
         <div class="alert alert-danger" style="border-radius:12px;"><i class="bi bi-exclamation-triangle-fill me-1"></i> No se pudo conectar la cuenta de Spotify. Intenta de nuevo.</div>
     <?php endif; ?>
 
-    <!-- Conexión con Spotify (playlists automáticas) -->
-    <div class="alert-admin-spotify <?php echo $spotifyConectado ? 'conectado' : ''; ?>">
-        <i class="bi bi-spotify"></i>
-        <div>
-            <strong><?php echo $spotifyConectado ? 'Spotify conectado' : 'Playlists de Spotify no conectadas'; ?></strong>
-            <p class="mb-0">
-                <?php echo $spotifyConectado
-                    ? 'Cada reserva con canciones elegidas crea automáticamente su propia playlist en la cuenta del negocio.'
-                    : 'Conecta la cuenta Premium del negocio una sola vez para que las playlists de las reservas se creen automáticamente en Spotify.'; ?>
-            </p>
-        </div>
-        <?php if (!$spotifyConectado): ?>
+    <!-- Conexión con Spotify (playlists automáticas) - solo se muestra mientras falta conectar -->
+    <?php if (!$spotifyConectado): ?>
+        <div class="alert-admin-spotify">
+            <i class="bi bi-spotify"></i>
+            <div>
+                <strong>Playlists de Spotify no conectadas</strong>
+                <p class="mb-0">Conecta la cuenta Premium del negocio una sola vez para que las playlists de las reservas se creen automáticamente en Spotify.</p>
+            </div>
             <a href="<?php echo URL_ROOT; ?>/admin/spotify-conectar" class="btn-admin-primario">Conectar Spotify</a>
-        <?php else: ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($spotifyConectado && ($_GET['spotify_debug'] ?? '') === '1'): ?>
+        <div class="alert-admin-spotify conectado">
+            <i class="bi bi-spotify"></i>
+            <div>
+                <strong>Spotify conectado (modo diagnóstico)</strong>
+                <p class="mb-0">Herramientas de prueba — entra a esta página con <code>?spotify_debug=1</code> cuando necesites revisar la conexión.</p>
+            </div>
             <div class="d-flex flex-column align-items-stretch gap-2">
                 <button type="button" id="btn-probar-spotify" class="btn-admin-primario">Probar creación de playlist</button>
                 <a href="<?php echo URL_ROOT; ?>/admin/spotify-desconectar" class="link-spotify-desconectar" onclick="return confirm('¿Desconectar Spotify? Vas a tener que volver a loguearte y autorizar permisos.');">Desconectar y reconectar</a>
             </div>
-        <?php endif; ?>
-    </div>
-    <?php if ($spotifyConectado): ?>
+        </div>
         <div id="spotify-prueba-resultado" class="alert-spotify-prueba hidden"></div>
     <?php endif; ?>
 
@@ -169,19 +172,25 @@
         </div>
         <div class="col-lg-4">
             <div class="card-section">
-                <h5>Próximas Reservas (Confirmadas)</h5>
-                <ul class="reservas-list">
-                    <?php if (empty($proximasReservas)): ?>
-                        <p class="text-muted mt-3">No hay reservas confirmadas próximas.</p>
+                <h5>Reservas Pendientes por Revisar</h5>
+                <ul class="reservas-list reservas-list-pendientes">
+                    <?php if (empty($pendientesRecientes)): ?>
+                        <p class="text-muted mt-3">No hay reservas pendientes. 🎉</p>
                     <?php else: ?>
-                        <?php foreach($proximasReservas as $reserva): ?>
+                        <?php foreach($pendientesRecientes as $reserva): ?>
                             <li>
-                                <span class="nombre"><?php echo htmlspecialchars($reserva->nombre_cumpleanero); ?></span>
-                                <span class="fecha"><?php echo date('d/m/Y', strtotime($reserva->fecha)); ?></span>
+                                <a href="<?php echo URL_ROOT; ?>/admin/reservas?estado=pendiente" class="pendiente-item">
+                                    <span class="nombre"><?php echo htmlspecialchars($reserva->nombre_cumpleanero); ?></span>
+                                    <span class="fecha"><?php echo date('d/m/Y', strtotime($reserva->fecha)); ?></span>
+                                    <span class="monto">S/ <?php echo number_format($reserva->monto, 2); ?></span>
+                                </a>
                             </li>
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </ul>
+                <?php if (!empty($pendientesRecientes)): ?>
+                    <a href="<?php echo URL_ROOT; ?>/admin/reservas?estado=pendiente" class="ver-todas-pendientes">Ver todas las pendientes →</a>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -400,7 +409,7 @@
 })();
 </script>
 
-<?php if ($spotifyConectado): ?>
+<?php if ($spotifyConectado && ($_GET['spotify_debug'] ?? '') === '1'): ?>
 <!-- ══ PROBAR CREACIÓN DE PLAYLIST (diagnóstico) ══ -->
 <script>
 document.getElementById('btn-probar-spotify').addEventListener('click', async function () {

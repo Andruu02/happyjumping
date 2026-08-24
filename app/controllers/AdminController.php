@@ -29,7 +29,7 @@ class AdminController extends Controller {
             'totalClientes'      => $this->adminModel->contarTotalClientes(),
             'ingresosTotales'    => $this->adminModel->sumarIngresosTotales(),
             'reservasPendientes' => $this->adminModel->contarReservasPendientes(),
-            'proximasReservas'   => $this->adminModel->getProximasReservas(),
+            'pendientesRecientes' => $this->adminModel->getReservasPendientesRecientes(),
             'chartLabels'        => json_encode($chartLabels),
             'chartData'          => json_encode($chartData),
             'spotifyConectado'   => $spotify->conectada(),

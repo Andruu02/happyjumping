@@ -148,6 +148,32 @@ body {
 .reservas-list li .nombre { font-weight: 700; color: #333; }
 .reservas-list li .fecha { font-weight: 700; color: var(--morado); }
 
+.reservas-list-pendientes li { padding: 0; border-bottom: 1px solid #f2eefc; }
+.pendiente-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 8px;
+    margin: 0 -8px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background .15s ease;
+}
+.pendiente-item:hover { background: #faf7ff; }
+.pendiente-item .nombre { font-weight: 700; color: #333; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pendiente-item .fecha { font-size: .8rem; color: #999; flex-shrink: 0; }
+.pendiente-item .monto { font-weight: 700; color: #f5a623; flex-shrink: 0; }
+.ver-todas-pendientes {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    font-weight: 700;
+    font-size: .85rem;
+    color: var(--morado);
+    text-decoration: none;
+}
+.ver-todas-pendientes:hover { text-decoration: underline; }
+
 /* ---------- Botones ---------- */
 .btn-admin-primario {
     display: inline-flex;

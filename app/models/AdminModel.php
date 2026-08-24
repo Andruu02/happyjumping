@@ -38,6 +38,19 @@ class AdminModel extends Model {
         return $this->resultSet();
     }
 
+    // Reservas pendientes más recientes, para el "pendientes por revisar" del dashboard
+    public function getReservasPendientesRecientes($limit = 5) {
+        $this->query("SELECT r.id_reserva, r.nombre_cumpleanero, h.fecha, pg.monto
+                      FROM reservas r
+                      INNER JOIN pagos pg ON r.id_reserva = pg.id_reserva
+                      INNER JOIN horarios_disponibles h ON r.id_horario = h.id_horario
+                      WHERE pg.estado = 'pendiente' OR pg.estado = '' OR pg.estado IS NULL
+                      ORDER BY r.id_reserva DESC
+                      LIMIT :limit");
+        $this->bind(':limit', $limit);
+        return $this->resultSet();
+    }
+
     // Ingresos agrupados por día (últimos 7 días) para la gráfica
     public function getIngresosUltimos7Dias() {
         $this->query("SELECT 
