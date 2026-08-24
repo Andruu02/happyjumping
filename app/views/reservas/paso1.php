@@ -353,7 +353,7 @@
                                     </label>
                                 </div>
 
-                                <button type="submit" class="btn-next w-100" id="btnFinalizar" disabled>
+                                <button type="submit" class="btn-next w-100" id="btnFinalizar">
                                     Pagar con Yape y Finalizar
                                 </button>
                             </form>
@@ -828,12 +828,6 @@
         const btnFinalizar = document.getElementById('btnFinalizar');
         const labelCapturaPago = document.getElementById('label-captura-pago');
         const checkNoCancelable = document.getElementById('check-no-cancelable');
-
-        // El botón arranca deshabilitado hasta que el cliente marque que
-        // entendió que la reserva no se puede cancelar después.
-        checkNoCancelable.addEventListener('change', () => {
-            btnFinalizar.disabled = !checkNoCancelable.checked;
-        });
 
         // Celulares reales de Yape empiezan con 9 (9 dígitos).
         const CELULAR_YAPE_REGEX = /^9\d{8}$/;
