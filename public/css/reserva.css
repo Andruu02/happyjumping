@@ -1006,6 +1006,31 @@ body.body-exito { padding-bottom: 0; }
     box-shadow: 0 0 10px rgba(255, 60, 141, 0.3);
 }
 
+/* --- Aviso de "no se puede cancelar" antes de finalizar --- */
+.aviso-no-cancelable {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #fff3e0;
+    border: 1.5px solid #ffcc80;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    font-size: .88rem;
+    color: #7a4a00;
+}
+.aviso-no-cancelable i { color: var(--naranja); font-size: 1.1rem; margin-top: 1px; flex-shrink: 0; }
+.aviso-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding-left: 2px;
+}
+.aviso-checkbox .form-check-input { width: 18px; height: 18px; flex-shrink: 0; margin-top: 0; cursor: pointer; }
+.aviso-checkbox .form-check-input:checked { background-color: var(--morado); border-color: var(--morado); }
+.aviso-checkbox .form-check-label { font-size: .88rem; color: #555; cursor: pointer; }
+
 /* --- Aviso flotante de campos incompletos --- */
 .reserva-errores-banner {
     position: fixed;

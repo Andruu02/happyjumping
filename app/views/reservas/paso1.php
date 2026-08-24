@@ -339,7 +339,21 @@
 
                                 <p class="text-muted small mt-3 mb-3" id="texto-ayuda-finalizar">Con Yape el cobro es automático. Con Plin tu reserva queda "Pendiente" hasta que verifiquemos el pago.</p>
 
-                                <button type="submit" class="btn-next w-100" id="btnFinalizar">
+                                <div class="aviso-no-cancelable">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    <div>
+                                        <strong>Importante:</strong> una vez realizada, la reserva <strong>no se puede cancelar</strong>. Revisa bien la fecha, el horario y los datos antes de continuar.
+                                    </div>
+                                </div>
+
+                                <div class="form-check aviso-checkbox">
+                                    <input class="form-check-input" type="checkbox" id="check-no-cancelable">
+                                    <label class="form-check-label" for="check-no-cancelable">
+                                        Entiendo que esta reserva no se puede cancelar.
+                                    </label>
+                                </div>
+
+                                <button type="submit" class="btn-next w-100" id="btnFinalizar" disabled>
                                     Pagar con Yape y Finalizar
                                 </button>
                             </form>
@@ -813,6 +827,13 @@
         const textoAyudaFinalizar = document.getElementById('texto-ayuda-finalizar');
         const btnFinalizar = document.getElementById('btnFinalizar');
         const labelCapturaPago = document.getElementById('label-captura-pago');
+        const checkNoCancelable = document.getElementById('check-no-cancelable');
+
+        // El botón arranca deshabilitado hasta que el cliente marque que
+        // entendió que la reserva no se puede cancelar después.
+        checkNoCancelable.addEventListener('change', () => {
+            btnFinalizar.disabled = !checkNoCancelable.checked;
+        });
 
         // Celulares reales de Yape empiezan con 9 (9 dígitos).
         const CELULAR_YAPE_REGEX = /^9\d{8}$/;
@@ -971,6 +992,10 @@
 
             if (fileInput.files.length > 0 && !fileInput.files[0].type.startsWith('image/')) {
                 errores.push({ paso: 3, mensaje: 'La captura de pago debe ser una imagen (JPG, PNG o WEBP), no otro tipo de archivo.', el: fileInput });
+            }
+
+            if (!checkNoCancelable.checked) {
+                errores.push({ paso: 3, mensaje: 'Marca que entiendes que la reserva no se puede cancelar.', el: checkNoCancelable });
             }
 
             return errores;
